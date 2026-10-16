@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0e2023">
+  <meta name="description" content="Consulte equipamentos fotovoltaicos por geração estimada, potência, módulos e inversores. Solicite seu orçamento com a WW Solar.">
+  <title>WW Solar | Consulta de Kits Fotovoltaicos</title>
+  <link rel="stylesheet" href="./styles.css">
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml">
+</head>
+<body>
+  <a class="skip-link" href="#simulador">Ir para o simulador</a>
+  <header class="header">
+    <div class="shell header-inner">
+      <a class="brand" href="#inicio" aria-label="WW Solar, início">
+        <span class="brand-symbol" aria-hidden="true"><svg viewBox="0 0 44 44" fill="none"><circle cx="22" cy="22" r="12" stroke="currentColor" stroke-width="4"/><path d="M22 2v7M22 35v7M2 22h7M35 22h7M8 8l5 5M31 31l5 5M36 8l-5 5M13 31l-5 5" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/></svg></span>
+        <span class="brand-copy"><strong>WW<span>SOLAR</span></strong><small>CATÁLOGO FOTOVOLTAICO</small></span>
+      </a>
+      <nav class="nav" aria-label="Navegação principal"><a href="#simulador">Simular</a><a href="#catalogo">Ver kits</a><a href="#informacoes">Informações</a></nav>
+      <a href="#catalogo" class="header-button">Explorar kits <span aria-hidden="true">↗</span></a>
+    </div>
+  </header>
+
+  <main id="inicio">
+    <section class="hero">
+      <div class="hero-grid shell">
+        <div class="hero-copy">
+          <div class="eyebrow"><span class="pulse"></span> ENERGIA SOLAR SEM COMPLICAÇÃO</div>
+          <h1>Seu próximo sistema solar começa <em>aqui.</em></h1>
+          <p>Descubra kits fotovoltaicos por geração estimada, compare configurações e solicite uma cotação dos equipamentos em poucos toques.</p>
+          <div class="hero-actions"><a class="button button-accent" href="#simulador">Simular meu sistema <span>↗</span></a><a class="text-link" href="#catalogo">Ver catálogo <span>→</span></a></div>
+          <div class="hero-trust"><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m5 12 4 4L19 6"/></svg> Sem instalação</span><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m5 12 4 4L19 6"/></svg> Preço sob consulta</span><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m5 12 4 4L19 6"/></svg> Atendimento direto</span></div>
+        </div>
+        <div class="hero-visual" aria-hidden="true">
+          <div class="orb orb-one"></div><div class="orb orb-two"></div>
+          <div class="sun-disc"><span>☀</span></div>
+          <div class="panel-array"><div class="solar-panel"></div><div class="solar-panel"></div><div class="solar-panel"></div><div class="solar-panel"></div></div>
+          <div class="floating-note floating-note-top"><span class="note-icon">⚡</span><span><b>Energia solar</b><small>Geração estimada</small></span></div>
+          <div class="floating-note floating-note-bottom"><span class="note-icon green">✓</span><span><b>Escolha seu kit</b><small>Simples e rápido</small></span></div>
+        </div>
+      </div>
+      <div class="hero-edge"></div>
+    </section>
+
+    <section class="main-section shell" id="simulador" aria-labelledby="simulador-title">
+      <div class="section-title"><div><div class="section-label">01 / SIMULAÇÃO INTERATIVA</div><h2 id="simulador-title">Encontre um kit para a sua necessidade.</h2><p>Movimente a barra ou informe um valor para encontrar a configuração cadastrada mais próxima da sua geração desejada.</p></div><span class="section-decor">◉</span></div>
+      <div class="simulator">
+        <div class="simulator-controls">
+          <div class="segmented" role="group" aria-label="Tipo de simulação"><button type="button" class="segment active" data-mode="geracao" aria-pressed="true">Geração desejada</button><button type="button" class="segment" data-mode="consumo" aria-pressed="false">Meu consumo</button></div>
+          <div class="sim-intro"><label for="target-input" id="target-label">Quanto você deseja gerar por mês?</label><p id="target-description">Selecione a geração mensal estimada que procura.</p></div>
+          <div class="target-input-wrap"><input id="target-input" type="number" min="300" max="14600" step="50" value="750" inputmode="numeric" aria-label="Energia mensal em quilowatt-hora"><span>kWh/mês</span></div>
+          <input id="target-slider" type="range" min="300" max="14600" step="50" value="750" aria-label="Ajustar energia mensal desejada">
+          <div class="slider-endpoints"><span>300 kWh</span><span>14.600 kWh</span></div>
+          <div class="sim-info"><span class="info-mark">i</span><span>Simulação comparativa com base na tabela de kits. A geração real varia com a localidade e as condições de instalação; consumo e energia compensada não são necessariamente iguais.</span></div>
+        </div>
+        <div class="result-card" aria-live="polite" aria-atomic="true">
+          <div class="result-top"><span class="result-label">KIT ENCONTRADO NA BASE</span><span class="result-status" id="result-status">CALCULANDO</span></div>
+          <h3 id="result-title">Buscando configuração...</h3>
+          <p class="result-sub" id="result-description">Um momento.</p>
+          <div class="result-generation"><strong id="result-generation">—</strong><span>kWh/mês <small>geração estimada</small></span></div>
+          <div class="result-stats"><div><small>Potência do kit</small><strong id="result-power">—</strong></div><div><small>Quantidade de módulos</small><strong id="result-panels">—</strong></div><div><small>Inversor</small><strong id="result-inverter">—</strong></div></div>
+          <div class="result-footer"><div><small>Preço dos equipamentos</small><strong id="result-price">Sob consulta</strong></div><button type="button" id="result-button" class="button button-dark">Ver este kit <span>↗</span></button></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="catalogue-section" id="catalogo" aria-labelledby="catalogo-title">
+      <div class="shell">
+        <div class="section-title catalogue-heading"><div><div class="section-label">02 / CATÁLOGO DE EQUIPAMENTOS</div><h2 id="catalogo-title">Compare os kits disponíveis na base.</h2><p>Confira as configurações técnicas. Preços e estoque ficam sujeitos à confirmação comercial.</p></div><div class="catalogue-counter"><strong id="kit-total">—</strong><small>configurações na base</small></div></div>
+        <div class="filterbar"><label class="search-wrap"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m16 16 5 5"/></svg><span class="sr-only">Buscar kits</span><input id="kit-search" type="search" placeholder="Buscar por marca, kit ou potência..." autocomplete="off"></label><label class="select-wrap"><span class="sr-only">Filtrar inversor</span><select id="inverter-filter"><option value="todos">Todos os inversores</option><option value="SAJ">SAJ</option><option value="DEYE">DEYE</option><option value="MICRO DEYE">Micro DEYE</option></select></label><button class="reset-filters" type="button" id="clear-filters">Limpar filtros ↺</button></div>
+        <div class="result-count" id="result-count" aria-live="polite">Carregando catálogo...</div>
+        <div class="kit-grid" id="kit-grid" aria-live="polite"></div>
+        <div class="load-more-wrap"><button type="button" class="button button-outline" id="more-kits" hidden>Mostrar mais kits <span>↓</span></button></div>
+      </div>
+    </section>
+
+    <section class="bottom-section shell" id="informacoes"><div class="explain-block"><div class="section-label">03 / INFORMAÇÕES IMPORTANTES</div><h2>Simples na consulta.<br><em>Claro nas condições.</em></h2><p>A seleção é uma referência para iniciar uma cotação comercial. O kit indicado deve ser confirmado quanto à disponibilidade, compatibilidade e valores atualizados.</p><div class="notes"><div><span>01</span><p><b>Somente equipamentos</b>Não inclui instalação, projeto, homologação ou mão de obra.</p></div><div><span>02</span><p><b>Frete à parte</b>O custo de envio deve ser confirmado no atendimento.</p></div><div><span>03</span><p><b>Geração estimada</b>Os valores reproduzem a base técnica e não representam garantia de produção.</p></div></div></div><div class="contact-block"><div class="contact-mark">☀</div><h3>Encontrou um kit interessante?</h3><p>Abra os detalhes, confira a configuração e prepare sua solicitação de cotação.</p><a class="button button-accent" href="#catalogo">Explorar opções <span>↗</span></a></div></section>
+  </main>
+  <footer class="footer"><div class="shell footer-inner"><span><strong>WW</strong>SOLAR</span><span>Catálogo informativo de equipamentos fotovoltaicos</span><span id="catalog-date">Base técnica em atualização</span></div></footer>
+
+  <dialog class="kit-dialog" id="kit-dialog" aria-labelledby="dialog-title"><div class="dialog-inner"><button type="button" class="dialog-close" id="dialog-close" aria-label="Fechar detalhes">×</button><div class="section-label">DETALHES DO EQUIPAMENTO</div><h2 id="dialog-title">Kit fotovoltaico</h2><p id="dialog-subtitle" class="dialog-subtitle"></p><div id="dialog-details" class="dialog-details"></div><div class="dialog-price"><div><small>Valor de venda</small><strong id="dialog-price">Sob consulta</strong></div><div class="dialog-availability" id="dialog-availability">Disponibilidade a confirmar</div></div><p class="dialog-disclaimer">Somente equipamentos. Frete, projeto, homologação e instalação não estão incluídos. Valores e estoque sujeitos a confirmação.</p><div class="dialog-actions"><button type="button" id="dialog-contact" class="button button-accent">Copiar solicitação <span>↗</span></button><button type="button" class="button button-outline" id="dialog-dismiss">Voltar ao catálogo</button></div><p class="dialog-hint" id="dialog-hint">Informe o WhatsApp comercial na configuração pública para ativar o atendimento direto.</p></div></dialog>
+  <div class="toast" role="status" id="toast" aria-live="polite"></div>
+  <script src="./app.js" defer></script>
+</body>
+</html>
