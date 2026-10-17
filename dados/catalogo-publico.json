@@ -1,5 +1,5 @@
 {
-  "versao": "1.0.0",
+  "versao": "1.1.0",
   "atualizadoEm": "2026-10-16",
   "tabelaFonte": "Tabela técnica recebida (14/out; ano não indicado)",
   "fonteGeracao": "Estimativas da tabela recebida; produção não garantida",
@@ -15,9 +15,9 @@
       "inversor": "MICRO DEYE",
       "inversorKwUnidade": 2.25,
       "quantidadeInversores": 1,
-      "precoVendaAvista": null,
-      "precoAprovado": false,
-      "disponibilidade": "a_confirmar"
+      "precoAprovado": true,
+      "disponibilidade": "a_confirmar",
+      "precoVendaFinal": 4550.45
     },
     {
       "id": "KIT-002",
@@ -28,9 +28,9 @@
       "inversor": "SAJ",
       "inversorKwUnidade": 3,
       "quantidadeInversores": 1,
-      "precoVendaAvista": null,
-      "precoAprovado": false,
-      "disponibilidade": "a_confirmar"
+      "precoAprovado": true,
+      "disponibilidade": "a_confirmar",
+      "precoVendaFinal": 4918.49
     },
     {
       "id": "KIT-003",
@@ -41,9 +41,9 @@
       "inversor": "SAJ",
       "inversorKwUnidade": 3,
       "quantidadeInversores": 1,
-      "precoVendaAvista": null,
-      "precoAprovado": false,
-      "disponibilidade": "a_confirmar"
+      "precoAprovado": true,
+      "disponibilidade": "a_confirmar",
+      "precoVendaFinal": 5824.17
     },
     {
       "id": "KIT-004",
@@ -54,9 +54,9 @@
       "inversor": "SAJ",
       "inversorKwUnidade": 3,
       "quantidadeInversores": 1,
-      "precoVendaAvista": null,
-      "precoAprovado": false,
-      "disponibilidade": "a_confirmar"
+      "precoAprovado": true,
+      "disponibilidade": "a_confirmar",
+      "precoVendaFinal": 6646.39
     },
     {
       "id": "KIT-005",
@@ -67,9 +67,9 @@
       "inversor": "SAJ",
       "inversorKwUnidade": 3,
       "quantidadeInversores": 1,
-      "precoVendaAvista": null,
-      "precoAprovado": false,
-      "disponibilidade": "a_confirmar"
+      "precoAprovado": true,
+      "disponibilidade": "a_confirmar",
+      "precoVendaFinal": 7480.89
     },
     {
       "id": "KIT-006",
@@ -80,9 +80,9 @@
       "inversor": "SAJ",
       "inversorKwUnidade": 6,
       "quantidadeInversores": 1,
-      "precoVendaAvista": null,
-      "precoAprovado": false,
-      "disponibilidade": "a_confirmar"
+      "precoAprovado": true,
+      "disponibilidade": "a_confirmar",
+      "precoVendaFinal": 8548.56
     },
     {
       "id": "KIT-007",
@@ -93,9 +93,9 @@
       "inversor": "SAJ",
       "inversorKwUnidade": 6,
       "quantidadeInversores": 1,
-      "precoVendaAvista": null,
-      "precoAprovado": false,
-      "disponibilidade": "a_confirmar"
+      "precoAprovado": true,
+      "disponibilidade": "a_confirmar",
+      "precoVendaFinal": 9454.24
     },
     {
       "id": "KIT-008",
@@ -106,9 +106,9 @@
       "inversor": "SAJ",
       "inversorKwUnidade": 6,
       "quantidadeInversores": 1,
-      "precoVendaAvista": null,
-      "precoAprovado": false,
-      "disponibilidade": "a_confirmar"
+      "precoAprovado": true,
+      "disponibilidade": "a_confirmar",
+      "precoVendaFinal": 10276.46
     },
     {
       "id": "KIT-009",
@@ -119,9 +119,9 @@
       "inversor": "SAJ",
       "inversorKwUnidade": 6,
       "quantidadeInversores": 1,
-      "precoVendaAvista": null,
-      "precoAprovado": false,
-      "disponibilidade": "a_confirmar"
+      "precoAprovado": true,
+      "disponibilidade": "a_confirmar",
+      "precoVendaFinal": 11098.69
     },
     {
       "id": "KIT-010",
@@ -132,9 +132,9 @@
       "inversor": "SAJ",
       "inversorKwUnidade": 6,
       "quantidadeInversores": 1,
-      "precoVendaAvista": null,
-      "precoAprovado": false,
-      "disponibilidade": "a_confirmar"
+      "precoAprovado": true,
+      "disponibilidade": "a_confirmar",
+      "precoVendaFinal": 11920.91
     },
     {
       "id": "KIT-011",
@@ -145,9 +145,9 @@
       "inversor": "SAJ",
       "inversorKwUnidade": 6,
       "quantidadeInversores": 1,
-      "precoVendaAvista": null,
-      "precoAprovado": false,
-      "disponibilidade": "a_confirmar"
+      "precoAprovado": true,
+      "disponibilidade": "a_confirmar",
+      "precoVendaFinal": 12826.58
     },
     {
       "id": "KIT-012",
@@ -158,9 +158,9 @@
       "inversor": "SAJ",
       "inversorKwUnidade": 6,
       "quantidadeInversores": 1,
-      "precoVendaAvista": null,
-      "precoAprovado": false,
-      "disponibilidade": "a_confirmar"
+      "precoAprovado": true,
+      "disponibilidade": "a_confirmar",
+      "precoVendaFinal": 13955.61
     },
     {
       "id": "KIT-013",
@@ -171,9 +171,9 @@
       "inversor": "DEYE",
       "inversorKwUnidade": 7.3,
       "quantidadeInversores": 1,
-      "precoVendaAvista": null,
-      "precoAprovado": false,
-      "disponibilidade": "a_confirmar"
+      "precoAprovado": true,
+      "disponibilidade": "a_confirmar",
+      "precoVendaFinal": 15145.99
     },
     {
       "id": "KIT-014",
@@ -184,9 +184,9 @@
       "inversor": "DEYE",
       "inversorKwUnidade": 7.3,
       "quantidadeInversores": 1,
-      "precoVendaAvista": null,
-      "precoAprovado": false,
-      "disponibilidade": "a_confirmar"
+      "precoAprovado": true,
+      "disponibilidade": "a_confirmar",
+      "precoVendaFinal": 15968.22
     },
     {
       "id": "KIT-015",
@@ -197,9 +197,9 @@
       "inversor": "DEYE",
       "inversorKwUnidade": 7.3,
       "quantidadeInversores": 1,
-      "precoVendaAvista": null,
-      "precoAprovado": false,
-      "disponibilidade": "a_confirmar"
+      "precoAprovado": true,
+      "disponibilidade": "a_confirmar",
+      "precoVendaFinal": 16873.89
     },
     {
       "id": "KIT-016",
@@ -210,9 +210,9 @@
       "inversor": "DEYE",
       "inversorKwUnidade": 7.3,
       "quantidadeInversores": 2,
-      "precoVendaAvista": null,
-      "precoAprovado": false,
-      "disponibilidade": "a_confirmar"
+      "precoAprovado": true,
+      "disponibilidade": "a_confirmar",
+      "precoVendaFinal": 19536.8
     },
     {
       "id": "KIT-017",
@@ -223,9 +223,9 @@
       "inversor": "DEYE",
       "inversorKwUnidade": 7.3,
       "quantidadeInversores": 2,
-      "precoVendaAvista": null,
-      "precoAprovado": false,
-      "disponibilidade": "a_confirmar"
+      "precoAprovado": true,
+      "disponibilidade": "a_confirmar",
+      "precoVendaFinal": 20359.03
     },
     {
       "id": "KIT-018",
@@ -236,9 +236,9 @@
       "inversor": "DEYE",
       "inversorKwUnidade": 7.3,
       "quantidadeInversores": 2,
-      "precoVendaAvista": null,
-      "precoAprovado": false,
-      "disponibilidade": "a_confirmar"
+      "precoAprovado": true,
+      "disponibilidade": "a_confirmar",
+      "precoVendaFinal": 21181.25
     },
     {
       "id": "KIT-019",
@@ -249,9 +249,9 @@
       "inversor": "DEYE",
       "inversorKwUnidade": 7.3,
       "quantidadeInversores": 2,
-      "precoVendaAvista": null,
-      "precoAprovado": false,
-      "disponibilidade": "a_confirmar"
+      "precoAprovado": true,
+      "disponibilidade": "a_confirmar",
+      "precoVendaFinal": 22086.92
     },
     {
       "id": "KIT-020",
@@ -262,9 +262,9 @@
       "inversor": "DEYE",
       "inversorKwUnidade": 7.3,
       "quantidadeInversores": 2,
-      "precoVendaAvista": null,
-      "precoAprovado": false,
-      "disponibilidade": "a_confirmar"
+      "precoAprovado": true,
+      "disponibilidade": "a_confirmar",
+      "precoVendaFinal": 22909.15
     },
     {
       "id": "KIT-021",
@@ -275,9 +275,9 @@
       "inversor": "DEYE",
       "inversorKwUnidade": 7.3,
       "quantidadeInversores": 2,
-      "precoVendaAvista": null,
-      "precoAprovado": false,
-      "disponibilidade": "a_confirmar"
+      "precoAprovado": true,
+      "disponibilidade": "a_confirmar",
+      "precoVendaFinal": 23731.37
     },
     {
       "id": "KIT-022",
@@ -288,9 +288,9 @@
       "inversor": "DEYE",
       "inversorKwUnidade": 7.3,
       "quantidadeInversores": 2,
-      "precoVendaAvista": null,
-      "precoAprovado": false,
-      "disponibilidade": "a_confirmar"
+      "precoAprovado": true,
+      "disponibilidade": "a_confirmar",
+      "precoVendaFinal": 24553.6
     },
     {
       "id": "KIT-023",
@@ -301,9 +301,9 @@
       "inversor": "DEYE",
       "inversorKwUnidade": 7.3,
       "quantidadeInversores": 2,
-      "precoVendaAvista": null,
-      "precoAprovado": false,
-      "disponibilidade": "a_confirmar"
+      "precoAprovado": true,
+      "disponibilidade": "a_confirmar",
+      "precoVendaFinal": 25459.27
     },
     {
       "id": "KIT-024",
@@ -314,9 +314,9 @@
       "inversor": "DEYE",
       "inversorKwUnidade": 7.3,
       "quantidadeInversores": 2,
-      "precoVendaAvista": null,
-      "precoAprovado": false,
-      "disponibilidade": "a_confirmar"
+      "precoAprovado": true,
+      "disponibilidade": "a_confirmar",
+      "precoVendaFinal": 26281.49
     },
     {
       "id": "KIT-025",
@@ -327,9 +327,9 @@
       "inversor": "DEYE",
       "inversorKwUnidade": 7.3,
       "quantidadeInversores": 2,
-      "precoVendaAvista": null,
-      "precoAprovado": false,
-      "disponibilidade": "a_confirmar"
+      "precoAprovado": true,
+      "disponibilidade": "a_confirmar",
+      "precoVendaFinal": 27103.72
     },
     {
       "id": "KIT-026",
@@ -340,9 +340,9 @@
       "inversor": "DEYE",
       "inversorKwUnidade": 7.3,
       "quantidadeInversores": 2,
-      "precoVendaAvista": null,
-      "precoAprovado": false,
-      "disponibilidade": "a_confirmar"
+      "precoAprovado": true,
+      "disponibilidade": "a_confirmar",
+      "precoVendaFinal": 28232.74
     },
     {
       "id": "KIT-027",
@@ -353,9 +353,9 @@
       "inversor": "DEYE",
       "inversorKwUnidade": 7.3,
       "quantidadeInversores": 2,
-      "precoVendaAvista": null,
-      "precoAprovado": false,
-      "disponibilidade": "a_confirmar"
+      "precoAprovado": true,
+      "disponibilidade": "a_confirmar",
+      "precoVendaFinal": 29138.42
     },
     {
       "id": "KIT-028",
@@ -366,9 +366,9 @@
       "inversor": "DEYE",
       "inversorKwUnidade": 7.3,
       "quantidadeInversores": 2,
-      "precoVendaAvista": null,
-      "precoAprovado": false,
-      "disponibilidade": "a_confirmar"
+      "precoAprovado": true,
+      "disponibilidade": "a_confirmar",
+      "precoVendaFinal": 29960.64
     },
     {
       "id": "KIT-029",
@@ -379,9 +379,9 @@
       "inversor": "DEYE",
       "inversorKwUnidade": 7.3,
       "quantidadeInversores": 2,
-      "precoVendaAvista": null,
-      "precoAprovado": false,
-      "disponibilidade": "a_confirmar"
+      "precoAprovado": true,
+      "disponibilidade": "a_confirmar",
+      "precoVendaFinal": 30782.86
     },
     {
       "id": "KIT-030",
@@ -392,9 +392,9 @@
       "inversor": "DEYE",
       "inversorKwUnidade": 7.3,
       "quantidadeInversores": 2,
-      "precoVendaAvista": null,
-      "precoAprovado": false,
-      "disponibilidade": "a_confirmar"
+      "precoAprovado": true,
+      "disponibilidade": "a_confirmar",
+      "precoVendaFinal": 31421.01
     },
     {
       "id": "KIT-031",
@@ -405,9 +405,9 @@
       "inversor": "DEYE",
       "inversorKwUnidade": 7.3,
       "quantidadeInversores": 2,
-      "precoVendaAvista": null,
-      "precoAprovado": false,
-      "disponibilidade": "a_confirmar"
+      "precoAprovado": true,
+      "disponibilidade": "a_confirmar",
+      "precoVendaFinal": 32326.68
     },
     {
       "id": "KIT-032",
@@ -418,9 +418,9 @@
       "inversor": "DEYE",
       "inversorKwUnidade": 7.3,
       "quantidadeInversores": 2,
-      "precoVendaAvista": null,
-      "precoAprovado": false,
-      "disponibilidade": "a_confirmar"
+      "precoAprovado": true,
+      "disponibilidade": "a_confirmar",
+      "precoVendaFinal": 33148.91
     },
     {
       "id": "KIT-033",
@@ -431,9 +431,9 @@
       "inversor": "DEYE",
       "inversorKwUnidade": 7.3,
       "quantidadeInversores": 2,
-      "precoVendaAvista": null,
-      "precoAprovado": false,
-      "disponibilidade": "a_confirmar"
+      "precoAprovado": true,
+      "disponibilidade": "a_confirmar",
+      "precoVendaFinal": 33971.13
     },
     {
       "id": "KIT-034",
@@ -444,9 +444,9 @@
       "inversor": "SAJ",
       "inversorKwUnidade": 15,
       "quantidadeInversores": 2,
-      "precoVendaAvista": null,
-      "precoAprovado": false,
-      "disponibilidade": "a_confirmar"
+      "precoAprovado": true,
+      "disponibilidade": "a_confirmar",
+      "precoVendaFinal": 38473.87
     },
     {
       "id": "KIT-035",
@@ -457,9 +457,9 @@
       "inversor": "SAJ",
       "inversorKwUnidade": 15,
       "quantidadeInversores": 2,
-      "precoVendaAvista": null,
-      "precoAprovado": false,
-      "disponibilidade": "a_confirmar"
+      "precoAprovado": true,
+      "disponibilidade": "a_confirmar",
+      "precoVendaFinal": 39379.55
     },
     {
       "id": "KIT-036",
@@ -470,9 +470,9 @@
       "inversor": "SAJ",
       "inversorKwUnidade": 15,
       "quantidadeInversores": 2,
-      "precoVendaAvista": null,
-      "precoAprovado": false,
-      "disponibilidade": "a_confirmar"
+      "precoAprovado": true,
+      "disponibilidade": "a_confirmar",
+      "precoVendaFinal": 35944.92
     },
     {
       "id": "KIT-037",
@@ -483,9 +483,9 @@
       "inversor": "SAJ",
       "inversorKwUnidade": 15,
       "quantidadeInversores": 2,
-      "precoVendaAvista": null,
-      "precoAprovado": false,
-      "disponibilidade": "a_confirmar"
+      "precoAprovado": true,
+      "disponibilidade": "a_confirmar",
+      "precoVendaFinal": 36767.15
     },
     {
       "id": "KIT-038",
@@ -496,9 +496,9 @@
       "inversor": "SAJ",
       "inversorKwUnidade": 15,
       "quantidadeInversores": 2,
-      "precoVendaAvista": null,
-      "precoAprovado": false,
-      "disponibilidade": "a_confirmar"
+      "precoAprovado": true,
+      "disponibilidade": "a_confirmar",
+      "precoVendaFinal": 37589.37
     },
     {
       "id": "KIT-039",
@@ -509,9 +509,9 @@
       "inversor": "SAJ",
       "inversorKwUnidade": 15,
       "quantidadeInversores": 2,
-      "precoVendaAvista": null,
-      "precoAprovado": false,
-      "disponibilidade": "a_confirmar"
+      "precoAprovado": true,
+      "disponibilidade": "a_confirmar",
+      "precoVendaFinal": 38495.04
     },
     {
       "id": "KIT-040",
@@ -522,9 +522,9 @@
       "inversor": "SAJ",
       "inversorKwUnidade": 15,
       "quantidadeInversores": 2,
-      "precoVendaAvista": null,
-      "precoAprovado": false,
-      "disponibilidade": "a_confirmar"
+      "precoAprovado": true,
+      "disponibilidade": "a_confirmar",
+      "precoVendaFinal": 39562.71
     },
     {
       "id": "KIT-041",
@@ -535,9 +535,9 @@
       "inversor": "SAJ",
       "inversorKwUnidade": 15,
       "quantidadeInversores": 2,
-      "precoVendaAvista": null,
-      "precoAprovado": false,
-      "disponibilidade": "a_confirmar"
+      "precoAprovado": true,
+      "disponibilidade": "a_confirmar",
+      "precoVendaFinal": 40384.93
     },
     {
       "id": "KIT-042",
@@ -548,9 +548,9 @@
       "inversor": "SAJ",
       "inversorKwUnidade": 15,
       "quantidadeInversores": 2,
-      "precoVendaAvista": null,
-      "precoAprovado": false,
-      "disponibilidade": "a_confirmar"
+      "precoAprovado": true,
+      "disponibilidade": "a_confirmar",
+      "precoVendaFinal": 41207.15
     },
     {
       "id": "KIT-043",
@@ -561,9 +561,9 @@
       "inversor": "SAJ",
       "inversorKwUnidade": 15,
       "quantidadeInversores": 2,
-      "precoVendaAvista": null,
-      "precoAprovado": false,
-      "disponibilidade": "a_confirmar"
+      "precoAprovado": true,
+      "disponibilidade": "a_confirmar",
+      "precoVendaFinal": 42112.83
     },
     {
       "id": "KIT-044",
@@ -574,9 +574,9 @@
       "inversor": "SAJ",
       "inversorKwUnidade": 15,
       "quantidadeInversores": 2,
-      "precoVendaAvista": null,
-      "precoAprovado": false,
-      "disponibilidade": "a_confirmar"
+      "precoAprovado": true,
+      "disponibilidade": "a_confirmar",
+      "precoVendaFinal": 42935.05
     },
     {
       "id": "KIT-045",
@@ -587,9 +587,9 @@
       "inversor": "SAJ",
       "inversorKwUnidade": 15,
       "quantidadeInversores": 2,
-      "precoVendaAvista": null,
-      "precoAprovado": false,
-      "disponibilidade": "a_confirmar"
+      "precoAprovado": true,
+      "disponibilidade": "a_confirmar",
+      "precoVendaFinal": 43757.28
     },
     {
       "id": "KIT-046",
@@ -600,9 +600,9 @@
       "inversor": "SAJ",
       "inversorKwUnidade": 15,
       "quantidadeInversores": 2,
-      "precoVendaAvista": null,
-      "precoAprovado": false,
-      "disponibilidade": "a_confirmar"
+      "precoAprovado": true,
+      "disponibilidade": "a_confirmar",
+      "precoVendaFinal": 44579.5
     },
     {
       "id": "KIT-047",
@@ -613,9 +613,9 @@
       "inversor": "SAJ",
       "inversorKwUnidade": 15,
       "quantidadeInversores": 2,
-      "precoVendaAvista": null,
-      "precoAprovado": false,
-      "disponibilidade": "a_confirmar"
+      "precoAprovado": true,
+      "disponibilidade": "a_confirmar",
+      "precoVendaFinal": 45485.17
     },
     {
       "id": "KIT-048",
@@ -626,9 +626,9 @@
       "inversor": "SAJ",
       "inversorKwUnidade": 15,
       "quantidadeInversores": 2,
-      "precoVendaAvista": null,
-      "precoAprovado": false,
-      "disponibilidade": "a_confirmar"
+      "precoAprovado": true,
+      "disponibilidade": "a_confirmar",
+      "precoVendaFinal": 46307.4
     },
     {
       "id": "KIT-049",
@@ -639,9 +639,9 @@
       "inversor": "SAJ",
       "inversorKwUnidade": 15,
       "quantidadeInversores": 2,
-      "precoVendaAvista": null,
-      "precoAprovado": false,
-      "disponibilidade": "a_confirmar"
+      "precoAprovado": true,
+      "disponibilidade": "a_confirmar",
+      "precoVendaFinal": 47129.62
     },
     {
       "id": "KIT-050",
@@ -652,9 +652,9 @@
       "inversor": "SAJ",
       "inversorKwUnidade": 15,
       "quantidadeInversores": 2,
-      "precoVendaAvista": null,
-      "precoAprovado": false,
-      "disponibilidade": "a_confirmar"
+      "precoAprovado": true,
+      "disponibilidade": "a_confirmar",
+      "precoVendaFinal": 47951.85
     },
     {
       "id": "KIT-051",
@@ -665,9 +665,9 @@
       "inversor": "SAJ",
       "inversorKwUnidade": 15,
       "quantidadeInversores": 2,
-      "precoVendaAvista": null,
-      "precoAprovado": false,
-      "disponibilidade": "a_confirmar"
+      "precoAprovado": true,
+      "disponibilidade": "a_confirmar",
+      "precoVendaFinal": 48857.52
     },
     {
       "id": "KIT-052",
@@ -678,9 +678,9 @@
       "inversor": "SAJ",
       "inversorKwUnidade": 15,
       "quantidadeInversores": 2,
-      "precoVendaAvista": null,
-      "precoAprovado": false,
-      "disponibilidade": "a_confirmar"
+      "precoAprovado": true,
+      "disponibilidade": "a_confirmar",
+      "precoVendaFinal": 49679.74
     },
     {
       "id": "KIT-053",
@@ -691,9 +691,9 @@
       "inversor": "SAJ",
       "inversorKwUnidade": 15,
       "quantidadeInversores": 2,
-      "precoVendaAvista": null,
-      "precoAprovado": false,
-      "disponibilidade": "a_confirmar"
+      "precoAprovado": true,
+      "disponibilidade": "a_confirmar",
+      "precoVendaFinal": 50501.97
     },
     {
       "id": "KIT-054",
@@ -704,9 +704,9 @@
       "inversor": "SAJ",
       "inversorKwUnidade": 15,
       "quantidadeInversores": 2,
-      "precoVendaAvista": null,
-      "precoAprovado": false,
-      "disponibilidade": "a_confirmar"
+      "precoAprovado": true,
+      "disponibilidade": "a_confirmar",
+      "precoVendaFinal": 51569.63
     },
     {
       "id": "KIT-055",
@@ -717,9 +717,9 @@
       "inversor": "SAJ",
       "inversorKwUnidade": 15,
       "quantidadeInversores": 2,
-      "precoVendaAvista": null,
-      "precoAprovado": false,
-      "disponibilidade": "a_confirmar"
+      "precoAprovado": true,
+      "disponibilidade": "a_confirmar",
+      "precoVendaFinal": 52475.31
     },
     {
       "id": "KIT-056",
@@ -730,9 +730,9 @@
       "inversor": "SAJ",
       "inversorKwUnidade": 15,
       "quantidadeInversores": 2,
-      "precoVendaAvista": null,
-      "precoAprovado": false,
-      "disponibilidade": "a_confirmar"
+      "precoAprovado": true,
+      "disponibilidade": "a_confirmar",
+      "precoVendaFinal": 53297.53
     },
     {
       "id": "KIT-057",
@@ -743,9 +743,9 @@
       "inversor": "SAJ",
       "inversorKwUnidade": 15,
       "quantidadeInversores": 4,
-      "precoVendaAvista": null,
-      "precoAprovado": false,
-      "disponibilidade": "a_confirmar"
+      "precoAprovado": true,
+      "disponibilidade": "a_confirmar",
+      "precoVendaFinal": 121849.77
     },
     {
       "id": "KIT-058",
@@ -756,9 +756,10 @@
       "inversor": "SAJ",
       "inversorKwUnidade": 15,
       "quantidadeInversores": 5,
-      "precoVendaAvista": null,
-      "precoAprovado": false,
-      "disponibilidade": "a_confirmar"
+      "precoAprovado": true,
+      "disponibilidade": "a_confirmar",
+      "precoVendaFinal": 152140.4
     }
-  ]
+  ],
+  "avisoPreco": "Preço final de equipamentos, com condições comerciais, disponibilidade e frete sujeitos à confirmação. Não inclui instalação, projeto ou homologação."
 }
