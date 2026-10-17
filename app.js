@@ -6,10 +6,10 @@
   const number = n => new Intl.NumberFormat('pt-BR',{maximumFractionDigits:0}).format(n);
   const decimal = n => new Intl.NumberFormat('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}).format(n);
   const escapeHtml = s => String(s ?? '').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-  const isApproved = kit => kit.precoAprovado === true && Number.isFinite(kit.precoVendaAvista) && kit.precoVendaAvista > 0;
+  const isApproved = kit => kit.precoAprovado === true && Number.isFinite(kit.precoVendaFinal) && kit.precoVendaFinal > 0;
   const phone = () => String(state.config.whatsappNumero || '').replace(/\D/g,'');
   const availableForRecommendation = kit => kit.disponibilidade !== 'indisponivel';
-  const priceText = kit => isApproved(kit) ? money(kit.precoVendaAvista) : 'Sob consulta';
+  const priceText = kit => isApproved(kit) ? money(kit.precoVendaFinal) : 'Sob consulta';
   const statusText = kit => ({disponivel:'Disponível',indisponivel:'Indisponível',a_confirmar:'A confirmar',sob_consulta:'Sob consulta'})[kit.disponibilidade] || 'A confirmar';
   const power = kit => decimal(kit.potenciaKwp) + ' kWp';
   const inverter = kit => `${kit.inversor} · ${number(kit.quantidadeInversores)} × ${decimal(kit.inversorKwUnidade)} kW`;
@@ -58,7 +58,7 @@
     $('more-kits').hidden=kits.length<=state.visible;
   }
   function buildMessage(kit){
-    return [`Olá! Gostaria de consultar o valor e a disponibilidade deste kit fotovoltaico da WW Solar:`,``,`• Referência: ${kit.id}`,`• Potência: ${power(kit)}`,`• Geração mensal estimada na tabela: ${number(kit.geracaoMensalKwh)} kWh`, `• Módulos: ${number(kit.placas)} unidades de ${number(kit.moduloWp)} Wp`,`• Inversor: ${inverter(kit)}`,`• Preço anunciado: ${isApproved(kit)?money(kit.precoVendaAvista):'sob consulta'}`,``,`A cotação é somente de equipamentos, sem instalação, projeto, homologação ou frete. Poderia confirmar o preço atual, estoque e frete?`].join('\n');
+    return [`Olá! Gostaria de consultar o valor e a disponibilidade deste kit fotovoltaico da WW Solar:`,``,`• Referência: ${kit.id}`,`• Potência: ${power(kit)}`,`• Geração mensal estimada na tabela: ${number(kit.geracaoMensalKwh)} kWh`, `• Módulos: ${number(kit.placas)} unidades de ${number(kit.moduloWp)} Wp`,`• Inversor: ${inverter(kit)}`,`• Preço anunciado: ${isApproved(kit)?money(kit.precoVendaFinal):'sob consulta'}`,``,`A cotação é somente de equipamentos, sem instalação, projeto, homologação ou frete. Poderia confirmar o preço atual, estoque e frete?`].join('\n');
   }
   const detail = (label,value) => `<div><small>${escapeHtml(label)}</small><strong>${escapeHtml(value)}</strong></div>`;
   function openDetails(id){
