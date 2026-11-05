@@ -1,5 +1,5 @@
 {
-  "versao": "1.2.0",
+  "versao": "1.2.1",
   "atualizadoEm": "2026-11-05",
   "titulo": "Peças avulsas para sistemas fotovoltaicos",
   "estoqueEmTempoReal": false,
@@ -115,15 +115,6 @@
       "descricaoIncompleta": false
     },
     {
-      "id": "PAV-013",
-      "categoria": "componentes",
-      "nome": "QUADRO DE PROTEÇÃO PARA CARREGADORES VEICULARES MOBI BOX CLAMPER 8KW 220V 40A…",
-      "preco": 658.34,
-      "precoAprovado": true,
-      "disponibilidade": "a_confirmar",
-      "descricaoIncompleta": true
-    },
-    {
       "id": "PAV-014",
       "categoria": "componentes",
       "nome": "STRING CLAMPER SB 1000V 32A 2E/2S",
@@ -149,42 +140,6 @@
       "precoAprovado": true,
       "disponibilidade": "a_confirmar",
       "descricaoIncompleta": false
-    },
-    {
-      "id": "PAV-017",
-      "categoria": "componentes",
-      "nome": "MONITORAMENTO E CONTROLE ZERO-GRID (ZERO-EXPORT) SAJ SEC-C-S100 MONOFÁSICO 100A",
-      "preco": 1500,
-      "precoAprovado": true,
-      "disponibilidade": "a_confirmar",
-      "descricaoIncompleta": false
-    },
-    {
-      "id": "PAV-018",
-      "categoria": "componentes",
-      "nome": "MONITORAMENTO E CONTROLE ZERO-GRID (ZERO-EXPORT) SAJ SEC-C-T80 TRIFÁSICO 80A",
-      "preco": 2399.85,
-      "precoAprovado": true,
-      "disponibilidade": "a_confirmar",
-      "descricaoIncompleta": false
-    },
-    {
-      "id": "PAV-019",
-      "categoria": "componentes",
-      "nome": "MONITORAMENTO E CONTROLE ZERO-GRID (ZERO-EXPORT) SAJ SEC-C-T100 TRIFÁSICO 100A",
-      "preco": 2686.35,
-      "precoAprovado": true,
-      "disponibilidade": "a_confirmar",
-      "descricaoIncompleta": false
-    },
-    {
-      "id": "PAV-020",
-      "categoria": "componentes",
-      "nome": "MONITORAMENTO E CONTROLE ZERO-GRID (ZERO-EXPORT) SAJ SEC-C-T250 TRIFÁSICO 250A COM TC…",
-      "preco": 2850.02,
-      "precoAprovado": true,
-      "disponibilidade": "a_confirmar",
-      "descricaoIncompleta": true
     },
     {
       "id": "PAV-021",
