@@ -1,0 +1,496 @@
+{
+  "versao": "1.2.0",
+  "atualizadoEm": "2026-11-05",
+  "titulo": "Peças avulsas para sistemas fotovoltaicos",
+  "estoqueEmTempoReal": false,
+  "precosSujeitosAConfirmacao": true,
+  "aviso": "Somente equipamentos; preço, estoque e frete sujeitos à confirmação comercial. Não inclui projeto, homologação ou instalação.",
+  "produtos": [
+    {
+      "id": "PAV-001",
+      "categoria": "cabos",
+      "nome": "CABO SOLAR 4MM VERMELHO - 25MT",
+      "preco": 150,
+      "precoAprovado": true,
+      "disponibilidade": "a_confirmar",
+      "descricaoIncompleta": false
+    },
+    {
+      "id": "PAV-002",
+      "categoria": "cabos",
+      "nome": "CABO SOLAR 4MM PRETO - 25MT",
+      "preco": 150,
+      "precoAprovado": true,
+      "disponibilidade": "a_confirmar",
+      "descricaoIncompleta": false
+    },
+    {
+      "id": "PAV-003",
+      "categoria": "cabos",
+      "nome": "CABO SOLAR 6MM PRETO - 25MT",
+      "preco": 187.5,
+      "precoAprovado": true,
+      "disponibilidade": "a_confirmar",
+      "descricaoIncompleta": false
+    },
+    {
+      "id": "PAV-004",
+      "categoria": "cabos",
+      "nome": "CABO SOLAR 6MM VERMELHO - 25MT",
+      "preco": 187.5,
+      "precoAprovado": true,
+      "disponibilidade": "a_confirmar",
+      "descricaoIncompleta": false
+    },
+    {
+      "id": "PAV-005",
+      "categoria": "cabos",
+      "nome": "CABO SOLAR 6MM VERDE 50MT",
+      "preco": 375,
+      "precoAprovado": true,
+      "disponibilidade": "a_confirmar",
+      "descricaoIncompleta": false
+    },
+    {
+      "id": "PAV-006",
+      "categoria": "componentes",
+      "nome": "KIT GARRA DE ATERRAMENTO COM 2 PEÇAS",
+      "preco": 14.84,
+      "precoAprovado": true,
+      "disponibilidade": "a_confirmar",
+      "descricaoIncompleta": false
+    },
+    {
+      "id": "PAV-007",
+      "categoria": "componentes",
+      "nome": "CONECTOR SOLAR MC4 MACHO E FEMEA COM 2 PARES",
+      "preco": 15,
+      "precoAprovado": true,
+      "disponibilidade": "a_confirmar",
+      "descricaoIncompleta": false
+    },
+    {
+      "id": "PAV-008",
+      "categoria": "componentes",
+      "nome": "DPS CLAMPER SOLAR 1000V 40KA",
+      "preco": 194.83,
+      "precoAprovado": true,
+      "disponibilidade": "a_confirmar",
+      "descricaoIncompleta": false
+    },
+    {
+      "id": "PAV-009",
+      "categoria": "componentes",
+      "nome": "FILTRO DE LINHA COM PROTETOR CONTRA SURTOS (DPS) 127/220V 10A 5 TOMADAS 3 PINOS TRANSPARENTE",
+      "preco": 104.85,
+      "precoAprovado": true,
+      "disponibilidade": "a_confirmar",
+      "descricaoIncompleta": false
+    },
+    {
+      "id": "PAV-010",
+      "categoria": "componentes",
+      "nome": "QUADRO DE PROTECAO AC FRONT BOX CLAMPER 275V 40A 20KA 2P IP65",
+      "preco": 464.85,
+      "precoAprovado": true,
+      "disponibilidade": "a_confirmar",
+      "descricaoIncompleta": false
+    },
+    {
+      "id": "PAV-011",
+      "categoria": "componentes",
+      "nome": "QUADRO DE PROTECÃO AC FRONT BOX CLAMPER 275V 50A 20KA 3P IP65",
+      "preco": 644.85,
+      "precoAprovado": true,
+      "disponibilidade": "a_confirmar",
+      "descricaoIncompleta": false
+    },
+    {
+      "id": "PAV-012",
+      "categoria": "componentes",
+      "nome": "STRING CLAMPER SB 1000V 32A 1E/1S",
+      "preco": 690.02,
+      "precoAprovado": true,
+      "disponibilidade": "a_confirmar",
+      "descricaoIncompleta": false
+    },
+    {
+      "id": "PAV-013",
+      "categoria": "componentes",
+      "nome": "QUADRO DE PROTEÇÃO PARA CARREGADORES VEICULARES MOBI BOX CLAMPER 8KW 220V 40A…",
+      "preco": 658.34,
+      "precoAprovado": true,
+      "disponibilidade": "a_confirmar",
+      "descricaoIncompleta": true
+    },
+    {
+      "id": "PAV-014",
+      "categoria": "componentes",
+      "nome": "STRING CLAMPER SB 1000V 32A 2E/2S",
+      "preco": 809.85,
+      "precoAprovado": true,
+      "disponibilidade": "a_confirmar",
+      "descricaoIncompleta": false
+    },
+    {
+      "id": "PAV-015",
+      "categoria": "componentes",
+      "nome": "STRING CLAMPER SB-1000V 20A 4E/2S 4D",
+      "preco": 898.5,
+      "precoAprovado": true,
+      "disponibilidade": "a_confirmar",
+      "descricaoIncompleta": false
+    },
+    {
+      "id": "PAV-016",
+      "categoria": "componentes",
+      "nome": "STRING CLAMPER SB 1000V 32A 3E/3S P24",
+      "preco": 1349.87,
+      "precoAprovado": true,
+      "disponibilidade": "a_confirmar",
+      "descricaoIncompleta": false
+    },
+    {
+      "id": "PAV-017",
+      "categoria": "componentes",
+      "nome": "MONITORAMENTO E CONTROLE ZERO-GRID (ZERO-EXPORT) SAJ SEC-C-S100 MONOFÁSICO 100A",
+      "preco": 1500,
+      "precoAprovado": true,
+      "disponibilidade": "a_confirmar",
+      "descricaoIncompleta": false
+    },
+    {
+      "id": "PAV-018",
+      "categoria": "componentes",
+      "nome": "MONITORAMENTO E CONTROLE ZERO-GRID (ZERO-EXPORT) SAJ SEC-C-T80 TRIFÁSICO 80A",
+      "preco": 2399.85,
+      "precoAprovado": true,
+      "disponibilidade": "a_confirmar",
+      "descricaoIncompleta": false
+    },
+    {
+      "id": "PAV-019",
+      "categoria": "componentes",
+      "nome": "MONITORAMENTO E CONTROLE ZERO-GRID (ZERO-EXPORT) SAJ SEC-C-T100 TRIFÁSICO 100A",
+      "preco": 2686.35,
+      "precoAprovado": true,
+      "disponibilidade": "a_confirmar",
+      "descricaoIncompleta": false
+    },
+    {
+      "id": "PAV-020",
+      "categoria": "componentes",
+      "nome": "MONITORAMENTO E CONTROLE ZERO-GRID (ZERO-EXPORT) SAJ SEC-C-T250 TRIFÁSICO 250A COM TC…",
+      "preco": 2850.02,
+      "precoAprovado": true,
+      "disponibilidade": "a_confirmar",
+      "descricaoIncompleta": true
+    },
+    {
+      "id": "PAV-021",
+      "categoria": "estruturas",
+      "nome": "KIT SUPORTE FIXAÇÃO PARA MICROINVERSOR COM 2 UNIDADES",
+      "preco": 44.85,
+      "precoAprovado": true,
+      "disponibilidade": "a_confirmar",
+      "descricaoIncompleta": false
+    },
+    {
+      "id": "PAV-022",
+      "categoria": "estruturas",
+      "nome": "KIT JUNÇÃO PARA PERFIL 2.40MT / 2.70MT COM 2 UNIDADES",
+      "preco": 44.85,
+      "precoAprovado": true,
+      "disponibilidade": "a_confirmar",
+      "descricaoIncompleta": false
+    },
+    {
+      "id": "PAV-023",
+      "categoria": "estruturas",
+      "nome": "KIT FIXAÇÃO GRAMPO INTERMEDIARIO PARAFUSO INOX COM 6 UNIDADES",
+      "preco": 44.85,
+      "precoAprovado": true,
+      "disponibilidade": "a_confirmar",
+      "descricaoIncompleta": false
+    },
+    {
+      "id": "PAV-024",
+      "categoria": "estruturas",
+      "nome": "PERFIL FIXAÇAO MODULO 27,8MMX45MMX2.36M",
+      "preco": 67.5,
+      "precoAprovado": true,
+      "disponibilidade": "a_confirmar",
+      "descricaoIncompleta": false
+    },
+    {
+      "id": "PAV-025",
+      "categoria": "estruturas",
+      "nome": "PERFIL FIXAÇAO MODULO SOLAR ALUMINIO 27,8MMX45MMX2.36M",
+      "preco": 67.52,
+      "precoAprovado": true,
+      "disponibilidade": "a_confirmar",
+      "descricaoIncompleta": false
+    },
+    {
+      "id": "PAV-026",
+      "categoria": "estruturas",
+      "nome": "KIT FIXAÇAÕ EM L TELHA METALICA PARA 4 MODULOS FOTOVOLTAICO",
+      "preco": 104.85,
+      "precoAprovado": true,
+      "disponibilidade": "a_confirmar",
+      "descricaoIncompleta": false
+    },
+    {
+      "id": "PAV-027",
+      "categoria": "estruturas",
+      "nome": "KIT FIXAÇÃO TELHA FIBROCIMENTO PARAFUSO INOX METAL M10X250 PARA 4 MODULOS FOTOVOLTAICO",
+      "preco": 120,
+      "precoAprovado": true,
+      "disponibilidade": "a_confirmar",
+      "descricaoIncompleta": false
+    },
+    {
+      "id": "PAV-028",
+      "categoria": "estruturas",
+      "nome": "KIT FIXAÇÃO TELHA FIBROCIMENTO PARAFUSO INOX MADEIRA PARA 4 MODULOS",
+      "preco": 120,
+      "precoAprovado": true,
+      "disponibilidade": "a_confirmar",
+      "descricaoIncompleta": false
+    },
+    {
+      "id": "PAV-029",
+      "categoria": "estruturas",
+      "nome": "KIT FIXAÇÃO TELHA CERÂMICA COM PROLONGADOR PARA 4 MÓDULOS FOTOVOLTAICO",
+      "preco": 149.85,
+      "precoAprovado": true,
+      "disponibilidade": "a_confirmar",
+      "descricaoIncompleta": false
+    },
+    {
+      "id": "PAV-030",
+      "categoria": "estruturas",
+      "nome": "KIT FIXAÇÃO TELHA CERÂMICA COM PROLONGADOR PARA 4 MÓDULOS FOTOVOLTAICO",
+      "preco": 149.85,
+      "precoAprovado": true,
+      "disponibilidade": "a_confirmar",
+      "descricaoIncompleta": false
+    },
+    {
+      "id": "PAV-031",
+      "categoria": "estruturas",
+      "nome": "KIT FIXAÇÃO MINI-TRILHO 42CM TELHADO METALICO PARA 4 MODULOS",
+      "preco": 179.85,
+      "precoAprovado": true,
+      "disponibilidade": "a_confirmar",
+      "descricaoIncompleta": false
+    },
+    {
+      "id": "PAV-032",
+      "categoria": "estruturas",
+      "nome": "KIT FIXAÇAO TELHA METALICA MINI-TRILHO 42CM PARA 4 MODULOS FOTOVOLTAICO",
+      "preco": 179.85,
+      "precoAprovado": true,
+      "disponibilidade": "a_confirmar",
+      "descricaoIncompleta": false
+    },
+    {
+      "id": "PAV-033",
+      "categoria": "estruturas",
+      "nome": "KIT FIXAÇÃO PERFIL MINI-TRILHO ALTO TELHA METALICA PARA MICROINVERSOR 30CM X 10CM",
+      "preco": 224.83,
+      "precoAprovado": true,
+      "disponibilidade": "a_confirmar",
+      "descricaoIncompleta": false
+    },
+    {
+      "id": "PAV-034",
+      "categoria": "microinversores",
+      "nome": "MICRO-INVERSOR DEYE-S2.25K-G4 220V",
+      "preco": 1119.86,
+      "precoAprovado": true,
+      "disponibilidade": "a_confirmar",
+      "descricaoIncompleta": false
+    },
+    {
+      "id": "PAV-035",
+      "categoria": "inversores",
+      "nome": "INVERSOR DEYE AFCI MONOFASICO 6K ON GRID 220V 2MPPT",
+      "preco": 1349.87,
+      "precoAprovado": true,
+      "disponibilidade": "a_confirmar",
+      "descricaoIncompleta": false
+    },
+    {
+      "id": "PAV-036",
+      "categoria": "inversores",
+      "nome": "INVERSOR SAJ AFCI MONO 3K-R5-ON-GRID 220V 1MPPT",
+      "preco": 1349.87,
+      "precoAprovado": true,
+      "disponibilidade": "a_confirmar",
+      "descricaoIncompleta": false
+    },
+    {
+      "id": "PAV-037",
+      "categoria": "inversores",
+      "nome": "INVERSOR SAJ MONOFASICO 6K-R5 ON-GRID 220V 2MPPT",
+      "preco": 1753.65,
+      "precoAprovado": true,
+      "disponibilidade": "a_confirmar",
+      "descricaoIncompleta": false
+    },
+    {
+      "id": "PAV-038",
+      "categoria": "inversores",
+      "nome": "INVERSOR DEYE MONO 7.3KW ON GRID 220V 2MPPT",
+      "preco": 2024.88,
+      "precoAprovado": true,
+      "disponibilidade": "a_confirmar",
+      "descricaoIncompleta": false
+    },
+    {
+      "id": "PAV-039",
+      "categoria": "inversores",
+      "nome": "INVERSOR DEYE AFCI MONO 10.5KW ON GRID-G2 220V 2MPPT",
+      "preco": 2699.87,
+      "precoAprovado": true,
+      "disponibilidade": "a_confirmar",
+      "descricaoIncompleta": false
+    },
+    {
+      "id": "PAV-040",
+      "categoria": "inversores",
+      "nome": "INVERSOR SAJ AFCI MONO 7.3KW-R5 220V 2MPPT",
+      "preco": 3415.15,
+      "precoAprovado": true,
+      "disponibilidade": "a_confirmar",
+      "descricaoIncompleta": false
+    },
+    {
+      "id": "PAV-041",
+      "categoria": "inversores",
+      "nome": "INVERSOR SAJ AFCI MONO 10KW-R6 220V 3MPPT",
+      "preco": 3861.12,
+      "precoAprovado": true,
+      "disponibilidade": "a_confirmar",
+      "descricaoIncompleta": false
+    },
+    {
+      "id": "PAV-042",
+      "categoria": "modulos",
+      "nome": "MODULO 630W N-TYPE TSUN BIFACIAL 30MM",
+      "preco": 766.59,
+      "precoAprovado": true,
+      "disponibilidade": "a_confirmar",
+      "descricaoIncompleta": false
+    },
+    {
+      "id": "PAV-043",
+      "categoria": "modulos",
+      "nome": "MODULO 585W RENEPV BIFACIAL 30 MM",
+      "preco": 835,
+      "precoAprovado": true,
+      "disponibilidade": "a_confirmar",
+      "descricaoIncompleta": false
+    },
+    {
+      "id": "PAV-044",
+      "categoria": "modulos",
+      "nome": "MODULO 600W N-TYPE ZNSHINE MONOFACIAL 30MM",
+      "preco": 850,
+      "precoAprovado": true,
+      "disponibilidade": "a_confirmar",
+      "descricaoIncompleta": false
+    },
+    {
+      "id": "PAV-045",
+      "categoria": "modulos",
+      "nome": "MODULO 600W N-TYPE TSUN BIFACIAL 30MM",
+      "preco": 850,
+      "precoAprovado": true,
+      "disponibilidade": "a_confirmar",
+      "descricaoIncompleta": false
+    },
+    {
+      "id": "PAV-046",
+      "categoria": "modulos",
+      "nome": "MODULO 610W RENEPV BIFACIAL 30MM",
+      "preco": 860,
+      "precoAprovado": true,
+      "disponibilidade": "a_confirmar",
+      "descricaoIncompleta": false
+    },
+    {
+      "id": "PAV-047",
+      "categoria": "modulos",
+      "nome": "MODULO 620W NPLUS BIFACIAL 30MM",
+      "preco": 870,
+      "precoAprovado": true,
+      "disponibilidade": "a_confirmar",
+      "descricaoIncompleta": false
+    },
+    {
+      "id": "PAV-048",
+      "categoria": "modulos",
+      "nome": "MODULO 620W RENEPV BIFACIAL 30MM",
+      "preco": 870,
+      "precoAprovado": true,
+      "disponibilidade": "a_confirmar",
+      "descricaoIncompleta": false
+    },
+    {
+      "id": "PAV-049",
+      "categoria": "modulos",
+      "nome": "MODULO 625W N-TYPE DMEGC BIFACIAL 30MM",
+      "preco": 875,
+      "precoAprovado": true,
+      "disponibilidade": "a_confirmar",
+      "descricaoIncompleta": false
+    },
+    {
+      "id": "PAV-050",
+      "categoria": "modulos",
+      "nome": "MODULO 630W N-TYPE TSUN BIFACIAL 30MM",
+      "preco": 880,
+      "precoAprovado": true,
+      "disponibilidade": "a_confirmar",
+      "descricaoIncompleta": false
+    },
+    {
+      "id": "PAV-051",
+      "categoria": "modulos",
+      "nome": "MODULO 630W N-TYPE TSUN BIFACIAL 30MM",
+      "preco": 880,
+      "precoAprovado": true,
+      "disponibilidade": "a_confirmar",
+      "descricaoIncompleta": false
+    },
+    {
+      "id": "PAV-052",
+      "categoria": "modulos",
+      "nome": "MODULO 630W RENEPV BIFACIAL 30MM",
+      "preco": 880,
+      "precoAprovado": true,
+      "disponibilidade": "a_confirmar",
+      "descricaoIncompleta": false
+    },
+    {
+      "id": "PAV-053",
+      "categoria": "modulos",
+      "nome": "MODULO 670W RENEPV BIFACIAL 30MM",
+      "preco": 920,
+      "precoAprovado": true,
+      "disponibilidade": "a_confirmar",
+      "descricaoIncompleta": false
+    },
+    {
+      "id": "PAV-054",
+      "categoria": "modulos",
+      "nome": "MODULO 710W N-TYPE DMEGC BIFACIAL 30MM",
+      "preco": 960,
+      "precoAprovado": true,
+      "disponibilidade": "a_confirmar",
+      "descricaoIncompleta": false
+    }
+  ]
+}
