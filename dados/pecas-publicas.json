@@ -1,5 +1,5 @@
 {
-  "versao": "1.2.2",
+  "versao": "1.2.3",
   "atualizadoEm": "2026-11-08",
   "titulo": "Peças avulsas para sistemas fotovoltaicos",
   "estoqueEmTempoReal": false,
@@ -446,6 +446,16 @@
       "precoAprovado": true,
       "disponibilidade": "a_confirmar",
       "descricaoIncompleta": false
+    },
+    {
+      "id": "PAV-055",
+      "categoria": "modulos",
+      "nome": "MODULO 620W RENEPV BIFACIAL 30MM (REF. 432446)",
+      "preco": 870,
+      "precoAprovado": true,
+      "disponibilidade": "a_confirmar",
+      "descricaoIncompleta": false,
+      "codigoProduto": "432446"
     }
   ]
 }
