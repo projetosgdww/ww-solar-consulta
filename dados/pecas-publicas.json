@@ -1,6 +1,6 @@
 {
-  "versao": "1.2.1",
-  "atualizadoEm": "2026-11-05",
+  "versao": "1.2.2",
+  "atualizadoEm": "2026-11-08",
   "titulo": "Peças avulsas para sistemas fotovoltaicos",
   "estoqueEmTempoReal": false,
   "precosSujeitosAConfirmacao": true,
@@ -199,7 +199,7 @@
       "id": "PAV-027",
       "categoria": "estruturas",
       "nome": "KIT FIXAÇÃO TELHA FIBROCIMENTO PARAFUSO INOX METAL M10X250 PARA 4 MODULOS FOTOVOLTAICO",
-      "preco": 120,
+      "preco": 121.5,
       "precoAprovado": true,
       "disponibilidade": "a_confirmar",
       "descricaoIncompleta": false
@@ -208,7 +208,7 @@
       "id": "PAV-028",
       "categoria": "estruturas",
       "nome": "KIT FIXAÇÃO TELHA FIBROCIMENTO PARAFUSO INOX MADEIRA PARA 4 MODULOS",
-      "preco": 120,
+      "preco": 121.5,
       "precoAprovado": true,
       "disponibilidade": "a_confirmar",
       "descricaoIncompleta": false
@@ -289,7 +289,7 @@
       "id": "PAV-037",
       "categoria": "inversores",
       "nome": "INVERSOR SAJ MONOFASICO 6K-R5 ON-GRID 220V 2MPPT",
-      "preco": 1753.65,
+      "preco": 2023.91,
       "precoAprovado": true,
       "disponibilidade": "a_confirmar",
       "descricaoIncompleta": false
