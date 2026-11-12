@@ -1,0 +1,53 @@
+/* Montador WW Solar DEV — só administração, visual institucional preservado. */
+.kit-admin-main{padding:64px 0 90px;min-height:calc(100vh - 180px)}
+.kit-admin-main h1{font-size:clamp(32px,4.4vw,56px);line-height:1.1;letter-spacing:-.04em}
+.kit-admin-main h1 em{font-style:normal;color:#bd9319}
+.kit-admin-main .kit-heading{display:flex;justify-content:space-between;align-items:center;gap:24px;margin:20px 0 24px}
+.kit-admin-main .kit-heading p{color:#637874;font-size:14px;margin:15px 0 0}
+.kit-draft-tag{font-size:10px;letter-spacing:.11em;font-weight:900;color:#9a6418;background:#fff3d4;border-radius:50px;padding:11px 15px;white-space:nowrap}
+#kit-admin-app[hidden]{display:none!important}
+#kit-admin-app{margin-top:24px}
+.kit-progress{color:#47675f;border:1px solid #d8e7e0;background:#f5f9f6;padding:14px 18px;border-radius:12px;margin-bottom:20px;font-weight:800;font-size:13px}
+.kit-workspace{display:grid;grid-template-columns:minmax(280px,345px) minmax(0,1fr);gap:18px;align-items:start}
+.kit-control-panel,.kit-output-panel{background:#fff;border:1px solid #dce8e2;border-radius:19px;box-shadow:0 16px 42px rgba(4,34,30,.045);padding:clamp(17px,2.6vw,28px)}
+.kit-control-panel{position:sticky;top:95px}
+.kit-control-panel h2,.kit-output-panel h2{font-size:26px;letter-spacing:-.035em;margin:0 0 20px}
+.kit-output-head{display:flex;align-items:center;gap:18px;justify-content:space-between;margin-bottom:22px}
+.kit-output-head h2{margin:5px 0}
+.kit-output-head p{color:#5e7670;font-size:13px}
+.kit-field{display:flex;flex-direction:column;gap:7px;margin:0 0 15px}
+.kit-field label{font-size:12px;font-weight:850;color:#183b33}
+.kit-field small,.kit-small-note{font-size:12px;line-height:1.55;color:#657d75}
+.kit-field select,.kit-field input{border:1px solid #ccded5;background:#f8fbf9;color:#122927;border-radius:9px;padding:12px;width:100%;font-size:13px;min-width:0}
+.kit-field select:focus-visible,.kit-field input:focus-visible{outline:3px solid #f1c24c}
+.kit-field-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.kit-control-panel #kit-recalculate{display:block;width:100%;margin:22px 0}
+.kit-safe-note{background:#fff8e6;border-left:3px solid #e7b640;padding:13px 15px;border-radius:9px;color:#806227;font-size:12px;line-height:1.6}
+.kit-metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;margin-bottom:22px}
+.kit-metrics>div{padding:15px 12px;background:#f6f9f7;border:1px solid #e8f0ec;border-radius:11px;min-width:0}
+.kit-metrics small{font-size:10px;display:block;color:#607872;line-height:1.35}
+.kit-metrics strong{display:block;font-size:18px;margin-top:8px;overflow-wrap:anywhere}
+.kit-output-panel h3{font-size:19px;margin:26px 0 12px}
+.kit-table-scroll{overflow:auto;max-width:100%;border:1px solid #dde7e2;border-radius:12px}
+.kit-bom-table{border-collapse:collapse;width:100%;min-width:650px;font-size:12px}
+.kit-bom-table th{background:#f3f7f4;text-align:left;font-size:11px;color:#526c63;padding:12px}
+.kit-bom-table td{border-top:1px solid #edf1ee;padding:13px;vertical-align:middle}
+.kit-bom-table td:first-child{min-width:235px}
+.kit-bom-table td strong{display:block;line-height:1.4;color:#19362d}
+.kit-bom-table td small{display:block;margin-top:5px;color:#698077}
+.kit-bom-table .kit-sku-note{max-width:250px}
+.kit-bom-table .kit-qty-cell,.kit-bom-table .kit-subtotal{white-space:nowrap}
+.kit-cost-edit{display:flex;align-items:center;gap:7px}
+.kit-cost-edit input{width:100px;min-width:0;max-width:115px;padding:8px;border:1px solid #c6d9cf;border-radius:7px;background:#fafffb;font-size:12px}
+.kit-cost-save{padding:9px 11px;border:1px solid #cddcd2;border-radius:7px;background:#102a2a;color:white;font-size:11px;font-weight:850;cursor:pointer}
+.kit-cost-save:disabled{opacity:.5;cursor:wait}
+.kit-missing{color:#986e17;font-size:11px}
+.kit-totals{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:20px 0}
+.kit-totals>div{padding:20px;background:#112627;color:white;border-radius:13px}
+.kit-totals>div:last-child{background:#f5ca56;color:#142b29}
+.kit-totals span{display:block;font-size:11px;opacity:.8}
+.kit-totals strong{display:block;font-size:clamp(20px,2.3vw,27px);margin-top:8px;overflow-wrap:anywhere}
+.kit-risk-list{padding-left:21px;color:#526b63;line-height:1.7;font-size:12px}
+.kit-risk-list li{padding:3px 0}
+@media(max-width:1080px){.kit-workspace{grid-template-columns:1fr}.kit-control-panel{position:static}.kit-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:650px){.kit-admin-main{padding:33px 0}.kit-heading{flex-direction:column;align-items:flex-start!important}.kit-output-head{align-items:flex-start;flex-wrap:wrap}.kit-totals{grid-template-columns:1fr}}
