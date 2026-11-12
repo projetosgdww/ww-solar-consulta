@@ -25,3 +25,15 @@ test('mensagem do WhatsApp usa itens e confirma cotação',()=>{
  assert.match(message,/cliente@exemplo.com/);assert.match(message,/R\$\s+10\.276,46/);
  assert.match(message,/não é compra concluída/);
 });
+
+test('carrinho expira em 25 minutos sem virar reserva de estoque',()=>{
+ const start='2026-11-12T15:00:00.000Z';
+ const t=Date.parse(start);
+ assert.equal(C.quoteRemainingMs(start,t),25*60*1000);
+ assert.equal(C.quoteRemainingMs(start,t+5*60*1000),20*60*1000);
+ assert.equal(C.quoteRemainingMs(start,t+25*60*1000),0);
+ assert.equal(C.quoteRemainingMs(start,t+26*60*1000),0);
+ assert.equal(C.quoteClock(25*60*1000),'25:00');
+ assert.equal(C.quoteClock(79*1000),'01:19');
+ assert.equal(C.quoteClock(0),'00:00');
+});
