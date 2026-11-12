@@ -37,3 +37,14 @@ assert(config.includes('supabaseUrl: "https://drutoqwkjzdsirqthdux.supabase.co"'
 assert(config.includes('publishableKey: "sb_publishable_'));
 assert(!/sb_secret_|service_role|SERVICE_ROLE/.test(config));
 console.log('WW Solar Cliente DEV — guardas de segurança básicas aprovadas.');
+
+const kitsCore=read('kit-builder-core.js');
+const kitsAdmin=read('kits-admin-dev.js');
+const kitsSQL=read('supabase/wwsolar-kit-drafts-dev.sql');
+assert(!/service_role|serviceRole|SUPABASE_SERVICE_ROLE_KEY/.test(kitsAdmin),'nunca expor chave privada no montador');
+assert(kitsSQL.includes('enable row level security'),'custos admin precisam RLS');
+assert(kitsSQL.includes('revoke all on public.wwsolar_piece_costs'),'custos não públicos por padrão');
+assert(kitsSQL.includes("auth.jwt()->'app_metadata'->>'wwsolar_role'"),'políticas apenas para admin');
+assert(kitsSQL.includes('engineering_approved = false')&&kitsSQL.includes('published = false'),'rascunhos nunca publicáveis');
+assert(kitsCore.includes('publicationAllowed:false'),'trava de liberação de kits');
+assert(kitsAdmin.includes("wwsolar_piece_costs"),'custos apenas de tabela admin');
