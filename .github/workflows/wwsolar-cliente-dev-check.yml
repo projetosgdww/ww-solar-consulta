@@ -7,6 +7,7 @@ on:
       - "cliente-*"
       - "admin-dev.*"
       - "tests/cliente-*"
+      - "scripts/build-cliente-dev.mjs"
       - "supabase/wwsolar-dev-schema.sql"
       - "supabase/functions/wwsolar-create-customer/**"
       - ".github/workflows/wwsolar-cliente-dev-check.yml"
@@ -31,3 +32,7 @@ jobs:
         run: node --test tests/cliente-core.test.cjs
       - name: Guardas de seguranca estatica
         run: node tests/cliente-security.test.cjs
+      - name: Construir arquivos permitidos da area DEV
+        run: node scripts/build-cliente-dev.mjs
+      - name: Confirmar que nao publica tabela de precos publicos
+        run: node --test tests/cliente-build.test.cjs
