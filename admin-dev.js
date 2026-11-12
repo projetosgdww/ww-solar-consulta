@@ -14,6 +14,7 @@
       status('Acesso restrito ao administrador. Faça login na área do cliente com sua conta administrativa.');return;
     }
     $('admin-dev-form').hidden=false;
+    $('admin-kits-entry').hidden=false;
     status('Administrador autenticado. Informe o e-mail para liberar um acesso.');
   }
   async function sendAction(action){
