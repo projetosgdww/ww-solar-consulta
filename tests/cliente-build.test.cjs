@@ -39,3 +39,12 @@ test('release apresenta URLs limpas e legado redirecionado',()=>{
   assert(oldAdmin.includes('url=./admin.html'));
   assert(fs.readFileSync(path.join(out,'admin-dev.js'),'utf8').includes("new URL('./cliente.html',window.location.href)"));
 });
+
+test('limpar carrinho no drawer requer confirmacao e esvazia pelo fluxo persistente',()=>{
+  const html=fs.readFileSync('cliente-dev.html','utf8');
+  assert(html.includes('id="client-drawer-clear"')&&html.includes('disabled>Limpar carrinho'));
+  assert(js.includes("$('client-drawer-clear').disabled=S.lines.length===0"));
+  assert(js.includes("$('client-drawer-clear').addEventListener('click'"));
+  assert(js.includes("window.confirm('Limpar todos os itens do carrinho?"));
+  assert(js.includes("void save([],'Carrinho limpo.')"));
+});
