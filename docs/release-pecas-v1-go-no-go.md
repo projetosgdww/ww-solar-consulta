@@ -21,7 +21,7 @@ Atualização: 12/11/2026. Ambiente auditado: `ww-solar-clientes-dev`.
 
 ## Bloqueios para abertura irrestrita de produção
 1. **Provisionamento de cliente novo em E2E:** criar uma conta via painel e validar login e bloqueio/reativação com essa conta. A estrutura/credenciais aleatórias já está implementada, mas o teste real desse percurso ainda não foi comprovado.
-2. **Contato comercial:** destino WhatsApp ativo na configuração é `+55 85 99272-3637`. Validar que é o número de vendas correto antes de divulgar para clientes.
+2. **Contato comercial — CONFIRMADO em 12/11/2026:** destino WhatsApp `+55 85 99272-3637` foi confirmado pelo responsável como o número correto neste momento. Se mudar futuramente, atualizar a configuração e repetir o teste do pedido.
 3. **Privacidade comercial/legado:** `main` no repositório público ainda contém `dados/catalogo-publico.json` e `dados/pecas-publicas.json`. O novo build DEV não inclui esses arquivos, mas o catálogo antigo e histórico público não se tornam privados. Definir retirada/migração do legado sem quebrar outros endereços.
 4. **Ambiente definitivo:** o projeto atual e a URL ainda são DEV; preparar e validar o endereço definitivo e estratégia de backend antes de anunciar como produção.
 5. **Segurança Auth:** Security Advisor reporta `auth_leaked_password_protection` desativado. Rever configuração em Auth > Security no projeto de lançamento.
@@ -32,5 +32,7 @@ Atualização: 12/11/2026. Ambiente auditado: `ww-solar-clientes-dev`.
 - Kits sem homologação não ficam disponíveis, incluindo os 58 antigos e os 12 rascunhos.
 - Não habilitar pagamentos, compra automática ou alegar que WhatsApp enviou mensagem.
 - Publicar apenas após revisar os bloqueios e executar smoke test de login/cotação/histórico no endereço definitivo.
+
+**Atualização de liberação:** telefone comercial validado; permanecem as demais verificações de provisionamento, legado, ambiente definitivo e segurança Auth.
 
 **Decisão atual:** V1 de peças tecnicamente funcional e comprovada no DEV; ainda **NO-GO para divulgação irrestrita/PROD**, até os cinco bloqueios acima serem tratados. Não confundir sucesso do piloto com aprovação dos kits.
