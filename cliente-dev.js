@@ -2,7 +2,7 @@
   'use strict';
   const $ = id => document.getElementById(id);
   const C=window.WWSolarClienteCore, cfg=window.WWSOLAR_CLIENTE_CONFIG||{};
-  const S={db:null,user:null,admin:false,catalog:[],lines:[],kind:'kit',category:'all',query:'',target:750,cartUpdatedAt:null,cartInvalid:false,saveQueue:Promise.resolve(),timer:null,toastTimer:null,drawerOpen:false};
+  const S={db:null,user:null,admin:false,catalog:[],lines:[],kind:'kit',category:'all',query:'',target:750,cartUpdatedAt:null,cartInvalid:false,saveQueue:Promise.resolve(),timer:null,toastTimer:null,drawerOpen:false,expiryNotified:false};
   const status=(m,id='client-action-status')=>{$(id).textContent=m;};
   const show=(id,visible)=>{$(id).hidden=!visible;};
   const euro = v => C.money(v);
@@ -239,8 +239,11 @@
     $('client-drawer-refresh').textContent=expired()?'Renovar cotação':'Atualizar valores';
     for(const id of ['client-top-clock','client-cart-timer','client-drawer-timer'])
       $(id).classList.toggle('client-clock-expired',expired());
-    if(expired()&&status && $('client-action-status').textContent==='Carrinho atualizado.')
-      status('Cotação de 25 minutos expirada. Atualize os valores antes de solicitar pelo WhatsApp.');
+    if(expired()&&!S.expiryNotified){
+      S.expiryNotified=true;
+      status('Cotação de 25 minutos expirada. Atualize os preços antes de solicitar pelo WhatsApp.');
+    }
+    if(!expired())S.expiryNotified=false;
   }
   function openDrawer(){
     if(!S.user)return;
@@ -417,7 +420,9 @@
       const fresh=data||[];
       const {selected,cents}=C.sumCart(S.lines,fresh);
       const local=C.sumCart(S.lines,available());
-      if(cents!==local.cents){
+      const oldPrices=new Map(local.selected.map(x=>[x.id,x.unit]));
+      const changed=selected.some(x=>oldPrices.get(x.id)!==x.unit);
+      if(changed||cents!==local.cents){
         const map=new Map(fresh.map(x=>[x.id,x]));
         S.catalog=S.catalog.map(x=>map.get(x.id)||x);
         renderProducts();renderCart();
