@@ -16,9 +16,9 @@ for(const file of allowed){
   await cp(source,join(out,file));
 }
 await writeFile(join(out,'index.html'),
-  '<!doctype html><html lang="pt-BR"><head><meta charset="UTF-8"><meta name="robots" content="noindex,nofollow"><meta http-equiv="refresh" content="0; url=./cliente-dev.html"><title>WW Solar — Área do Cliente DEV</title></head><body><p><a href="./cliente-dev.html">Abrir área do cliente</a></p></body></html>\n');
+  '<!doctype html><html lang="pt-BR"><head><meta charset="UTF-8"><meta name="robots" content="noindex,nofollow"><meta http-equiv="refresh" content="0; url=./cliente-dev.html"><title>WW Solar — Área do Cliente</title></head><body><p><a href="./cliente-dev.html">Abrir área do cliente</a></p></body></html>\n');
 await writeFile(join(out,'404.html'),
   '<!doctype html><html lang="pt-BR"><head><meta charset="UTF-8"><meta name="robots" content="noindex,nofollow"><title>Página não encontrada</title></head><body><h1>Página não encontrada</h1><p><a href="/cliente-dev.html">Área do cliente WW Solar</a></p></body></html>\n');
 await writeFile(join(out,'_headers'),
   '/*\n  X-Robots-Tag: noindex, nofollow\n  X-Content-Type-Options: nosniff\n  Referrer-Policy: strict-origin-when-cross-origin\n  Permissions-Policy: camera=(), microphone=(), geolocation=()\n\n/*.html\n  Cache-Control: no-store\n');
-console.log('Build DEV isolado concluído; nenhum catálogo JSON nem arquivo do site público foi copiado.');
+console.log('Build V1 isolado concluído; nenhum catálogo JSON nem arquivo do site público foi copiado.');
