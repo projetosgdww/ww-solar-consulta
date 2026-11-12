@@ -25,7 +25,7 @@
       const {data,error}=await db.functions.invoke('wwsolar-create-customer',{body:{email}});
       if(error||!data?.email||!data?.password)throw Error('Falha');
       oneTime='WW Solar — Área do cliente\n'
-        +'Acesso: https://projetosgdww.github.io/ww-solar-consulta/cliente.html\n'
+        +'Acesso: '+new URL('./cliente-dev.html',window.location.href).href+'\n'
         +'E-mail: '+data.email+'\nSenha: '+data.password+'\n'
         +'Guarde esta mensagem em local seguro.';
       $('admin-dev-credentials').textContent=oneTime;
