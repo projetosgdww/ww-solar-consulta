@@ -1,13 +1,20 @@
-<!doctype html><html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><meta name="theme-color" content="#0e2023"><title>WW Solar | Administração de clientes (DEV)</title><link rel="icon" href="./favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="./styles.css"><link rel="stylesheet" href="./cliente-dev.css"></head><body>
-<header class="header"><div class="shell header-inner"><a class="brand" href="./cliente-dev.html"><span class="brand-symbol" aria-hidden="true">☀</span><span class="brand-copy"><strong>WW<span>SOLAR</span></strong><small>ADMINISTRAÇÃO DE CLIENTES</small></span></a><nav class="nav"><a href="./cliente-dev.html">Voltar ao catálogo</a></nav></div></header>
+<!doctype html><html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><meta name="theme-color" content="#0e2023"><title>WW Solar | Clientes e Pedidos (DEV)</title><link rel="icon" href="./favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="./styles.css"><link rel="stylesheet" href="./cliente-dev.css"><link rel="stylesheet" href="./admin-dev.css"></head><body>
+<header class="header"><div class="shell header-inner"><a class="brand" href="./cliente-dev.html"><span class="brand-symbol" aria-hidden="true">☀</span><span class="brand-copy"><strong>WW<span>SOLAR</span></strong><small>PAINEL COMERCIAL · DEV</small></span></a><nav class="nav"><a href="./cliente-dev.html">Voltar ao catálogo</a></nav></div></header>
 <main class="shell client-main">
-<div class="section-label">WW SOLAR / ADMINISTRAÇÃO DEV</div><section class="client-login" style="margin:22px auto;max-width:620px">
+<div class="section-label">WW SOLAR / ADMINISTRAÇÃO DEV</div>
+<h1 class="admin-main-title">Seu painel <em>comercial.</em></h1>
+<p class="admin-main-intro">Acessos e histórico de solicitações em um só lugar. Atualizações de produtos e kits permanecem no desenvolvimento técnico.</p>
+<div id="admin-tabs" class="admin-tabs" role="group" aria-label="Seções do painel" hidden>
+  <button id="admin-tab-clients" class="active" type="button" aria-pressed="true" data-admin-panel="clients"><span>👥</span><strong>Clientes</strong><small>Cadastrar e gerenciar acessos</small></button>
+  <button id="admin-tab-orders" type="button" aria-pressed="false" data-admin-panel="orders"><span>📋</span><strong>Pedidos</strong><small>Histórico e negociações</small></button>
+</div>
+<section class="client-login admin-clients-panel" id="admin-clients-panel">
 <h1>Liberação de <em>clientes.</em></h1><p>Informe apenas o e-mail do cliente. Para novos acessos, o sistema gera uma senha individual no formato <strong>GDWW-xxxxxx-xxxxxx</strong> com caracteres aleatórios, mostrada uma vez para copiar.</p><p>Perdeu a senha de um cliente? Use <strong>Reemitir senha</strong> para substituir a anterior, sem excluir sua conta ou carrinho.</p>
 <p id="admin-dev-status" role="status" class="client-status">Verificando seu perfil de acesso...</p>
 <form id="admin-dev-form" class="client-form" hidden><label for="admin-dev-email">E-mail do cliente</label><input id="admin-dev-email" type="email" required maxlength="254" placeholder="cliente@exemplo.com" autocomplete="off">
 <button class="button button-accent" type="submit" id="admin-dev-submit">Criar acesso <span>↗</span></button>
 <button class="button button-outline" type="button" id="admin-dev-rotate">Reemitir senha</button></form>
-<div id="admin-kits-entry" hidden style="margin:23px 0;padding:17px;border:1px solid #dce8e2;border-radius:12px;background:#f7faf7"><strong>Montador de kits — DEV</strong><p class="client-muted">12 modelos-base, três coberturas, materiais preliminares e custo de aquisição restrito. Nenhum kit publicado.</p><a class="button button-outline" href="./kits-admin-dev.html">Abrir montador de kits ↗</a></div>
+
 <div id="admin-dev-created" hidden><div class="section-label">CREDENCIAIS — MOSTRADAS APENAS UMA VEZ</div>
 <p class="client-muted">Copie agora e envie diretamente ao cliente. Não salve senhas em planilhas ou repositórios.</p>
 <pre id="admin-dev-credentials" style="white-space:pre-wrap;overflow-wrap:anywhere;border:1px solid #dae9e3;padding:16px;border-radius:12px;background:#f4f8f6"></pre>
@@ -15,7 +22,21 @@
 <button type="button" id="admin-dev-clear" class="button button-outline">Limpar da tela</button>
 </div>
 <p class="client-muted">Sem convite, cadastro público ou recuperação de senha pelo cliente. A nova senha só aparece uma vez; copiar em local seguro. A reemissão invalida a senha anterior.</p>
-</section></main>
+<div id="admin-client-directory" class="admin-client-directory" hidden>
+<div class="admin-section-row"><div><h2>Acessos cadastrados</h2><p class="client-muted">Consulte e bloqueie acessos sem apagar o histórico.</p></div><button type="button" id="admin-refresh-clients" class="button button-outline">Atualizar</button></div>
+<div id="admin-client-list" class="admin-client-list"></div>
+</div>
+</section>
+<section id="admin-orders-panel" class="admin-orders-panel" hidden>
+<div class="admin-section-row"><div><h2>Histórico de solicitações</h2><p class="client-muted">Valores e itens preservados no momento da solicitação. O registro não confirma envio da mensagem pelo WhatsApp nem compra concluída.</p></div><button id="admin-refresh-orders" type="button" class="button button-outline">Atualizar pedidos</button></div>
+<div class="admin-order-toolbar"><label for="admin-order-filter">Filtrar por situação</label>
+<select id="admin-order-filter"><option value="todos">Todas as solicitações</option><option value="registrado">Registradas</option><option value="em_atendimento">Em atendimento</option><option value="fechado">Fechadas</option><option value="cancelado">Canceladas</option></select>
+<span id="admin-order-count" aria-live="polite">—</span></div>
+<p id="admin-order-status" class="client-status" role="status"></p>
+<div id="admin-order-list" class="admin-order-list"></div>
+<p class="client-muted">São exibidas as 100 solicitações mais recentes neste piloto DEV. Nenhum pagamento ou compra é realizado automaticamente.</p>
+</section>
+</main>
 <footer class="footer"><div class="shell footer-inner"><span><strong>WW</strong>SOLAR</span><span>Administração restrita · DEV</span></div></footer>
 <script defer src="./cliente-dev-config.js"></script><script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0/dist/umd/supabase.min.js"></script><script defer src="./admin-dev.js"></script>
 </body></html>
