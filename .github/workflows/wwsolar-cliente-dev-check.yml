@@ -8,6 +8,10 @@ on:
       - "admin-dev.*"
       - "tests/cliente-*"
       - "scripts/build-cliente-dev.mjs"
+      - "kits-admin-dev.*"
+      - "kit-builder-core.js"
+      - "tests/kit-builder.test.cjs"
+      - "supabase/wwsolar-kit-drafts-dev.sql"
       - "supabase/wwsolar-dev-schema.sql"
       - "supabase/functions/wwsolar-create-customer/**"
       - ".github/workflows/wwsolar-cliente-dev-check.yml"
@@ -28,8 +32,12 @@ jobs:
           node --check cliente-core.js
           node --check cliente-dev.js
           node --check admin-dev.js
+          node --check kit-builder-core.js
+          node --check kits-admin-dev.js
       - name: Testes do carrinho e do simulador
         run: node --test tests/cliente-core.test.cjs
+      - name: Testes dos 12 kits e calculo seguro de custos
+        run: node --test tests/kit-builder.test.cjs
       - name: Guardas de seguranca estatica
         run: node tests/cliente-security.test.cjs
       - name: Construir arquivos permitidos da area DEV
