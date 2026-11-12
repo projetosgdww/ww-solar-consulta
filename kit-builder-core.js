@@ -43,26 +43,76 @@
     return {sku,qty,label,assumption};
   }
   function roundCents(v){return Math.round(Number(v)*100);}
-  function costSummary(rows,costs){
-    const map=new Map((costs||[]).map(x=>[String(x.sku),Number(x.unit_cost)]));
-    let cents=0;const pending=[];
+  // Regras comerciais aprovadas; NÃO são fichas de custo do fornecedor.
+  // Preços na wwsolar_catalog são de VENDA avulsa. O custo obtido por
+  // reversão destas regras é sempre ESTIMATIVO, jamais um dado confirmado.
+  const PRICE_RULES=Object.freeze({
+    modulos:Object.freeze({type:'fixed',value:175}),
+    inversores:Object.freeze({type:'factor',value:1.25}),
+    microinversores:Object.freeze({type:'factor',value:1.25}),
+    estruturas:Object.freeze({type:'factor',value:1.40}),
+    cabos:Object.freeze({type:'factor',value:1.30}),
+    componentes:Object.freeze({type:'factor',value:1.30})
+  });
+  function estimatedCostFromSale(product){
+    const rule=PRICE_RULES[category(product)];
+    const sale=Number(product?.price);
+    if(!rule||!Number.isFinite(sale)||sale<=0)return null;
+    const estimate=rule.type==='fixed'?sale-rule.value:sale/rule.value;
+    if(!Number.isFinite(estimate)||roundCents(estimate)<=0)return null;
+    return {unitCost:roundCents(estimate)/100,source:'estimado',
+      sourceDetail:rule.type==='fixed'?'Venda avulsa − R$ 175':
+        'Venda avulsa ÷ '+rule.value.toFixed(2).replace('.',','),
+      sourceSalePrice:roundCents(sale)/100};
+  }
+  function costSummary(rows,costs,products=[]){
+    const manual=new Map((costs||[]).map(x=>[String(x.sku),x]));
+    const items=new Map((products||[]).map(x=>[String(x.id),x]));
+    let cents=0;const pending=[];let estimatedLines=0,verifiedLines=0,staleLines=0;
     const detailed=rows.map(r=>{
       if(!r.sku||!Number.isInteger(r.qty)||r.qty<=0){
         pending.push(r.label+' — quantidade/peça pendente');
-        return {...r,unitCost:null,subtotal:null};
+        return {...r,unitCost:null,subtotal:null,costSource:'pendente'};
       }
-      const unit=map.get(r.sku);
-      if(!Number.isFinite(unit)||unit<=0){
-        pending.push(r.label+' — custo real não informado');
-        return {...r,unitCost:null,subtotal:null};
+      const p=items.get(String(r.sku)), m=manual.get(String(r.sku));
+      const approved=p&&p.kind==='piece'&&p.active===true&&p.approved===true;
+      if(!approved){
+        pending.push(r.label+' — SKU indisponível ou não aprovado');
+        return {...r,unitCost:null,subtotal:null,costSource:'pendente'};
       }
-      const sub=roundCents(unit)*r.qty;
+      const unit=Number(m?.unit_cost);
+      const costDate=Date.parse(String(m?.updated_at||''));
+      const productDate=Date.parse(String(p?.updated_at||''));
+      const isStale=Number.isFinite(costDate)&&Number.isFinite(productDate)&&productDate>costDate;
+      let candidate=null;
+      if(Number.isFinite(unit)&&unit>0&&!isStale){
+        candidate={unitCost:roundCents(unit)/100,source:'confirmado',
+          sourceDetail:'Custo informado e salvo pelo administrador'};
+      }else{
+        candidate=estimatedCostFromSale(p);
+        if(candidate&&isStale){
+          candidate.source='estimado_revisar';
+          candidate.sourceDetail+=' · custo manual anterior à atualização de preço';
+          staleLines++;
+        }
+      }
+      if(!candidate){
+        pending.push(r.label+' — custo não recuperável do preço avulso');
+        return {...r,unitCost:null,subtotal:null,costSource:'pendente'};
+      }
+      const sub=roundCents(candidate.unitCost)*r.qty;
       cents+=sub;
-      return {...r,unitCost:roundCents(unit)/100,subtotal:sub/100};
+      if(candidate.source==='confirmado')verifiedLines++;
+      else estimatedLines++;
+      return {...r,unitCost:candidate.unitCost,subtotal:sub/100,
+        costSource:candidate.source,costSourceDetail:candidate.sourceDetail,
+        salePriceReference:candidate.sourceSalePrice??null};
     });
     return {rows:detailed,missing:pending,
       cost:pending.length?null:cents/100,
       sellingPrice:pending.length?null:Math.round(cents*1.15)/100,
+      estimatedLines,verifiedLines,staleLines,
+      pricingStatus:pending.length?'incompleto':estimatedLines>0?'estimado':'confirmado',
       markupPercent:15
     };
   }
@@ -107,7 +157,7 @@
         'MC4 — pacote de 2 pares','Número de entradas/strings CC usadas exige verificação física; conferir conectores já fornecidos')
     ];
     const missingPieces=rows.filter(r=>r.sku&&!byId.has(r.sku)).map(r=>r.label);
-    const priced=costSummary(rows,costs);
+    const priced=costSummary(rows,costs,pieces);
     const risks=[
       'Inversor e arranjo: conferir Voc no frio, Vmp, Isc, Imp, MPPT, limites CC e rede/ramal',
       'Definir strings e quantidade REAL de entradas CC usadas; verificar MC4 do inversor',
@@ -116,6 +166,8 @@
       'Proteções CC/CA, aterramento, equipotencialização e dispositivos de manobra pendentes',
       'Verificar estoques, validade dos custos, disponibilidade de cada SKU e frete'
     ];
+    if(priced.estimatedLines)risks.unshift('Custos inferidos a partir dos preços de venda avulsa; conferir custos reais antes de aprovar kits');
+    if(priced.staleLines)risks.unshift('Custos manuais anteriores à última atualização do catálogo: revisar');
     if(!nominalInverter)risks.unshift('Nenhum inversor on-grid único atende à triagem 0,77 com os itens disponíveis');
     if(missingPieces.length)risks.unshift('Peças não disponíveis no catálogo: '+missingPieces.join(', '));
     return {
@@ -126,11 +178,13 @@
       dcInputs:countInput,rows:priced.rows,
       missingCosts:priced.missing,cost:missingPieces.length?null:priced.cost,
       previewPrice:missingPieces.length?null:priced.sellingPrice,
-      markupPercent:15,risks,missingPieces,
+      markupPercent:15,pricingStatus:priced.pricingStatus,
+      estimatedLines:priced.estimatedLines,verifiedLines:priced.verifiedLines,
+      staleLines:priced.staleLines,risks,missingPieces,
       engineeringApproved:false,publicationAllowed:false,
       note:'PRÉ-COMPOSIÇÃO — não é projeto executivo nem orçamento aprovado.'
     };
   }
   return Object.freeze({PRESETS,ROOFS,MODULE_SKU,compose,inverterCandidates,
-    costSummary,wattsFromTitle,inverterKw});
+    costSummary,estimatedCostFromSale,PRICE_RULES,wattsFromTitle,inverterKw});
 });
