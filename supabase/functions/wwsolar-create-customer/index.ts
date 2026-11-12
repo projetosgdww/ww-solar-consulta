@@ -24,7 +24,12 @@ Deno.serve(async(req)=>{
   const origin=req.headers.get("origin")||"";
   if(!origin||!origins.has(origin))
     return new Response(JSON.stringify({error:"origin_not_allowed"}),{status:403});
-  if(req.method==="OPTIONS")return reply(204,{},origin);
+  if(req.method==="OPTIONS")return new Response(null,{status:204,headers:{
+    "Access-Control-Allow-Origin":origin,
+    "Access-Control-Allow-Headers":"authorization, apikey, content-type, x-client-info",
+    "Access-Control-Allow-Methods":"POST,OPTIONS",
+    "Vary":"Origin"
+  }});
   if(req.method!=="POST")return reply(405,{error:"method_not_allowed"},origin);
   if(!url||!secret)return reply(503,{error:"server_unconfigured"},origin);
   const auth=req.headers.get("authorization")||"";
