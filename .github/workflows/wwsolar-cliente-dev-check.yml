@@ -15,6 +15,7 @@ on:
   push:
     branches:
       - feat/wwsolar-area-cliente-dev
+      - release/wwsolar-pecas-v1
     paths:
       - "cliente-*"
       - "admin-dev.*"
@@ -22,6 +23,7 @@ on:
       - "supabase/wwsolar-quote-audit-dev.sql"
       - "supabase/functions/wwsolar-quote/**"
       - "tests/cliente-*"
+      - "tests/wwsolar-quote-rls-dev.sql"
       - "scripts/build-cliente-dev.mjs"
       - "kits-admin-dev.*"
       - "kit-builder-core.js"
