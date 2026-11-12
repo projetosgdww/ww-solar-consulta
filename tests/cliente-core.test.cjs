@@ -22,6 +22,6 @@ test('não permite preço de item inativo ou não aprovado',()=>assert.throws(()
 test('mensagem do WhatsApp usa itens e confirma cotação',()=>{
  const {selected,cents}=C.sumCart([{id:'KIT-008',qty:1}],products);
  const message=C.buildMessage('cliente@exemplo.com',selected,cents);
- assert.match(message,/cliente@exemplo.com/);assert.match(message,/R\$ 10.276,46/);
+ assert.match(message,/cliente@exemplo.com/);assert.match(message,/R\$\s+10\.276,46/);
  assert.match(message,/não é compra concluída/);
 });
