@@ -13,6 +13,12 @@ end $$;
 grant select on _wwsolar_accounts to authenticated;
 create temporary table _wwsolar_checks(name text,got bigint,want bigint);
 grant insert,select on _wwsolar_checks to authenticated;
+-- Preflight: the Edge Function uses service_role; RLS-only tests miss SQL GRANTs.
+insert into _wwsolar_checks values
+ ('Backend can read carts',case when has_table_privilege('service_role','public.wwsolar_carts','SELECT') then 1 else 0 end,1),
+ ('Backend can read catalog',case when has_table_privilege('service_role','public.wwsolar_catalog','SELECT') then 1 else 0 end,1),
+ ('Backend can insert orders',case when has_table_privilege('service_role','public.wwsolar_quote_requests','INSERT') then 1 else 0 end,1),
+ ('Backend can update access status',case when has_column_privilege('service_role','public.wwsolar_client_access','active','UPDATE') then 1 else 0 end,1);
 insert into public.wwsolar_client_access(user_id,email,active)
 select b,'wwsolar-regression-'||b||'@invalid.example',true from _wwsolar_accounts
 on conflict(user_id) do nothing;
@@ -61,7 +67,7 @@ do $$begin
  end;
 end$$;
 do $$begin
- if (select count(*) from _wwsolar_checks)<>7 or exists(select 1 from _wwsolar_checks where got<>want) then
+ if (select count(*) from _wwsolar_checks)<>11 or exists(select 1 from _wwsolar_checks where got<>want) then
   raise exception 'WW Solar regression FAILED';
  end if;
 end$$;
