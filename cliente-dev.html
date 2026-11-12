@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0e2023"><meta name="robots" content="noindex,nofollow">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<title>WW Solar | Área do Cliente (DEV)</title>
+<link rel="icon" href="./favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="./styles.css"><link rel="stylesheet" href="./cliente-dev.css">
+</head>
+<body>
+<a class="skip-link" href="#client-main">Ir para o conteúdo</a>
+<header class="header"><div class="shell header-inner">
+<a class="brand" href="./index.html" aria-label="WW Solar, início"><span class="brand-symbol" aria-hidden="true"><svg viewBox="0 0 44 44" fill="none"><circle cx="22" cy="22" r="12" stroke="currentColor" stroke-width="4"/><path d="M22 2v7M22 35v7M2 22h7M35 22h7M8 8l5 5M31 31l5 5M36 8l-5 5M13 31l-5 5" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/></svg></span><span class="brand-copy"><strong>WW<span>SOLAR</span></strong><small>CATÁLOGO FOTOVOLTAICO</small></span></a>
+<nav class="nav" aria-label="Navegação principal"><a href="./index.html">Institucional</a><a href="#client-main" aria-current="page">Área do cliente</a></nav>
+</div></header>
+<main id="client-main" class="shell client-main">
+<div class="section-label">WW SOLAR / ACESSO DO CLIENTE</div>
+<section class="client-login" id="client-login">
+<h1>Seus equipamentos, <em>em um só lugar.</em></h1>
+<p>Entre com o e-mail e a senha enviados pela WW Solar.</p>
+<form id="client-login-form" class="client-form" autocomplete="on">
+<label for="client-email">E-mail</label><input type="email" id="client-email" autocomplete="username" required maxlength="254" placeholder="voce@exemplo.com">
+<label for="client-password">Senha</label><input type="password" id="client-password" autocomplete="current-password" required minlength="12" placeholder="Senha de acesso">
+<button class="button button-accent" type="submit" id="client-login-submit">Entrar <span>↗</span></button>
+<p id="client-login-status" role="status" class="client-status"></p>
+</form>
+<p class="client-helper">O cadastro e o acesso são fornecidos diretamente pelo atendimento WW Solar. Não há cadastro público.</p>
+</section>
+<section id="client-app" hidden>
+<div class="client-welcome"><div><h1>Olá, <em>bem-vindo.</em></h1><p id="client-identity" class="client-muted"></p></div><div class="client-tools"><a id="client-admin-link" class="button button-outline" href="./admin-dev.html" hidden>Administrar clientes</a><button id="client-logout" class="button button-outline" type="button">Sair</button></div></div>
+<section class="client-simulator" aria-labelledby="client-sim-title">
+<div class="section-label">01 / SIMULADOR</div><h2 id="client-sim-title">Encontre seu kit.</h2><p>Informe a geração mensal desejada para encontrar uma configuração aproximada.</p>
+<div class="client-controls">
+<label for="client-target">Geração desejada (kWh/mês)</label>
+<input id="client-target" type="number" min="300" max="14600" step="50" value="750" inputmode="numeric">
+<input id="client-target-slider" type="range" min="300" max="14600" step="50" value="750">
+</div>
+<div id="client-recommendation" class="client-recommendation" aria-live="polite"></div>
+</section>
+<section class="client-catalog" aria-labelledby="client-products-title">
+<div class="section-label">02 / CATÁLOGO</div><h2 id="client-products-title">Monte seu pedido.</h2>
+<p class="client-muted">Kits e equipamentos sujeitos a confirmação comercial.</p>
+<div class="client-filter-row">
+<div class="client-filter-tabs" role="group" aria-label="Tipo de produto">
+<button type="button" data-kind="kit" class="active" aria-pressed="true">Kits prontos</button>
+<button type="button" data-kind="piece" aria-pressed="false">Peças avulsas</button>
+</div>
+<label for="client-search" class="sr-only">Pesquisar equipamento</label>
+<input type="search" id="client-search" placeholder="Buscar por potência, fabricante ou equipamento..." autocomplete="off">
+</div>
+<p id="client-result-count" class="client-muted" aria-live="polite"></p>
+<div id="client-product-grid" class="client-product-grid"></div>
+</section>
+<section class="client-cart" aria-labelledby="client-cart-title">
+<div class="section-label">03 / SOLICITAÇÃO</div><h2 id="client-cart-title">Seu carrinho <span id="client-cart-count">0</span></h2>
+<p>Revise os equipamentos. Ao finalizar, o WhatsApp abrirá uma mensagem com sua solicitação para negociação.</p>
+<div id="client-cart-lines" class="client-cart-lines"></div>
+<div class="client-cart-bottom"><strong id="client-cart-total">R$ 0,00</strong><button type="button" id="client-checkout" class="button button-accent" disabled>Enviar cotação pelo WhatsApp <span>↗</span></button></div>
+<p class="client-muted">Não haverá compra ou pagamento automático. Frete, estoque e condições precisam ser confirmados.</p>
+<p id="client-action-status" class="client-status" role="status"></p>
+</section>
+</section>
+</main>
+<footer class="footer"><div class="shell footer-inner"><span><strong>WW</strong>SOLAR</span><span>Ambiente de clientes · Solicitação de cotação</span><span>Atendimento comercial (85) 99272-3637</span></div></footer>
+<script src="./cliente-dev-config.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0/dist/umd/supabase.min.js" defer></script>
+<script src="./cliente-core.js" defer></script>
+<script src="./cliente-dev.js" defer></script>
+</body></html>
