@@ -1,5 +1,17 @@
 name: WW Solar - Area Cliente DEV - Validacao
 on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "cliente-*"
+      - "admin-dev.*"
+      - "supabase/**"
+      - "tests/**"
+      - "scripts/build-cliente-dev.mjs"
+      - "kits-admin-dev.*"
+      - "kit-builder-core.js"
+      - ".github/workflows/wwsolar-cliente-dev-check.yml"
   push:
     branches:
       - feat/wwsolar-area-cliente-dev
