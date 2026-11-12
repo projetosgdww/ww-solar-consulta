@@ -235,6 +235,8 @@
     const ok=S.lines.length>0&&!S.cartInvalid&&!expired()&&!S.checkoutPending;
     $('client-checkout').disabled=!ok;
     $('client-drawer-checkout').disabled=!ok;
+    // Sincroniza o botão em todo tick, inclusive após trocas de sessão/cache.
+    $('client-drawer-clear').disabled=!S.user||S.lines.length===0;
     $('client-cart-refresh').textContent=expired()?'Renovar cotação':'Atualizar preços';
     $('client-drawer-refresh').textContent=expired()?'Renovar cotação':'Atualizar valores';
     for(const id of ['client-top-clock','client-cart-timer','client-drawer-timer'])
