@@ -2,7 +2,7 @@
   'use strict';
   const $ = id => document.getElementById(id);
   const C=window.WWSolarClienteCore, cfg=window.WWSOLAR_CLIENTE_CONFIG||{};
-  const S={db:null,user:null,admin:false,catalog:[],lines:[],kind:'kit',category:'all',query:'',target:750,cartUpdatedAt:null,cartInvalid:false,saveQueue:Promise.resolve(),timer:null,toastTimer:null,drawerOpen:false,expiryNotified:false};
+  const S={db:null,user:null,admin:false,catalog:[],lines:[],kind:'kit',category:'all',query:'',target:750,cartUpdatedAt:null,cartInvalid:false,saveQueue:Promise.resolve(),timer:null,toastTimer:null,drawerOpen:false,expiryNotified:false,checkoutPending:false,orderKey:null};
   const status=(m,id='client-action-status')=>{$(id).textContent=m;};
   const show=(id,visible)=>{$(id).hidden=!visible;};
   const euro = v => C.money(v);
@@ -83,7 +83,7 @@
   }
   async function logout(){
     if(S.db)await S.db.auth.signOut();
-    S.user=null;S.catalog=[];S.lines=[];S.admin=false;S.cartUpdatedAt=null;
+    S.user=null;S.catalog=[];S.lines=[];S.admin=false;S.cartUpdatedAt=null;S.orderKey=null;
     if(S.timer){clearInterval(S.timer);S.timer=null;}
     closeDrawer();
     show('client-app',false);show('client-entry',true);show('client-nav',false);show('client-cart-top',false);
@@ -232,7 +232,7 @@
     const text=S.lines.length?C.quoteClock(remaining()):'25:00';
     for(const id of ['client-top-clock','client-cart-timer','client-drawer-timer'])
       $(id).textContent=text;
-    const ok=S.lines.length>0&&!S.cartInvalid&&!expired();
+    const ok=S.lines.length>0&&!S.cartInvalid&&!expired()&&!S.checkoutPending;
     $('client-checkout').disabled=!ok;
     $('client-drawer-checkout').disabled=!ok;
     $('client-cart-refresh').textContent=expired()?'Renovar cotação':'Atualizar preços';
@@ -278,6 +278,7 @@
     try{clean=C.cleanLines(next);}
     catch(e){status('Revise quantidades ou produtos no carrinho.');return;}
     S.lines=clean;
+    S.orderKey=null;
     S.cartUpdatedAt=new Date().toISOString();
     renderCart();
     if(feedback){showToast(feedback);status(feedback);}
@@ -392,51 +393,70 @@
     }finally{buttons.forEach(b=>b.disabled=false);}
   }
   async function checkout(){
-    if(!S.user||!S.lines.length||S.cartInvalid)return;
-    $('client-checkout').disabled=true;$('client-drawer-checkout').disabled=true;
-    status('Validando os valores e a validade...');
+    if(!S.user||!S.lines.length||S.cartInvalid||S.checkoutPending||expired())return;
+    S.checkoutPending=true;updateClock();
+    status('Conferindo o carrinho e registrando a solicitação...');
     try{
       await S.saveQueue;
-      // Consulta a data e os itens salvos no servidor antes de permitir a cotação.
       const {data:cart,error:cartError}=await S.db.from('wwsolar_carts')
         .select('lines,updated_at').eq('user_id',S.user.id).single();
       if(cartError)throw cartError;
       if(!cart||!cart.updated_at||C.quoteRemainingMs(cart.updated_at,Date.now())===0){
         S.cartUpdatedAt=cart?.updated_at||S.cartUpdatedAt;
+        status('A cotação expirou. Clique em Atualizar preços antes de solicitar.');
         renderCart();
-        status('A cotação expirou. Clique em Atualizar preços para renovar.');
         return;
       }
-      const serverLines=C.cleanLines(cart.lines||[]);
-      if(JSON.stringify(serverLines)!==JSON.stringify(S.lines)){
-        S.lines=serverLines;S.cartUpdatedAt=cart.updated_at;renderCart();
-        status('Seu carrinho mudou em outra sessão. Confira antes de enviar.');
+      const storedLines=C.cleanLines(cart.lines||[]);
+      if(JSON.stringify(storedLines)!==JSON.stringify(S.lines)){
+        S.lines=storedLines;S.cartUpdatedAt=cart.updated_at;S.orderKey=null;
+        renderCart();
+        status('Seu carrinho mudou. Confira os itens antes de solicitar a cotação.');
         return;
       }
-      const {data,error}=await S.db.from('wwsolar_catalog')
+      const {data:fresh,error:catalogError}=await S.db.from('wwsolar_catalog')
         .select('id,title,price,kind,active,approved,payload')
         .in('id',S.lines.map(x=>x.id)).eq('active',true).eq('approved',true);
-      if(error)throw error;
-      const fresh=data||[];
-      const {selected,cents}=C.sumCart(S.lines,fresh);
+      if(catalogError)throw catalogError;
+      const current=C.sumCart(S.lines,fresh||[]);
       const local=C.sumCart(S.lines,available());
-      const oldPrices=new Map(local.selected.map(x=>[x.id,x.unit]));
-      const changed=selected.some(x=>oldPrices.get(x.id)!==x.unit);
-      if(changed||cents!==local.cents){
-        const map=new Map(fresh.map(x=>[x.id,x]));
-        S.catalog=S.catalog.map(x=>map.get(x.id)||x);
+      const known=new Map(local.selected.map(x=>[x.id,x.unit]));
+      if(current.cents!==local.cents||current.selected.some(x=>known.get(x.id)!==x.unit)){
+        const latest=new Map((fresh||[]).map(x=>[x.id,x]));
+        S.catalog=S.catalog.map(p=>latest.get(p.id)||p);S.orderKey=null;
         renderProducts();renderCart();
-        status('O preço de um ou mais itens mudou. Confira o novo total e clique em Atualizar preços.');
-        showToast('Preços alterados. Revise seu pedido.');
+        status('Um ou mais preços mudaram. Confira o novo total e atualize a cotação.');
+        showToast('Preço alterado. Revise seu pedido.');
         return;
       }
-      const message=C.buildMessage(S.user.email,selected,cents);
-      if(message.length>2500)throw Error('Mensagem longa');
-      status('Abrindo WhatsApp. Confirme o envio da mensagem por lá.');
+      if(!S.orderKey)S.orderKey=crypto.randomUUID();
+      const {data,error}=await S.db.functions.invoke('wwsolar-quote',{
+        body:{action:'submit',request_key:S.orderKey,expected_total_cents:current.cents}
+      });
+      if(error||!data?.order?.id||!data?.message){
+        let code='';
+        try{code=(await error?.context?.json?.())?.error||'';}catch(_){/*sem detalhe*/}
+        if(code==='quote_expired'){
+          status('Cotação expirada. Clique em Atualizar preços antes de enviar.');
+        }else if(code==='price_changed'||code==='product_unavailable'){
+          S.orderKey=null;
+          status('Os preços ou a disponibilidade mudaram. Clique em Atualizar preços e confira o carrinho.');
+        }else if(code==='client_inactive'){
+          status('Seu acesso foi suspenso. Entre em contato com a WW Solar.');
+        }else{
+          status('Não foi possível registrar sua solicitação. Nenhum pedido confirmado; tente novamente.');
+        }
+        return;
+      }
+      const message=String(data.message);
+      if(message.length>4000)throw Error('message_length');
+      const reference=String(data.order.id).slice(0,8).toUpperCase();
+      status('Solicitação '+reference+' registrada no histórico. O envio da mensagem deve ser confirmado no WhatsApp.');
+      showToast('Solicitação registrada! Abrindo WhatsApp...');
       window.location.assign('https://wa.me/'+cfg.whatsapp+'?text='+encodeURIComponent(message));
     }catch(e){
-      status('Não foi possível preparar a cotação. Revise os itens e a conexão.');
-    }finally{updateClock();}
+      status('Não foi possível completar a operação. Confira a conexão ou consulte seu atendimento.');
+    }finally{S.checkoutPending=false;updateClock();}
   }
   $('client-login-form').addEventListener('submit',login);
   $('client-logout').addEventListener('click',logout);
