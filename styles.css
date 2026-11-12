@@ -20,3 +20,6 @@ button:disabled{opacity:.55;cursor:not-allowed;transform:none!important}
 .dialog-direct{font-size:12px;color:var(--muted);margin-top:10px;line-height:1.55}
 .dialog-direct a{color:#176b5b;font-weight:750;text-decoration:underline;text-underline-offset:2px}
 @media(max-width:700px){.footer-contacts{flex-direction:column;align-items:flex-start;gap:10px;padding-top:16px}.footer-contacts a{gap:5px}}
+/* Telefone discreto no botão já existente do cabeçalho */
+.header-contact-number{font-size:10px;font-weight:600;color:#bcd0c9;white-space:nowrap;margin-left:4px}
+@media(max-width:1120px) and (min-width:981px){.header-contact-number{display:none}}
