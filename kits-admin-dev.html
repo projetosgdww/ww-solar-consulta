@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="pt-BR"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow"><meta name="theme-color" content="#0e2023">
+<title>WW Solar | Montador de kits DEV</title>
+<link rel="icon" href="./favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="./styles.css"><link rel="stylesheet" href="./cliente-dev.css">
+<link rel="stylesheet" href="./kits-admin-dev.css">
+</head><body>
+<header class="header"><div class="shell header-inner">
+<a class="brand" href="./admin-dev.html"><span class="brand-symbol" aria-hidden="true">☀</span>
+<span class="brand-copy"><strong>WW<span>SOLAR</span></strong><small>MONTADOR DE KITS · DEV</small></span></a>
+<nav class="nav"><a href="./admin-dev.html">Administrar clientes</a><a href="./cliente-dev.html">Voltar ao catálogo</a></nav>
+</div></header>
+<main class="shell kit-admin-main">
+<div class="section-label">WW SOLAR / COMPOSIÇÃO TÉCNICA · DEV</div>
+<div class="kit-heading">
+  <div><h1>Monte seus <em>próprios kits.</em></h1>
+    <p>12 modelos-base, três opções de telhado e preços estimados automaticamente com a base central de equipamentos.</p></div>
+  <span class="kit-draft-tag">SOMENTE RASCUNHOS</span>
+</div>
+<p id="kit-admin-status" class="client-status" role="status">Verificando autorização administrativa...</p>
+<section id="kit-admin-app" hidden>
+  <div class="kit-progress" id="kit-progress">Carregando modelos...</div>
+  <div class="kit-sync-bar"><div><strong>Preços conectados ao catálogo WW Solar</strong><small id="kit-price-date">Origem: preços avulsos cadastrados no Supabase DEV.</small></div><button id="kit-refresh-prices" class="button button-outline" type="button">Atualizar preços e produtos ↻</button></div>
+  <div class="kit-workspace">
+    <section class="kit-control-panel" aria-labelledby="kit-control-heading">
+      <h2 id="kit-control-heading">Configurar composição</h2>
+      <div class="kit-field"><label for="kit-preset">Modelo-base</label><select id="kit-preset"></select></div>
+      <div class="kit-field"><label for="kit-module">Módulo fotovoltaico</label><select id="kit-module"></select></div>
+      <div class="kit-field"><label for="kit-roof">Tipo de cobertura</label>
+        <select id="kit-roof"><option value="ceramica">Telha cerâmica</option>
+          <option value="fibrocimento">Fibrocimento (estrutura de madeira)</option>
+          <option value="metalica">Telha metálica — minitrilho</option></select>
+      </div>
+      <div class="kit-field"><label for="kit-inverter">Inversor on-grid candidato</label><select id="kit-inverter"></select>
+        <small>O fator de 0,77 serve apenas como triagem. Confirmar ficha técnica e arranjo de strings.</small></div>
+      <div class="kit-field"><label for="kit-dc-inputs">Entradas CC / strings utilizadas</label>
+        <input id="kit-dc-inputs" type="number" min="1" max="24" step="1" placeholder="Preencher após verificar inversor">
+        <small>O cálculo de conectores MC4 considera os pares efetivamente usados, não apenas o número de MPPTs.</small></div>
+      <div class="kit-field-grid">
+        <div class="kit-field"><label for="kit-red-meters">Cabo vermelho (m)</label><input id="kit-red-meters" type="number" min="0" step="1" placeholder="Estimativa"></div>
+        <div class="kit-field"><label for="kit-black-meters">Cabo preto (m)</label><input id="kit-black-meters" type="number" min="0" step="1" placeholder="Estimativa"></div>
+      </div>
+      <p class="kit-small-note">Por padrão, estimamos 3 metros totais por módulo, divididos entre as cores. Preencha após medir os percursos; o programa arredonda rolos de 25 m para cima.</p>
+      <button id="kit-recalculate" type="button" class="button button-accent">Recalcular pré-composição ↗</button>
+      <div class="kit-safe-note"><strong>Sem publicação automática.</strong> Nenhuma dessas opções é anunciada ao cliente sem conferência de projeto, materiais, custo e estoque.</div>
+    </section>
+    <section class="kit-output-panel" aria-labelledby="kit-output-heading">
+      <div class="kit-output-head"><div><div class="section-label">COMPOSIÇÃO PRELIMINAR</div>
+      <h2 id="kit-output-heading">WW-01</h2><p id="kit-power-line">Aguardando cálculo...</p></div>
+      <span class="kit-draft-tag">NÃO HOMOLOGADO</span></div>
+      <div class="kit-metrics">
+        <div><small>Potência CC</small><strong id="kit-power">—</strong></div>
+        <div><small>Referência 0,77</small><strong id="kit-ac-ref">—</strong></div>
+        <div><small>Fixações (4 módulos)</small><strong id="kit-roof-qty">—</strong></div>
+        <div><small>Cabo estimado</small><strong id="kit-cable">—</strong></div>
+      </div>
+      <h3>Lista preliminar de materiais</h3>
+      <p class="kit-small-note">Custos estimados automaticamente ao retirar a margem comercial dos preços avulsos. Custos reais confirmados substituem essas estimativas. Não será necessário digitar os preços novamente. Valores somente administrativos.</p>
+      <div class="kit-table-scroll"><table class="kit-bom-table"><thead><tr>
+        <th>Componente / SKU</th><th>Quantidade</th><th>Custo de referência (R$)</th><th>Subtotal</th></tr></thead>
+        <tbody id="kit-bom-body"></tbody></table></div>
+      <div id="kit-source-note" class="kit-source-note">Carregando origem dos custos...</div><div class="kit-totals">
+        <div><span>Custo completo dos itens</span><strong id="kit-total-cost">Pendente</strong></div>
+        <div><span>Preço de referência (custo + 15%)</span><strong id="kit-sale-price">Pendente</strong></div>
+      </div>
+      <p id="kit-price-caveat" class="kit-small-note">Valores bloqueados enquanto houver peças, quantidades ou preços sem origem. Estimativas nunca são publicadas automaticamente.</p>
+      <h3>Pendências para revisão técnica</h3>
+      <ul id="kit-risks" class="kit-risk-list"></ul>
+    </section>
+  </div>
+</section>
+</main>
+<footer class="footer"><div class="shell footer-inner"><span><strong>WW</strong>SOLAR</span><span>Revisão técnica pendente · DEV</span></div></footer>
+<script defer src="./cliente-dev-config.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0/dist/umd/supabase.min.js"></script>
+<script defer src="./kit-builder-core.js"></script>
+<script defer src="./kits-admin-dev.js"></script>
+</body></html>

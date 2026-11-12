@@ -1,0 +1,52 @@
+/* WW Solar Admin DEV: duas áreas comerciais, mesmo tema do catálogo. */
+.admin-main-title{font-size:clamp(31px,4vw,53px);letter-spacing:-.045em;line-height:1.05;margin:12px 0 9px}
+.admin-main-title em{font-style:normal;color:#b99322}
+.admin-main-intro{font-size:14px;color:#688078;max-width:790px;line-height:1.65;margin-bottom:24px}
+.admin-tabs{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:22px 0 26px}
+.admin-tabs button{background:#fff;border:1px solid #d8e5df;border-radius:16px;padding:20px 23px;text-align:left;display:grid;grid-template-columns:32px 1fr;column-gap:10px;row-gap:5px;cursor:pointer;color:#12322c;transition:box-shadow .15s,border-color .15s}
+.admin-tabs button span{grid-row:span 2;font-size:24px}
+.admin-tabs button strong{font-size:19px}
+.admin-tabs button small{font-size:12px;color:#657d72}
+.admin-tabs button.active{background:#102a2c;color:white;border-color:#102a2c;box-shadow:0 10px 25px rgba(10,38,38,.1)}
+.admin-tabs button.active small{color:#bed5cb}
+.admin-clients-panel{margin:12px 0 28px;max-width:none;width:100%}
+.admin-clients-panel>h1,.admin-clients-panel>p,.admin-clients-panel>.client-form,.admin-clients-panel>#admin-dev-created{max-width:650px}
+.admin-clients-panel>h1{font-size:clamp(26px,3vw,38px)}
+.admin-client-directory{margin-top:35px;padding-top:24px;border-top:1px solid #e1ebe6}
+.admin-section-row{display:flex;justify-content:space-between;align-items:center;gap:20px;margin-bottom:17px}
+.admin-section-row h2{font-size:26px;margin:0 0 6px}
+.admin-section-row p{margin:0;font-size:12px}
+.admin-client-row{display:grid;grid-template-columns:minmax(0,1fr) auto auto;align-items:center;gap:15px;padding:16px 0;border-top:1px solid #e1ebe6}
+.admin-client-row strong,.admin-order-header strong{overflow-wrap:anywhere;font-size:14px;display:block}
+.admin-client-row small,.admin-order-header small{display:block;font-size:11px;color:#698077;margin-top:6px}
+.admin-client-row button{font-size:11px;padding:9px 13px}
+.admin-pill{font-size:11px;font-weight:800;color:#8d5b1b;background:#fff1d8;border-radius:100px;padding:8px 11px;white-space:nowrap}
+.admin-pill-green{background:#e6f7ec;color:#1f7350}
+.admin-orders-panel{background:white;border:1px solid #deebe5;border-radius:18px;padding:clamp(20px,3vw,33px);box-shadow:0 10px 30px rgba(12,43,41,.04);margin:12px 0 35px}
+.admin-order-toolbar{display:flex;align-items:center;flex-wrap:wrap;gap:12px;margin:20px 0}
+.admin-order-toolbar label{font-size:12px;font-weight:800}
+.admin-order-toolbar select,.admin-order-actions select{font:inherit;font-size:12px;color:#12352b;border:1px solid #c9ddd2;background:#f6faf8;padding:10px 12px;border-radius:9px;min-height:40px}
+.admin-order-toolbar>span{margin-left:auto;color:#546f65;font-size:12px;font-weight:800}
+.admin-order-card{border:1px solid #e0eae5;border-radius:13px;overflow:hidden;margin:13px 0}
+.admin-order-header{display:grid;grid-template-columns:minmax(0,1fr) auto auto;align-items:center;gap:15px;padding:18px 20px}
+.admin-order-money{font-size:18px!important;color:#12342c}
+.admin-order-detail{border-top:1px solid #e9eeeb}
+.admin-order-detail summary{cursor:pointer;padding:12px 20px;font-size:12px;color:#385d50;font-weight:750}
+.admin-order-items{padding:0 20px 14px}
+.admin-order-item{border-top:1px solid #edf3ef;padding:10px 0;display:flex;justify-content:space-between;gap:12px;font-size:12px}
+.admin-order-item strong{white-space:nowrap}
+.admin-order-audit{padding:12px 20px 16px;background:#f8faf8;font-size:11px;color:#597168}
+.admin-order-audit p{margin:6px 0}
+.admin-order-actions{display:flex;align-items:center;justify-content:flex-end;gap:12px;flex-wrap:wrap;padding:13px 20px;background:#f7faf8;border-top:1px solid #edf2ef}
+.admin-order-actions label{font-size:12px;font-weight:800}
+.admin-order-actions button{font-size:11px;padding:10px 14px}
+@media(max-width:650px){
+ .admin-tabs{grid-template-columns:1fr}
+ .admin-section-row{align-items:stretch;flex-direction:column}
+ .admin-client-row{grid-template-columns:1fr auto}
+ .admin-client-row button{grid-column:2}
+ .admin-order-header{grid-template-columns:1fr auto}
+ .admin-order-header .admin-pill{grid-column:2}
+ .admin-order-actions{justify-content:flex-start}
+ .admin-order-toolbar>span{margin-left:0}
+}
