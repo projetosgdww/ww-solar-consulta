@@ -4,7 +4,7 @@ import { createClient } from "npm:@supabase/supabase-js@2.119.0";
 
 const url=Deno.env.get("SUPABASE_URL")||"";
 const secret=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")||"";
-const origins=new Set((Deno.env.get("WWSOLAR_ALLOWED_ORIGINS")||"").split(",").map(x=>x.trim()).filter(Boolean));
+const origins=new Set((Deno.env.get("WWSOLAR_ALLOWED_ORIGINS")||"https://projetosgdww.github.io").split(",").map(x=>x.trim()).filter(Boolean));
 const emailRE=/^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 function reply(status:number,body:Record<string,unknown>,origin:string){
