@@ -33,8 +33,8 @@ assert(admin.includes("sendAction('rotate')")&&admin.includes('window.confirm(')
 assert(!edge.includes('console.log(password)'));
 assert(login.includes('type="password"')&&!login.includes('Esqueci minha senha'));
 assert(!/id="client-password"[^>]*minlength=/.test(login),'login não deve impor tamanho mínimo diferente da senha existente');
-assert(config.includes('supabaseUrl: "https://drutoqwkjzdsirqthdux.supabase.co"'));
-assert(config.includes('publishableKey: "sb_publishable_'));
+assert(config.includes('supabaseUrl: ""'),"release nunca deve apontar para Supabase DEV");
+assert(config.includes('publishableKey: ""'),"release bloqueada ate configurar PROD");
 assert(!/sb_secret_|service_role|SERVICE_ROLE/.test(config));
 console.log('WW Solar Cliente DEV — guardas de segurança básicas aprovadas.');
 
