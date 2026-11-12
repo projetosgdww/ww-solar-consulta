@@ -18,6 +18,18 @@ assert(sql.includes('app_metadata')&&!sql.includes("auth.jwt()->'user_metadata'"
 assert(edge.includes('getUser(token)')&&edge.includes('wwsolar_role!=="admin"'));
 assert(edge.includes('createUser(')&&edge.includes('email_confirm:true'));
 assert(edge.includes('crypto.getRandomValues'));
+assert(edge.includes('new Uint8Array(9)'),'gerador deve ter 72 bits de entropia real');
+assert(edge.includes('GDWW-')&&edge.includes('random.slice(0,6)'),'senha legivel por blocos e aleatoria');
+assert(!/email\.split\(|email\.slice\(/.test(edge),'senha jamais derivada do email');
+assert(edge.includes('updateUserById(')&&edge.includes('getUserById('),'reemissao so pode atualizar cliente conhecido');
+assert(edge.includes('wwsolar_role!=="client"'),'proibir reemitir senha de admin por este endpoint');
+assert(edge.includes('wwsolar_role!=="admin"'),'manter admin obrigatorio');
+assert(edge.includes('action:"rotate"')&&edge.includes('action:"create"'),'respostas com acao');
+assert(sql.includes('grant select on public.wwsolar_client_access to service_role'));
+assert(sql.includes('wwsolar_client_access_email_uidx'));
+const adminHtml=read('admin-dev.html');
+assert(adminHtml.includes('id="admin-dev-rotate"'),'botao de reemissao no painel');
+assert(admin.includes("sendAction('rotate')")&&admin.includes('window.confirm('),'reamissao exige clique e confirmacao');
 assert(!edge.includes('console.log(password)'));
 assert(login.includes('type="password"')&&!login.includes('Esqueci minha senha'));
 assert(!/id="client-password"[^>]*minlength=/.test(login),'login não deve impor tamanho mínimo diferente da senha existente');
