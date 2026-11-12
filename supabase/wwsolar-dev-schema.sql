@@ -118,3 +118,6 @@ using (user_id = (select auth.uid()));
 -- protegido; não conceder INSERT/UPDATE das tabelas administrativas ao cliente.
 -- Para começar a servir o catálogo, importar somente produtos REVISADOS
 -- como approved=true, após migrá-los para um projeto exclusivo do WW Solar.
+
+-- Bloqueia execucao publica da funcao de RLS automatico criada pelo painel.
+revoke execute on function public.rls_auto_enable() from PUBLIC, anon, authenticated;
