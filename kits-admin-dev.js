@@ -73,6 +73,9 @@ function render(){
     $('kit-ac-ref').textContent=result.dcToAcReference.toFixed(2).replace('.',',')+' kW';
     $('kit-roof-qty').textContent=String(Math.ceil(draft.panels/4))+' kits';
     $('kit-cable').textContent=result.estimatedTotalMeters+' m / '+result.cableGauge+' mm²';
+    $('kit-source-note').textContent=result.estimatedLines
+      ?result.estimatedLines+' linha(s) com custo estimado a partir dos preços de venda avulsa e das margens vigentes. '+result.verifiedLines+' linha(s) com custo confirmado. As estimativas exigem revisão antes da liberação.'
+      :'Custos confirmados: '+result.verifiedLines+' linha(s). Campos pendentes ainda impedem a composição completa.';
     const tbody=$('kit-bom-body');tbody.replaceChildren();
     const byId=new Map(S.products.map(p=>[p.id,p]));
     for(const row of result.rows){
@@ -82,16 +85,29 @@ function render(){
       const qty=el('td',row.qty===null?'A definir':row.qty+' un','kit-qty-cell');
       const cost=el('td');
       if(row.sku&&byId.has(row.sku)&&row.qty!==null){
+        cost.append(el('strong',row.unitCost===null?'Pendente':fmt(row.unitCost),'kit-derived-cost'));
+        const from=row.costSource==='confirmado'
+          ?'Custo confirmado no cadastro'
+          :row.costSource==='estimado_revisar'
+            ?'Estimativa · custo antigo precisa revisão'
+            :row.costSource==='estimado'
+              ?'Estimado pela margem da categoria'
+              :'Sem base de preço válida';
+        cost.append(el('small',from,'kit-price-provenance'));
+        if(row.costSourceDetail)cost.append(el('small',row.costSourceDetail,'kit-sku-note'));
+        const details=el('details',undefined,'kit-override-cost');
+        const summary=el('summary','Corrigir custo de aquisição');
         const wrap=el('div',undefined,'kit-cost-edit');
         const input=el('input');
         input.type='text';input.inputMode='decimal';input.maxLength=15;
-        input.setAttribute('aria-label','Custo unitário do SKU '+row.sku);
-        input.value=row.unitCost===null?'':row.unitCost.toFixed(2).replace('.',',');
+        input.setAttribute('aria-label','Informar custo confirmado do SKU '+row.sku);
+        input.value=row.costSource==='confirmado'?row.unitCost.toFixed(2).replace('.',','):'';
         input.placeholder='Custo real';
         input.dataset.sku=row.sku;
         const btn=el('button','Salvar');
         btn.type='button';btn.className='kit-cost-save';btn.dataset.sku=row.sku;
-        wrap.append(input,btn);cost.append(wrap);
+        wrap.append(input,btn);details.append(summary,wrap);
+        cost.append(details);
       }else cost.append(el('span','Aguardar confirmação','kit-missing'));
       const subtotal=el('td',row.subtotal===null?'—':fmt(row.subtotal),'kit-subtotal');
       tr.append(first,qty,cost,subtotal);tbody.append(tr);
@@ -100,19 +116,22 @@ function render(){
     $('kit-sale-price').textContent=result.previewPrice===null?'Pendente':fmt(result.previewPrice);
     $('kit-price-caveat').textContent=
       result.previewPrice===null
-        ?'Preço indisponível: informe custos reais, defina entradas CC e resolva os itens pendentes. Nenhum valor será publicado.'
-        :'ESTIMATIVA INTERNA: acréscimo de 15% sobre custos completos, sem frete. Não representa homologação técnica, estoque ou preço liberado.';
+        ?'Preço completo indisponível: defina as entradas CC, confira os itens e os preços pendentes. Estimativas não são publicadas.'
+        :result.pricingStatus==='estimado'
+          ?'ESTIMATIVA INTERNA: custo obtido pela reversão das margens comerciais, acrescido de 15%. Validar custos e materiais antes de aprovar. Não inclui frete.'
+          :'REFERÊNCIA INTERNA: custo confirmado acrescido de 15%, ainda sujeito a análise técnica, estoque, frete e aprovação.';
     const risks=$('kit-risks');risks.replaceChildren();
     for(const warning of [...result.risks,...result.missingCosts.map(x=>'CUSTO: '+x)])
       risks.append(el('li',warning));
     $('kit-progress').textContent=S.drafts.length+' modelos · 3 coberturas · '+
-      S.products.filter(x=>cat(x)==='modulos').length+' módulos disponíveis · RASCUNHOS';
-    setStatus('Pré-composição calculada para análise. Nenhum kit foi liberado aos clientes.');
+      S.products.filter(x=>cat(x)==='modulos').length+' módulos disponíveis · '+result.estimatedLines+' custo(s) estimado(s) · RASCUNHOS';
+    setStatus('Valores atualizados a partir do catálogo WW Solar DEV. Pré-composição interna, não publicada.');
   }catch(err){
     S.result=null;
     setStatus('Não foi possível calcular: '+(err?.message||'parâmetro inválido'));
     $('kit-total-cost').textContent='Pendente';
     $('kit-sale-price').textContent='Pendente';
+    $('kit-source-note').textContent='Preço indisponível; revisão necessária.';
   }
 }
 async function saveCost(sku,button){
@@ -156,9 +175,9 @@ async function init(){
   S.user=profile.user;
   const [drafts,pieces,costs]=await Promise.all([
     S.db.from('wwsolar_kit_drafts').select('code,panels,module_id,status,engineering_approved,published').order('panels'),
-    S.db.from('wwsolar_catalog').select('id,kind,title,price,payload,active,approved')
+    S.db.from('wwsolar_catalog').select('id,kind,title,price,payload,active,approved,updated_at')
       .eq('kind','piece').eq('active',true).eq('approved',true),
-    S.db.from('wwsolar_piece_costs').select('sku,unit_cost')
+    S.db.from('wwsolar_piece_costs').select('sku,unit_cost,updated_at')
   ]);
   if(drafts.error||pieces.error||costs.error){
     setStatus('Falha ao consultar os rascunhos e custos privados. Verifique suas permissões no Supabase.');
@@ -169,10 +188,48 @@ async function init(){
     setStatus('Os rascunhos não correspondem à configuração segura de 12 modelos. Nenhuma alteração realizada.');
     return;
   }
-  S.ready=true;renderInputs();recalcInverters();
+  S.ready=true;renderInputs();recalcInverters();updateSourceDate();
   $('kit-admin-app').hidden=false;
   render();
 }
+function updateSourceDate(){
+  const stamps=S.products.map(p=>Date.parse(String(p.updated_at||'')))
+    .filter(Number.isFinite);
+  const newest=stamps.length?Math.max(...stamps):null;
+  $('kit-price-date').textContent=newest
+    ?'Fonte: preços de venda avulsa no Supabase DEV · último registro atualizado em '+new Date(newest).toLocaleString('pt-BR')+' · custos inferidos, não confirmados.'
+    :'Fonte: catálogo WW Solar DEV · custos inferidos, não confirmados.';
+}
+async function refreshSource(){
+  if(!S.ready)return;
+  const b=$('kit-refresh-prices');
+  b.disabled=true;setStatus('Consultando preços e produtos atualizados no Supabase DEV...');
+  const previous={preset:$('kit-preset').value,module:$('kit-module').value,
+    inverter:$('kit-inverter').value,roof:$('kit-roof').value};
+  try{
+    const [pieces,costs]=await Promise.all([
+      S.db.from('wwsolar_catalog').select('id,kind,title,price,payload,active,approved,updated_at')
+        .eq('kind','piece').eq('active',true).eq('approved',true),
+      S.db.from('wwsolar_piece_costs').select('sku,unit_cost,updated_at')
+    ]);
+    if(pieces.error||costs.error)throw Error('Não foi possível consultar o Supabase.');
+    S.products=pieces.data||[];S.costs=costs.data||[];
+    renderInputs();
+    $('kit-preset').value=previous.preset;
+    if(S.products.some(p=>p.id===previous.module))
+      $('kit-module').value=previous.module;
+    $('kit-roof').value=previous.roof;
+    recalcInverters();
+    if([...$('kit-inverter').options].some(o=>o.value===previous.inverter))
+      $('kit-inverter').value=previous.inverter;
+    updateSourceDate();
+    render();
+    setStatus('Preços e produtos sincronizados para o montador. Nenhuma oferta foi publicada.');
+  }catch(e){
+    setStatus('Não foi possível sincronizar a base. Os dados anteriores permanecem na tela.');
+  }finally{b.disabled=false;}
+}
+$('kit-refresh-prices').addEventListener('click',()=>{void refreshSource();});
 $('kit-preset').addEventListener('change',()=>{
   $('kit-dc-inputs').value='';
   $('kit-red-meters').value='';
