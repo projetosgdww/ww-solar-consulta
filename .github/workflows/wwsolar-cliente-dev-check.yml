@@ -1,0 +1,33 @@
+name: WW Solar - Area Cliente DEV - Validacao
+on:
+  push:
+    branches:
+      - feat/wwsolar-area-cliente-dev
+    paths:
+      - "cliente-*"
+      - "admin-dev.*"
+      - "tests/cliente-*"
+      - "supabase/wwsolar-dev-schema.sql"
+      - "supabase/functions/wwsolar-create-customer/**"
+      - ".github/workflows/wwsolar-cliente-dev-check.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  validar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+      - name: Sintaxe JavaScript
+        run: |
+          node --check cliente-core.js
+          node --check cliente-dev.js
+          node --check admin-dev.js
+      - name: Testes do carrinho e do simulador
+        run: node --test tests/cliente-core.test.cjs
+      - name: Guardas de seguranca estatica
+        run: node tests/cliente-security.test.cjs
