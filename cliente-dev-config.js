@@ -1,9 +1,8 @@
-// RELEASE PROD: fail closed. Configurar SOMENTE depois de criar e homologar Supabase PROD independente.
-// Nunca apontar esta branch para o projeto DEV drutoqwkjzdsirqthdux.
-// URL e publishable key são públicas; NUNCA coloque chaves administrativas nem senhas aqui.
-// Projeto não configurado => acesso desabilitado, sem fallback para catálogo público.
+// WW Solar V1 — custo zero, instância ÚNICA Catálogo Online promovida com homologação controlada.
+// Publicável: URL e publishable key não são credenciais administrativas.
+// NUNCA colocar service_role, segredo nem senha neste arquivo.
 window.WWSOLAR_CLIENTE_CONFIG = Object.freeze({
-  supabaseUrl: "",
-  publishableKey: "",
+  supabaseUrl: "https://drutoqwkjzdsirqthdux.supabase.co",
+  publishableKey: "sb_publishable_9X4K-1nYZkz0AZVDmwZ4hQ_jepPtYNL",
   whatsapp: "5585992723637"
 });
