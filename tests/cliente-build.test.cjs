@@ -7,6 +7,8 @@ test('vitrine preserva estrutura original, mas exige login',()=>{
   for(const name of ['class="hero"','class="simulator"','class="result-card"','class="catalogue-section"','class="kit-grid client-product-grid"','id="client-checkout"'])
     assert(src.includes(name),name);
   assert(src.includes('id="client-app" hidden'));
+  assert(js.includes("kind:'piece',category:'all'"),'peças aprovadas devem aparecer primeiro');
+  assert(src.includes('data-kind="piece" class="active" aria-pressed="true"'),'aba de peças deve iniciar ativa');
   assert(js.includes("show('client-entry',false)"));
   assert(js.includes("show('client-app',true)"));
 });
