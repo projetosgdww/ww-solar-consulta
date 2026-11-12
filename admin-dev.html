@@ -2,17 +2,18 @@
 <header class="header"><div class="shell header-inner"><a class="brand" href="./cliente-dev.html"><span class="brand-symbol" aria-hidden="true">☀</span><span class="brand-copy"><strong>WW<span>SOLAR</span></strong><small>ADMINISTRAÇÃO DE CLIENTES</small></span></a><nav class="nav"><a href="./cliente-dev.html">Voltar ao catálogo</a></nav></div></header>
 <main class="shell client-main">
 <div class="section-label">WW SOLAR / ADMINISTRAÇÃO DEV</div><section class="client-login" style="margin:22px auto;max-width:620px">
-<h1>Liberação de <em>clientes.</em></h1><p>Cadastre somente o e-mail informado pelo cliente. Uma senha individual forte será criada e exibida uma vez para você enviar diretamente.</p>
+<h1>Liberação de <em>clientes.</em></h1><p>Informe apenas o e-mail do cliente. Para novos acessos, o sistema gera uma senha individual no formato <strong>GDWW-xxxxxx-xxxxxx</strong> com caracteres aleatórios, mostrada uma vez para copiar.</p><p>Perdeu a senha de um cliente? Use <strong>Reemitir senha</strong> para substituir a anterior, sem excluir sua conta ou carrinho.</p>
 <p id="admin-dev-status" role="status" class="client-status">Verificando seu perfil de acesso...</p>
 <form id="admin-dev-form" class="client-form" hidden><label for="admin-dev-email">E-mail do cliente</label><input id="admin-dev-email" type="email" required maxlength="254" placeholder="cliente@exemplo.com" autocomplete="off">
-<button class="button button-accent" type="submit" id="admin-dev-submit">Criar acesso <span>↗</span></button></form>
+<button class="button button-accent" type="submit" id="admin-dev-submit">Criar acesso <span>↗</span></button>
+<button class="button button-outline" type="button" id="admin-dev-rotate">Reemitir senha</button></form>
 <div id="admin-dev-created" hidden><div class="section-label">CREDENCIAIS — MOSTRADAS APENAS UMA VEZ</div>
 <p class="client-muted">Copie agora e envie diretamente ao cliente. Não salve senhas em planilhas ou repositórios.</p>
 <pre id="admin-dev-credentials" style="white-space:pre-wrap;overflow-wrap:anywhere;border:1px solid #dae9e3;padding:16px;border-radius:12px;background:#f4f8f6"></pre>
 <button type="button" id="admin-dev-copy" class="button button-outline">Copiar acesso</button>
 <button type="button" id="admin-dev-clear" class="button button-outline">Limpar da tela</button>
 </div>
-<p class="client-muted">Sem convite, cadastro público ou recuperação de senha pelo cliente. Se perder as credenciais, o acesso precisará ser reemitido por você com segurança.</p>
+<p class="client-muted">Sem convite, cadastro público ou recuperação de senha pelo cliente. A nova senha só aparece uma vez; copiar em local seguro. A reemissão invalida a senha anterior.</p>
 </section></main>
 <footer class="footer"><div class="shell footer-inner"><span><strong>WW</strong>SOLAR</span><span>Administração restrita · DEV</span></div></footer>
 <script defer src="./cliente-dev-config.js"></script><script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0/dist/umd/supabase.min.js"></script><script defer src="./admin-dev.js"></script>
