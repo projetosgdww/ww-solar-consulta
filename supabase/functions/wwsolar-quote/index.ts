@@ -79,6 +79,9 @@ Deno.serve(async req=>{
  if(payload.action!=="submit")return result(400,{error:"bad_action"},origin);
  const key=String(payload.request_key||"");
  if(!uuid.test(key))return result(400,{error:"bad_request_key"},origin);
+ const expectedTotal=payload.expected_total_cents;
+ if(!Number.isSafeInteger(expectedTotal)||Number(expectedTotal)<=0)
+   return result(400,{error:"expected_total_required"},origin);
  // Cliente precisa estar ativo. Admin pode usar carrinho de testes próprio.
  if(!isAdmin){
    if(user.app_metadata?.wwsolar_role!=="client")
@@ -128,6 +131,7 @@ Deno.serve(async req=>{
    if(!Number.isSafeInteger(total)||total>1e12)return result(422,{error:"total_too_high"},origin);
    items.push({sku:l.id,title:String(product!.title),qty:l.qty,unit_cents:unit,subtotal_cents:subtotal});
  }
+ if(total!==expectedTotal)return result(409,{error:"price_changed"},origin);
  if(!user.email)return result(409,{error:"missing_email"},origin);
  const draft={id:"00000000-0000-4000-8000-000000000000",customer_email:user.email,
    items,total_cents:total};
