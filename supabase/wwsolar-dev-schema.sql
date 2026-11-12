@@ -53,6 +53,14 @@ grant usage on schema public to service_role;
 grant insert on public.wwsolar_client_access to service_role;
 grant select on public.wwsolar_client_access to service_role;
 
+-- wwsolar-quote usa a chave server-side para consultar carrinho e precificar
+-- somente produtos ativos/aprovados. Esses GRANTs são internos ao service_role;
+-- os usuários autenticados seguem limitados pelas políticas RLS abaixo.
+grant select on public.wwsolar_carts to service_role;
+grant select on public.wwsolar_catalog to service_role;
+-- Cadastro/bloqueio pelo admin autenticado através da Edge Function.
+grant update (active) on public.wwsolar_client_access to service_role;
+
 grant select on public.wwsolar_client_access to authenticated;
 grant select on public.wwsolar_catalog to authenticated;
 grant select,insert,update,delete on public.wwsolar_carts to authenticated;
