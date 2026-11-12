@@ -494,6 +494,16 @@
       "disponibilidade": "a_confirmar",
       "descricaoIncompleta": false,
       "codigoProduto": "665575"
+    },
+    {
+      "id": "PAV-056",
+      "categoria": "modulos",
+      "nome": "MODULO 620W RENEPV BIFACIAL 30MM (REF. 563396)",
+      "preco": 795,
+      "precoAprovado": true,
+      "disponibilidade": "a_confirmar",
+      "descricaoIncompleta": false,
+      "codigoProduto": "563396"
     }
   ]
 }
