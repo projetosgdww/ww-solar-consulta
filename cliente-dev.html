@@ -12,7 +12,14 @@
 <a class="skip-link" href="#client-main">Ir para o conteúdo</a>
 <header class="header"><div class="shell header-inner">
 <a class="brand" href="./index.html" aria-label="WW Solar, início"><span class="brand-symbol" aria-hidden="true"><svg viewBox="0 0 44 44" fill="none"><circle cx="22" cy="22" r="12" stroke="currentColor" stroke-width="4"/><path d="M22 2v7M22 35v7M2 22h7M35 22h7M8 8l5 5M31 31l5 5M36 8l-5 5M13 31l-5 5" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/></svg></span><span class="brand-copy"><strong>WW<span>SOLAR</span></strong><small>CATÁLOGO FOTOVOLTAICO</small></span></a>
-<nav class="nav" id="client-nav" aria-label="Navegação principal" hidden><a href="#simulador">Simular</a><a href="#catalogo">Ver kits</a><a href="#catalogo" id="client-pieces-link">Peças</a><a href="#carrinho">Carrinho</a></nav>
+<nav class="nav" id="client-nav" aria-label="Navegação principal" hidden><a href="#simulador">Simular</a><a href="#catalogo">Ver kits</a><a href="#catalogo" id="client-pieces-link">Peças</a></nav>
+<div id="client-cart-top" class="client-cart-top" hidden>
+  <button id="client-cart-trigger" class="client-cart-trigger" type="button" aria-label="Abrir carrinho" aria-controls="client-cart-drawer" aria-expanded="false">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M3 3h2l2.5 12.5h11L21 7H6M10 21h.01M18 21h.01"/></svg>
+    <span class="client-cart-top-info"><span class="client-cart-top-name">Carrinho <b id="client-top-count">0</b></span><strong id="client-top-total">R$ 0,00</strong><small id="client-top-clock">25:00</small></span>
+  </button>
+  <div class="client-cart-preview" id="client-cart-preview" aria-hidden="true"><strong>Prévia do seu carrinho</strong><div id="client-preview-lines">Carrinho vazio</div><div class="client-cart-preview-bottom"><strong id="client-preview-total">R$ 0,00</strong><span>Clique para conferir</span></div></div>
+</div>
 </div></header>
 <main id="client-main" class="client-main">
 <div class="shell client-entry" id="client-entry"><div class="section-label">WW SOLAR / ACESSO DO CLIENTE</div>
@@ -54,7 +61,7 @@
         <div class="simulator-controls">
           <div class="segmented" role="group" aria-label="Modo de consulta"><span class="segment active" style="display:inline-block">Geração desejada</span></div>
           <div class="sim-intro"><label for="client-target" id="target-label">Quanto você deseja gerar por mês?</label><p id="target-description">Selecione a geração mensal estimada que procura.</p></div>
-          <div class="target-input-wrap"><input id="client-target" type="number" min="300" max="14600" step="50" value="750" inputmode="numeric" aria-label="Energia mensal em quilowatt-hora"><span>kWh/mês</span></div>
+          <div class="client-target-entry"><label for="client-target">Digite a geração desejada ou ajuste a barra:</label><div class="client-target-input-row"><div class="target-input-wrap"><input id="client-target" type="number" min="300" max="14600" step="1" value="750" inputmode="numeric" aria-label="Energia mensal em quilowatt-hora"><span>kWh/mês</span></div><button type="button" id="client-target-apply" class="button button-dark">Encontrar kit ↗</button></div></div>
           <input id="client-target-slider" type="range" min="300" max="14600" step="50" value="750" aria-label="Ajustar energia mensal desejada">
           <div class="slider-endpoints"><span>300 kWh</span><span>14.600 kWh</span></div>
           <div class="sim-info"><span class="info-mark">i</span><span>Simulação comparativa com base na tabela de kits. A geração real varia com a localidade e as condições de instalação; consumo e energia compensada não são necessariamente iguais.</span></div>
@@ -72,15 +79,25 @@
 <section class="catalogue-section" id="catalogo" aria-labelledby="catalogo-title">
       <div class="shell">
         <div class="section-title catalogue-heading"><div><div class="section-label">02 / CATÁLOGO DE EQUIPAMENTOS</div><h2 id="catalogo-title">Consulte as opções disponíveis.</h2><p>Mesmo visual do WW Solar. Kits ainda não homologados permanecem indisponíveis; equipamentos avulsos já podem ser consultados.</p></div><div class="catalogue-counter"><strong id="client-available-count">—</strong><small>itens aprovados</small></div></div><div class="client-filter-tabs" role="group" aria-label="Tipo de produto" style="margin-bottom:14px"><button type="button" data-kind="kit" class="active" aria-pressed="true">Kits prontos</button><button type="button" data-kind="piece" aria-pressed="false">Peças avulsas</button></div>
+<div class="client-category-tabs" id="client-category-tabs" role="group" aria-label="Categorias de peças" hidden></div>
 <div class="filterbar"><label class="search-wrap"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m16 16 5 5"/></svg><span class="sr-only">Pesquisar equipamentos</span><input type="search" id="client-search" placeholder="Pesquisar por fabricante, potência ou equipamento..." autocomplete="off"></label><span class="reset-filters" id="client-filter-label">CD Fortaleza • Cotação a confirmar</span></div>
 <div class="result-count" id="client-result-count" aria-live="polite">Carregando catálogo...</div>
 <div class="kit-grid client-product-grid" id="client-product-grid"></div>
       </div>
     </section>
 <section class="main-section shell" id="carrinho" aria-labelledby="client-cart-title"><div class="section-title"><div><div class="section-label">03 / SOLICITAÇÃO</div><h2 id="client-cart-title">Seu carrinho <span id="client-cart-count">0</span></h2><p>Monte sua solicitação de equipamentos. Ao finalizar, o WhatsApp abrirá a mensagem para sua negociação.</p></div></div>
-<div class="client-cart"><div id="client-cart-lines" class="client-cart-lines"></div><div class="client-cart-bottom"><strong id="client-cart-total">R$ 0,00</strong><button type="button" id="client-checkout" class="button button-accent" disabled>Enviar cotação pelo WhatsApp <span>↗</span></button></div><p class="client-muted">Sem pagamento automático. Preços, estoque, frete e condições sujeitos à confirmação.</p><p id="client-action-status" class="client-status" role="status"></p></div></section>
+<div class="client-cart"><div id="client-cart-lines" class="client-cart-lines"></div><div class="client-cart-bottom"><strong id="client-cart-total">R$ 0,00</strong><button type="button" id="client-checkout" class="button button-accent" disabled>Enviar cotação pelo WhatsApp <span>↗</span></button></div><p class="client-muted">Sem pagamento automático. Preços, estoque, frete e condições sujeitos à confirmação.</p><div class="client-quote-footer"><span class="client-quote-note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg> Cotação válida por <strong id="client-cart-timer">25:00</strong> desde a última atualização; não reserva estoque.</span><button id="client-cart-refresh" class="button button-outline" type="button">Atualizar preços</button></div>
+<p id="client-action-status" class="client-status" role="status"></p></div></section>
 <section class="bottom-section shell" id="informacoes"><div class="explain-block"><div class="section-label">03 / INFORMAÇÕES IMPORTANTES</div><h2>Simples na consulta.<br><em>Claro nas condições.</em></h2><p>A seleção é uma referência para iniciar uma cotação comercial. O kit indicado deve ser confirmado quanto à disponibilidade, compatibilidade e valores atualizados.</p><div class="notes"><div><span>01</span><p><b>Somente equipamentos</b>Não inclui instalação, projeto, homologação ou mão de obra.</p></div><div><span>02</span><p><b>Frete à parte</b>O custo de envio deve ser confirmado no atendimento.</p></div><div><span>03</span><p><b>Geração estimada</b>Os valores reproduzem a base técnica e não representam garantia de produção.</p></div></div></div><div class="contact-block"><div class="contact-mark">☀</div><h3>Encontrou um kit interessante?</h3><p>Abra os detalhes, confira a configuração e prepare sua solicitação de cotação.</p><a class="button button-accent" href="#catalogo">Explorar opções <span>↗</span></a></div></section>
 </section>
+<div id="client-cart-shade" class="client-cart-shade" hidden></div>
+<aside id="client-cart-drawer" class="client-cart-drawer" role="dialog" aria-modal="true" aria-labelledby="client-drawer-title" aria-hidden="true" hidden>
+  <div class="client-drawer-head"><div><span class="section-label">WW SOLAR / RESUMO</span><h2 id="client-drawer-title">Meu carrinho</h2><p>Confirme os equipamentos antes de solicitar a cotação.</p></div><button type="button" id="client-cart-close" class="client-cart-close" aria-label="Fechar carrinho">×</button></div>
+  <div class="client-drawer-clock"><span>Validade da cotação</span><strong id="client-drawer-timer">25:00</strong></div>
+  <div class="client-drawer-items" id="client-drawer-lines"></div>
+  <div class="client-drawer-bottom"><div class="client-drawer-total"><span>Total estimado</span><strong id="client-drawer-total">R$ 0,00</strong></div><button type="button" id="client-drawer-checkout" class="button button-accent" disabled>Enviar pelo WhatsApp ↗</button><button type="button" id="client-drawer-refresh" class="button button-outline">Atualizar valores</button><small>Preço e estoque são confirmados no atendimento. Não há pagamento automático.</small></div>
+</aside>
+<div id="client-toast" class="client-toast" role="status" aria-live="polite" hidden><span aria-hidden="true">✓</span><span id="client-toast-text">Produto adicionado ao carrinho</span></div>
 </main>
 <footer class="footer"><div class="shell footer-inner"><span><strong>WW</strong>SOLAR</span><span>Ambiente de clientes · Solicitação de cotação</span><span>Atendimento comercial (85) 99272-3637</span></div></footer>
 <script src="./cliente-dev-config.js" defer></script>
