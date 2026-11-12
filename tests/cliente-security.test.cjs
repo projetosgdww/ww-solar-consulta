@@ -48,3 +48,25 @@ assert(kitsSQL.includes("auth.jwt()->'app_metadata'->>'wwsolar_role'"),'polític
 assert(kitsSQL.includes('engineering_approved = false')&&kitsSQL.includes('published = false'),'rascunhos nunca publicáveis');
 assert(kitsCore.includes('publicationAllowed:false'),'trava de liberação de kits');
 assert(kitsAdmin.includes("wwsolar_piece_costs"),'custos apenas de tabela admin');
+
+const orderEdge=read('supabase/functions/wwsolar-quote/index.ts');
+const orderSql=read('supabase/wwsolar-quote-requests-dev.sql');
+const orderAudit=read('supabase/wwsolar-quote-audit-dev.sql');
+const adminCss=read('admin-dev.css');
+for(const source of [orderEdge,orderSql,orderAudit,adminCss])assert(source.length>100);
+assert(orderSql.includes('enable row level security'),'pedidos com RLS obrigatória');
+assert(orderSql.includes("user_id = (select auth.uid())"),'clientes só podem ler pedidos próprios');
+assert(orderSql.includes('revoke all on public.wwsolar_quote_requests from PUBLIC,anon,authenticated'),'bloquear gravação pelo navegador');
+assert(orderSql.includes('grant select on public.wwsolar_quote_requests to authenticated'),'permitir leitura com RLS');
+assert(!/grant (?:insert|update|delete)[^;]*wwsolar_quote_requests to authenticated/.test(orderSql),'não permitir falsificar histórico');
+assert(orderEdge.includes('admin.auth.getUser('),'validar token de cliente no servidor');
+assert(orderEdge.includes('expected_total_cents')&&orderEdge.includes('total!==expectedTotal'),'preço não vem do cliente');
+assert(orderEdge.includes('quote_expired')&&orderEdge.includes('25*60*1000'),'validade da cotação');
+assert(orderEdge.includes('idempot')||orderEdge.includes('23505'),'pedido não duplicado em retentativas');
+assert(orderEdge.includes('wwsolar_catalog')&&orderEdge.includes('wwsolar_carts'),'dados sempre consultados no backend');
+assert(orderAudit.includes('historical_quote_snapshot_is_immutable'),'snapshot não pode ser alterado');
+assert(orderAudit.includes('wwsolar_quote_status_events'),'auditoria no banco');
+assert(adminHtml.includes('id="admin-tab-clients"')&&adminHtml.includes('id="admin-tab-orders"'),'duas áreas no painel');
+assert(admin.includes("action:'status'")&&admin.includes("action:'set_access'"),'admin permite gerir status e cliente sem editar banco direto');
+assert(client.includes("functions.invoke('wwsolar-quote'"),'registrar pedido antes do WhatsApp');
+assert(!client.includes("from('wwsolar_quote_requests').insert("),'navegador não grava pedidos diretamente');
