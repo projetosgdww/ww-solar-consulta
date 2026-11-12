@@ -44,17 +44,41 @@ Deno.serve(async(req)=>{
     return reply(403,{error:"not_authorized"},origin);
 
   let email="";
+  let action="create";
   try{
     const payload=await req.json();
     email=String(payload?.email||"").trim().toLowerCase();
+    action=String(payload?.action||"create");
   }catch{ return reply(400,{error:"invalid_payload"},origin); }
   if(email.length>254||!emailRE.test(email))
     return reply(400,{error:"invalid_email"},origin);
+  if(action!=="create"&&action!=="rotate")
+    return reply(400,{error:"invalid_action"},origin);
 
-  // 128 bits da fonte criptográfica do runtime. A senha não é armazenada
-  // no código, banco ou logs; só existe no Supabase Auth e nesta resposta.
-  const bytes=crypto.getRandomValues(new Uint8Array(18));
-  const password=Array.from(bytes,x=>x.toString(16).padStart(2,"0")).join("");
+  // 72 bits reais de aleatoriedade: prefixo de marca + 12 caracteres aleatórios.
+  // Exemplo de FORMATO (não é senha válida): GDWW-Ab12Cd-Ef34Gh.
+  // Jamais usar trecho do e-mail ou dados previsíveis como senha.
+  const bytes=crypto.getRandomValues(new Uint8Array(9));
+  const random=btoa(String.fromCharCode(...bytes))
+    .replace(/\+/g,"-").replace(/\//g,"_").replace(/=/g,"");
+  const password="GDWW-"+random.slice(0,6)+"-"+random.slice(6);
+
+  if(action==="rotate"){
+    const {data:access,error:accessError}=await admin.from("wwsolar_client_access")
+      .select("user_id,active,email").eq("email",email).maybeSingle();
+    if(accessError)return reply(500,{error:"access_lookup_failed"},origin);
+    if(!access||!access.active)return reply(404,{error:"client_not_found"},origin);
+    const {data:target,error:targetError}=await admin.auth.admin.getUserById(access.user_id);
+    if(targetError||!target?.user
+      ||target.user.email?.trim().toLowerCase()!==email
+      ||target.user.app_metadata?.wwsolar_role!=="client")
+      return reply(409,{error:"client_identity_not_valid"},origin);
+    const {error:rotateError}=await admin.auth.admin.updateUserById(
+      target.user.id,{password}
+    );
+    if(rotateError)return reply(500,{error:"password_rotation_failed"},origin);
+    return reply(200,{email,password,action:"rotate"},origin);
+  }
 
   const {data:created,error:createError}=await admin.auth.admin.createUser({
     email,password,email_confirm:true,app_metadata:{wwsolar_role:"client"}
@@ -63,7 +87,7 @@ Deno.serve(async(req)=>{
     return reply(409,{error:"cannot_create_customer"},origin);
 
   const {error:accessError}=await admin.from("wwsolar_client_access").insert({
-    user_id:created.user.id,active:true
+    user_id:created.user.id,email,active:true
   });
   if(accessError){
     // Rollback compensatório: não deixar conta autenticável sem vínculo.
