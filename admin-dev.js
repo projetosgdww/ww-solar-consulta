@@ -16,21 +16,35 @@
     $('admin-dev-form').hidden=false;
     status('Administrador autenticado. Informe o e-mail para liberar um acesso.');
   }
-  $('admin-dev-form').addEventListener('submit',async ev=>{
-    ev.preventDefault();if(!db)return;
-    const email=$('admin-dev-email').value.trim().toLowerCase();
-    $('admin-dev-submit').disabled=true;status('Criando acesso...');
-    $('admin-dev-created').hidden=true;oneTime='';
+  async function sendAction(action){
+    if(!db)return;
+    const input=$('admin-dev-email');
+    if(!input.reportValidity())return;
+    const email=input.value.trim().toLowerCase();
+    if(action==='rotate'&&!window.confirm(
+      'Reemitir uma senha para '+email+'? A senha anterior deixará de funcionar.'
+    ))return;
+
+    $('admin-dev-submit').disabled=true;
+    $('admin-dev-rotate').disabled=true;
+    status(action==='rotate'?'Reemitindo senha...':'Criando acesso...');
+    $('admin-dev-created').hidden=true;
+    oneTime='';$('admin-dev-credentials').textContent='';
     try{
-      const {data,error}=await db.functions.invoke('wwsolar-create-customer',{body:{email}});
+      const {data,error}=await db.functions.invoke('wwsolar-create-customer',{body:{email,action}});
       if(error){
         const httpStatus=Number(error.context?.status||0);
-        if(httpStatus===409)throw new Error('Não foi possível criar este acesso. Confirme se o e-mail já possui cadastro.');
-        if(httpStatus===401||httpStatus===403)throw new Error('Sua sessão administrativa não foi autorizada. Faça login novamente.');
-        if(httpStatus>=500)throw new Error('Falha técnica no servidor de cadastro. Nenhum acesso foi confirmado; tente novamente ou informe o suporte.');
-        throw new Error('Não foi possível concluir o cadastro. Confira o e-mail e tente novamente.');
+        if(httpStatus===404)throw new Error('Cliente não encontrado ou inativo. Verifique o e-mail cadastrado.');
+        if(httpStatus===409)throw new Error(
+          action==='rotate'?'Não foi possível confirmar a conta existente. Entre em contato com o suporte.':
+          'Este e-mail já pode possuir um cadastro. Use Reemitir senha, se for seu cliente.'
+        );
+        if(httpStatus===401||httpStatus===403)throw new Error('Sessão administrativa não autorizada. Faça login novamente.');
+        if(httpStatus>=500)throw new Error('Falha técnica na operação. A alteração não foi confirmada; procure o suporte.');
+        throw new Error('Não foi possível completar a operação. Confira o e-mail e a conexão.');
       }
-      if(!data?.email||!data?.password)throw new Error('O servidor não confirmou a criação. Não envie credenciais.');
+      if(!data?.email||!data?.password||data?.action!==(action==='rotate'?'rotate':'create'))
+        throw new Error('O servidor não confirmou os dados. Não envie credenciais.');
 
       oneTime='WW Solar — Área do cliente\n'
         +'Acesso: '+new URL('./cliente-dev.html',window.location.href).href+'\n'
@@ -38,11 +52,18 @@
         +'Guarde esta mensagem em local seguro.';
       $('admin-dev-credentials').textContent=oneTime;
       $('admin-dev-created').hidden=false;
-      $('admin-dev-form').reset();
-      status('Acesso criado. Copie as credenciais e encaminhe ao cliente.');
-    }catch(e){status(e?.message||'Não foi possível confirmar o cadastro.');}
-    finally{$('admin-dev-submit').disabled=false;}
+      input.value='';
+      status(action==='rotate'
+        ?'Senha reemitida. A anterior não funciona mais. Copie e envie a nova ao cliente.'
+        :'Acesso criado. Copie as credenciais e encaminhe ao cliente.');
+    }catch(e){status(e?.message||'Não foi possível confirmar a operação.');}
+    finally{$('admin-dev-submit').disabled=false;$('admin-dev-rotate').disabled=false;}
+  }
+  $('admin-dev-form').addEventListener('submit',ev=>{
+    ev.preventDefault();
+    void sendAction('create');
   });
+  $('admin-dev-rotate').addEventListener('click',()=>{void sendAction('rotate');});
   $('admin-dev-copy').addEventListener('click',async()=>{
     if(!oneTime)return;
     try{await navigator.clipboard.writeText(oneTime);status('Credenciais copiadas.');}
