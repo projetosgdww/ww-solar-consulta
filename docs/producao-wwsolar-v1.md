@@ -8,6 +8,15 @@ Revisado em 12/11/2026. **Estratégia custo zero aprovada: um único Supabase ex
 - Arquivo `cliente-dev-config.js` desta branch está intencionalmente **sem URL e sem publishable key**, bloqueando login. Antes de conectar à base existente é necessário promovê-la formalmente a PROD, com backup/exportação, separação ou limpeza controlada dos dados de teste, revisão de políticas e smoke tests. Não operar DEV e PROD ativos ao mesmo tempo no mesmo backend sem segregação segura.
 - `catalogo.wwplatform.com.br` é um hostname sugerido, sem registro DNS existente no levantamento de 12/11; **não foi criado nem anunciado**. `solar.wwplatform.com.br` já possui AAAA e não deve ser sobrescrito.
 
+## Auditoria atual sem alterações de dados (12/11/2026)
+- Catálogo: 50 peças `active=true, approved=true`; 58 kits `active=false, approved=false`.
+- RLS ativo nas sete tabelas `wwsolar_*`.
+- 2 clientes de homologação, 1 pedido e 1 evento de auditoria. Nenhum registro excluído ou reclassificado.
+- Edge Functions `wwsolar-create-customer` (versão 4) e `wwsolar-quote` (versão 3) ativas, ambas com `verify_jwt=true`.
+- Security Advisor: 1 aviso de senha vazada; sem outros avisos no retorno de segurança. O recurso de detecção de senha vazada é exclusivo do plano Pro ou superior conforme documentação oficial.
+- Ausência de cópia de segurança ou restauração testada impede promover o único banco para atendimento de produção hoje.
+- Compensação do plano Free: senhas geradas aleatoriamente pelo administrador; ainda necessário revisar rate limiting, configurações de Auth e política de recuperação.
+
 ## Escopo comercial
 - Somente 50 peças aprovadas. Nunca publicar automaticamente os 58 kits legados nem os 12 rascunhos sem aprovação de engenharia.
 - Administração Clientes/Pedidos, senha emitida pelo admin, sem convite/recuperação self-service.
