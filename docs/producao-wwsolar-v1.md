@@ -33,6 +33,15 @@ Revisado em 12/11/2026. **Estratégia custo zero aprovada: um único Supabase ex
 - **Validação parcial:** existência, tamanho não zero e hashes confirmados pelo operador. Não foi realizada comparação de integridade de tabelas, restore, Auth, Storage nem recuperação integral.
 - Próximas etapas: inventário local sem imprimir registros, segunda cópia criptografada, estratégia Auth e ensaio de restauração isolada. Não apagar dados de homologação.
 
+## Publicação técnica V1 — 12/11/2026
+- **Decisão operacional:** sem convite, sem cadastro público, sem recuperação de senha pelo cliente. O administrador informa e-mail, cria senha aleatória e a entrega diretamente; reemissão de senha somente pelo admin.
+- **Backend gratuito único:** instância Supabase existente `drutoqwkjzdsirqthdux`, com 50 peças ativas e kits não aprovados inativos; o nome do projeto permanece `ww-solar-clientes-dev` por enquanto. Separação DEV/PROD de dados **não existe** nessa arquitetura gratuita. Não alegar isolamento entre ambientes nem restauração completa.
+- Edge Functions `wwsolar-create-customer` v5 e `wwsolar-quote` v4 ativas, JWT obrigatório e origens restritas à V1 técnica, domínio comercial e DEV anterior. Nenhuma lógica de compra/preço foi alterada neste deploy.
+- Cloudflare Pages `ww-solar` com deploy técnico #`1ebf8abc-d42b-411f-bf79-cc180cc29f3a` concluído com sucesso; produção automática desativada. Código de release separado na branch `release/wwsolar-pecas-v1`; páginas antigas e arquivos JSON públicos não entram no diretório `dist-cliente-dev`.
+- Domínio personalizado `catalogo.wwplatform.com.br` adicionado ao Pages e DNS `CNAME -> ww-solar.pages.dev` criado, porém validação HTTP/TLS ainda **pending** na checagem Cloudflare. Verificar propagação antes de anunciar.
+- **Smoke test externo final pendente:** login, perfil admin, criação/reamissão/bloqueio, lista de 50 peças, pedido no domínio definitivo e auditoria. Não afirmar produção homologada só com deploy bem-sucedido.
+- **Legado:** PR #3 de retirada dos JSONs antigos segue em rascunho, branch `main` pública ainda possui os JSONs de preços; histórico GitHub público pode seguir acessível. Resolver antes de anunciar sigilo comercial completo.
+
 ## Escopo comercial
 - Somente 50 peças aprovadas. Nunca publicar automaticamente os 58 kits legados nem os 12 rascunhos sem aprovação de engenharia.
 - Administração Clientes/Pedidos, senha emitida pelo admin, sem convite/recuperação self-service.
