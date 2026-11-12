@@ -10,3 +10,13 @@
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
 [hidden]{display:none!important}
 button:disabled{opacity:.55;cursor:not-allowed;transform:none!important}
+/* Contatos comerciais - mantém o rodapé, as cores e os componentes existentes */
+.footer-inner{flex-wrap:wrap;padding-top:18px;padding-bottom:18px}
+.footer-contacts{width:100%;display:flex;justify-content:center;align-items:center;gap:clamp(18px,3vw,48px);padding-top:13px;border-top:1px solid rgba(221,229,226,.14)}
+.footer-contacts a{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;font-size:11px;color:#cad8d4;line-height:1.5}
+.footer-contacts a:hover,.footer-contacts a:focus-visible{color:#fff;text-decoration:underline;text-underline-offset:3px}
+.footer-contacts a span:first-child{font-size:11px;color:#9bafaa;font-weight:500;letter-spacing:0}
+.footer-contacts a strong{font-size:12px;color:var(--accent);font-weight:750}
+.dialog-direct{font-size:12px;color:var(--muted);margin-top:10px;line-height:1.55}
+.dialog-direct a{color:#176b5b;font-weight:750;text-decoration:underline;text-underline-offset:2px}
+@media(max-width:700px){.footer-contacts{flex-direction:column;align-items:flex-start;gap:10px;padding-top:16px}.footer-contacts a{gap:5px}}
