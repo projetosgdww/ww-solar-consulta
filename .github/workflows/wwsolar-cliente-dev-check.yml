@@ -6,6 +6,9 @@ on:
     paths:
       - "cliente-*"
       - "admin-dev.*"
+      - "supabase/wwsolar-quote-requests-dev.sql"
+      - "supabase/wwsolar-quote-audit-dev.sql"
+      - "supabase/functions/wwsolar-quote/**"
       - "tests/cliente-*"
       - "scripts/build-cliente-dev.mjs"
       - "kits-admin-dev.*"
