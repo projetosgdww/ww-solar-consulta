@@ -4,9 +4,19 @@
 
 create table if not exists public.wwsolar_client_access (
   user_id uuid primary key references auth.users(id) on delete cascade,
+  email text not null,
   active boolean not null default true,
   created_at timestamptz not null default now()
 );
+
+-- Evolução segura de projetos DEV criados antes da coluna de e-mail.
+alter table public.wwsolar_client_access add column if not exists email text;
+update public.wwsolar_client_access a set email=lower(u.email)
+from auth.users u where u.id=a.user_id
+  and (a.email is null or a.email<>lower(u.email));
+alter table public.wwsolar_client_access alter column email set not null;
+create unique index if not exists wwsolar_client_access_email_uidx
+  on public.wwsolar_client_access (lower(email));
 
 create table if not exists public.wwsolar_catalog (
   id text primary key,
@@ -41,6 +51,7 @@ revoke all on public.wwsolar_carts from anon, authenticated;
 -- Conceder somente à role privilegiada do backend, nunca a usuários públicos.
 grant usage on schema public to service_role;
 grant insert on public.wwsolar_client_access to service_role;
+grant select on public.wwsolar_client_access to service_role;
 
 grant select on public.wwsolar_client_access to authenticated;
 grant select on public.wwsolar_catalog to authenticated;
