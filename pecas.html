@@ -69,7 +69,7 @@
 <nav class="nav parts-nav" aria-label="Navegação principal">
 <a href="./index.html#simulador">Simular</a><a href="./index.html#catalogo">Kits prontos</a><a href="#pecas" aria-current="page">Peças avulsas</a>
 </nav>
-<a href="./index.html#catalogo" class="header-button">Ver kits <span aria-hidden="true">↗</span></a>
+<a href="https://wa.me/5585992723637?text=Ol%C3%A1!%20Gostaria%20de%20mais%20informa%C3%A7%C3%B5es%20sobre%20kits%20e%20equipamentos%20fotovoltaicos%20da%20WW%20Solar." class="header-button" target="_blank" rel="noopener noreferrer" aria-label="Fale conosco pelo WhatsApp (85) 99272-3637">Fale conosco <small class="header-contact-number">(85) 99272-3637</small> <span aria-hidden="true">↗</span></a>
 </div>
 </header>
 <main>
@@ -108,7 +108,7 @@
 </section>
 <section class="parts-final shell"><div><div class="section-label">SISTEMAS COMPLETOS</div><h2>Prefere um kit pronto?</h2><p>Nosso simulador compara configurações de módulos, inversores e geração mensal estimada.</p></div><a class="button button-dark" href="./index.html#simulador">Abrir simulador ↗</a></section>
 </main>
-<footer class="footer"><div class="shell footer-inner"><span><strong>WW</strong>SOLAR</span><span>Catálogo de peças avulsas · Somente equipamentos</span><span>Preços: 05/11/2026 · Estoque a confirmar</span></div></footer>
+<footer class="footer"><div class="shell footer-inner"><span><strong>WW</strong>SOLAR</span><span>Catálogo de peças avulsas · Somente equipamentos</span><span>Preços: 12/11/2026 · Estoque a confirmar</span><div class="footer-contacts" aria-label="Contatos especializados"><a href="https://wa.me/5585991170375?text=Ol%C3%A1!%20Gostaria%20de%20informa%C3%A7%C3%B5es%20sobre%20projetos%20e%20homologa%C3%A7%C3%A3o%20de%20sistemas%20fotovoltaicos." target="_blank" rel="noopener noreferrer"><span>Projetos e homologação</span><strong>+55 (85) 99117-0375 ↗</strong></a><a href="https://wa.me/558591078023?text=Ol%C3%A1!%20Gostaria%20de%20informa%C3%A7%C3%B5es%20sobre%20a%20instala%C3%A7%C3%A3o%20de%20um%20sistema%20fotovoltaico." target="_blank" rel="noopener noreferrer"><span>Instalação</span><strong>+55 (85) 9107-8023 ↗</strong></a></div></div></footer>
 <dialog class="kit-dialog" id="part-dialog" aria-labelledby="part-title">
 <div class="dialog-inner">
 <button id="part-close" type="button" class="dialog-close" aria-label="Fechar">×</button>
@@ -120,7 +120,7 @@
 <div class="parts-total"><span>Subtotal estimado</span><strong id="part-total-price">—</strong></div>
 <p class="dialog-disclaimer" id="part-warning">Preço, disponibilidade e frete a confirmar. Não inclui instalação, projeto ou homologação.</p>
 <div class="dialog-actions"><button type="button" class="button button-accent" id="part-contact">Copiar solicitação ↗</button><button type="button" class="button button-outline" id="part-dismiss">Fechar</button></div>
-<p class="dialog-hint" id="part-hint">WhatsApp não configurado. Copie o texto da solicitação para encaminhar ao atendimento comercial.</p>
+<p class="dialog-hint" id="part-hint">Confirme preço e disponibilidade durante o atendimento.</p><p class="dialog-direct">Mais informações: <a href="https://wa.me/5585992723637?text=Ol%C3%A1!%20Gostaria%20de%20mais%20informa%C3%A7%C3%B5es%20sobre%20kits%20e%20equipamentos%20fotovoltaicos%20da%20WW%20Solar." target="_blank" rel="noopener noreferrer">WhatsApp (85) 99272-3637 ↗</a></p>
 </div>
 </dialog>
 <div class="toast" id="part-toast" role="status" aria-live="polite"></div>
@@ -142,7 +142,7 @@ return '<article class="kit-card part-card"><div class="kit-top"><span class="pa
 }
 function matching(){
 const q=norm(s.q);
-let a=s.items.filter(p=>(s.cat==='todos'||p.categoria===s.cat)&&(!q||norm(p.nome+' '+category(p)+' '+p.id).includes(q)));
+let a=s.items.filter(p=>(s.cat==='todos'||p.categoria===s.cat)&&(!q||norm(p.nome+' '+category(p)+' '+p.id+' '+(p.codigoProduto||'')).includes(q)));
 a.sort((x,y)=>s.sort==='menor'?x.preco-y.preco:s.sort==='maior'?y.preco-x.preco:x.nome.localeCompare(y.nome,'pt-BR'));
 return a;
 }
