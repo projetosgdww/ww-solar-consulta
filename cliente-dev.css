@@ -128,3 +128,9 @@ body .header{position:sticky;top:0;z-index:80}
 .client-toast>span:first-child{display:grid;place-items:center;width:26px;height:26px;background:#d3f5e1;color:#177c48;border-radius:9px}
 @media(max-width:930px){#client-nav{gap:10px}#client-nav a{font-size:11px}.client-cart-trigger{padding:7px}.client-cart-top{margin-left:auto}}
 @media(max-width:700px){.header .header-inner{gap:9px}.header .brand-copy small{letter-spacing:.05em}.header #client-nav{display:none}.client-cart-top{margin-left:auto}.client-cart-trigger{min-height:49px;padding:5px 8px}.client-cart-trigger svg{width:22px}.client-cart-top-name{font-size:9px}#client-top-total{font-size:12px}#client-top-clock{font-size:9px}.client-cart-preview{display:none!important}.client-target-input-row #client-target-apply{flex:1}.client-quote-footer{flex-direction:column;align-items:stretch}.client-toast{left:14px;right:14px;top:77px}.client-drawer-head{padding:17px}.client-drawer-items{padding:10px 17px}.client-drawer-bottom{padding:15px 17px}}
+
+/* V1: acao secundaria para limpar o carrinho com confirmacao */
+.client-cart-clear{align-self:center;border:0;background:transparent;color:#a3402d;font:inherit;font-size:12px;font-weight:800;padding:9px 16px;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+.client-cart-clear:hover{color:#782a1d}
+.client-cart-clear:focus-visible{outline:3px solid #cc9b23;outline-offset:3px;border-radius:6px}
+.client-cart-clear:disabled{opacity:.4;cursor:not-allowed;text-decoration:none}
