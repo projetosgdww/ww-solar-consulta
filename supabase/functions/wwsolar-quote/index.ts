@@ -5,6 +5,9 @@ const url=Deno.env.get("SUPABASE_URL")||"";
 const secret=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")||"";
 const origins=new Set((Deno.env.get("WWSOLAR_ALLOWED_ORIGINS")||
   "https://ww-solar-clientes-dev.pages.dev").split(",").map(x=>x.trim()).filter(Boolean));
+// Domínios exatos da V1; nunca liberar origem arbitrária ou curinga.
+origins.add("https://ww-solar.pages.dev");
+origins.add("https://catalogo.wwplatform.com.br");
 const states=new Set(["registrado","em_atendimento","fechado","cancelado"]);
 const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 function result(status:number,body:Record<string,unknown>,origin:string){
