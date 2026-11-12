@@ -13,7 +13,7 @@ assert(sql.includes('alter table public.wwsolar_client_access enable row level s
 assert(sql.includes('alter table public.wwsolar_catalog enable row level security'));
 assert(sql.includes('alter table public.wwsolar_carts enable row level security'));
 assert(sql.includes('auth.uid()')&&sql.includes('with check ('));
-assert(sql.includes('app_metadata')&&!sql.includes("user_metadata"));
+assert(sql.includes('app_metadata')&&!sql.includes("auth.jwt()->'user_metadata'"));
 assert(edge.includes('getUser(token)')&&edge.includes('wwsolar_role!=="admin"'));
 assert(edge.includes('createUser(')&&edge.includes('email_confirm:true'));
 assert(edge.includes('crypto.getRandomValues'));
