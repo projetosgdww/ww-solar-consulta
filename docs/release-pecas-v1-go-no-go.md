@@ -18,9 +18,10 @@ Atualização: 12/11/2026. Ambiente auditado: `ww-solar-clientes-dev`.
 - SQL regression `tests/wwsolar-quote-rls-dev.sql`: 11/11 PASS (inclui preflight de permissões internas).
 - CI referência: GitHub Actions run 43283983572 `success` no commit `34634ef`.
 - Frontend DEV Pages commit `b8bf703` publicado com sucesso; tela nova de Clientes/Pedidos confirmada em screenshots.
+- Provisionamento real E2E da segunda conta aprovado; bloqueio, revogação de acesso e reativação com senha preservada aprovados pelo operador.
 
 ## Bloqueios para abertura irrestrita de produção
-1. **Provisionamento de cliente novo em E2E:** criar uma conta via painel e validar login e bloqueio/reativação com essa conta. A estrutura/credenciais aleatórias já está implementada, mas o teste real desse percurso ainda não foi comprovado.
+1. **Provisionamento e controle de acesso — HOMOLOGADO em 12/11/2026:** admin criou segundo cliente pelo painel; senha gerada foi usada para entrar; catálogo mostrou 50 peças; bloqueio levou à tela de login com aviso de acesso suspenso; reativação restaurou o login com a mesma credencial. Evidência por capturas de tela do operador. Não manter como bloqueio.
 2. **Contato comercial — CONFIRMADO em 12/11/2026:** destino WhatsApp `+55 85 99272-3637` foi confirmado pelo responsável como o número correto neste momento. Se mudar futuramente, atualizar a configuração e repetir o teste do pedido.
 3. **Privacidade comercial/legado:** `main` no repositório público ainda contém `dados/catalogo-publico.json` e `dados/pecas-publicas.json`. O novo build DEV não inclui esses arquivos, mas o catálogo antigo e histórico público não se tornam privados. Definir retirada/migração do legado sem quebrar outros endereços.
 4. **Ambiente definitivo:** o projeto atual e a URL ainda são DEV; preparar e validar o endereço definitivo e estratégia de backend antes de anunciar como produção.
@@ -33,6 +34,6 @@ Atualização: 12/11/2026. Ambiente auditado: `ww-solar-clientes-dev`.
 - Não habilitar pagamentos, compra automática ou alegar que WhatsApp enviou mensagem.
 - Publicar apenas após revisar os bloqueios e executar smoke test de login/cotação/histórico no endereço definitivo.
 
-**Atualização de liberação:** telefone comercial validado; permanecem as demais verificações de provisionamento, legado, ambiente definitivo e segurança Auth.
+**Atualização de liberação:** telefone comercial validado; provisionamento, login, bloqueio e reativação homologados. Permanecem privacidade do legado, ambiente definitivo e segurança Auth.
 
-**Decisão atual:** V1 de peças tecnicamente funcional e comprovada no DEV; ainda **NO-GO para divulgação irrestrita/PROD**, até os cinco bloqueios acima serem tratados. Não confundir sucesso do piloto com aprovação dos kits.
+**Decisão atual:** V1 de peças tecnicamente funcional e comprovada no DEV; ainda **NO-GO para divulgação irrestrita/PROD**, até os bloqueios restantes (legado, ambiente definitivo e segurança Auth) serem tratados. Não confundir sucesso do piloto com aprovação dos kits.
