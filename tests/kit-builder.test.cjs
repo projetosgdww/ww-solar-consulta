@@ -72,7 +72,7 @@ test('pares MC4 não são inventados com base em MPPT',()=>{
 });
 test('15% de ACRÉSCIMO sobre custo real só com todas as linhas e quantidades',()=>{
   const base=draft(10,{dcInputs:2});
-  assert.equal(base.previewPrice,null,'não usar preços de venda como custo');
+  assert.equal(base.previewPrice,null,'sem preços cadastrados nos fixtures, composição fica pendente');
   const costs=base.rows.filter(x=>x.sku).map((x,i)=>({sku:x.sku,unit_cost:100+i*25}));
   const priced=draft(10,{dcInputs:2,costs});
   assert.equal(priced.missingCosts.length,0);
@@ -84,4 +84,60 @@ test('validação de catálogo e entradas malformadas',()=>{
   assert.throws(()=>draft(10,{roof:'solo'}),/Cobertura inválida/);
   assert.throws(()=>draft(10,{redMeters:1,blackMeters:1}),/insuficientes/);
   assert.throws(()=>draft(10,{moduleSku:'PAV-035'}),/Módulo indisponível/);
+});
+
+test('reverte margens a partir de preços avulsos APENAS como estimativa',()=>{
+  const rows=[
+    {sku:'PAV-049',qty:10,label:'Módulos'},
+    {sku:'PAV-041',qty:1,label:'Inversor'},
+    {sku:'PAV-029',qty:3,label:'Fixação'},
+    {sku:'PAV-001',qty:2,label:'Cabo'},
+    {sku:'PAV-007',qty:1,label:'MC4'}
+  ];
+  const prices=[
+    {...pieces.find(p=>p.id==='PAV-049'),price:800.00},
+    {...pieces.find(p=>p.id==='PAV-041'),price:3575.11},
+    {...pieces.find(p=>p.id==='PAV-029'),price:139.86},
+    {...pieces.find(p=>p.id==='PAV-001'),price:130.00},
+    {...pieces.find(p=>p.id==='PAV-007'),price:13.00}
+  ];
+  assert.equal(K.estimatedCostFromSale(prices[0]).unitCost,625);
+  assert.equal(K.estimatedCostFromSale(prices[1]).unitCost,2860.09);
+  assert.equal(K.estimatedCostFromSale(prices[2]).unitCost,99.90);
+  assert.equal(K.estimatedCostFromSale(prices[3]).unitCost,100);
+  assert.equal(K.estimatedCostFromSale(prices[4]).unitCost,10);
+  const quote=K.costSummary(rows,[],prices);
+  assert.equal(quote.estimatedLines,5);
+  assert.equal(quote.verifiedLines,0);
+  assert.equal(quote.pricingStatus,'estimado');
+  assert.equal(quote.cost,10*625+2860.09+3*99.90+2*100+10);
+  assert.equal(quote.sellingPrice,Math.round(quote.cost*115)/100);
+  assert(quote.rows.every(x=>x.costSource==='estimado'));
+});
+test('precificação usa custo comprovado prioritariamente, não margem em cima da venda',()=>{
+  const p={...pieces.find(x=>x.id==='PAV-049'),price:800,updated_at:'2026-11-12T10:00:00Z'};
+  const r=[{sku:p.id,qty:2,label:'Módulo'}];
+  const manual=K.costSummary(r,[{sku:p.id,unit_cost:600,updated_at:'2026-11-12T11:00:00Z'}],[p]);
+  assert.equal(manual.cost,1200);
+  assert.equal(manual.sellingPrice,1380);
+  assert.equal(manual.pricingStatus,'confirmado');
+  const old=K.costSummary(r,[{sku:p.id,unit_cost:600,updated_at:'2026-11-11T11:00:00Z'}],[p]);
+  assert.equal(old.cost,1250);
+  assert.equal(old.pricingStatus,'estimado');
+  assert.equal(old.staleLines,1);
+  assert.equal(old.rows[0].costSource,'estimado_revisar');
+});
+test('atualizar catálogo atualiza precificação sem digitação, sem publicar kit',()=>{
+ const original={...pieces.find(x=>x.id==='PAV-049'),price:800};
+ const updated={...original,price:810};
+ const originalQuote=K.costSummary([{sku:original.id,qty:10,label:'Módulos'}],[],[original]);
+ const newQuote=K.costSummary([{sku:updated.id,qty:10,label:'Módulos'}],[],[updated]);
+ assert.equal(newQuote.cost-originalQuote.cost,100);
+ assert.equal(newQuote.sellingPrice-originalQuote.sellingPrice,115);
+ assert.equal(draft(10).publicationAllowed,false);
+});
+test('não inverte margens de categorias excluídas, preço ausente ou valor sem base',()=>{
+ assert.equal(K.estimatedCostFromSale(item('x','Módulo','baterias')),null);
+ assert.equal(K.estimatedCostFromSale({...pieces[0],price:0}),null);
+ assert.equal(K.estimatedCostFromSale({...pieces[0],price:100}),null);
 });
