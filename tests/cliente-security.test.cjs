@@ -12,6 +12,7 @@ for(const code of [client,admin,config]){
 assert(sql.includes('alter table public.wwsolar_client_access enable row level security'));
 assert(sql.includes('alter table public.wwsolar_catalog enable row level security'));
 assert(sql.includes('alter table public.wwsolar_carts enable row level security'));
+assert(sql.includes('grant insert on public.wwsolar_client_access to service_role'));
 assert(sql.includes('auth.uid()')&&sql.includes('with check ('));
 assert(sql.includes('app_metadata')&&!sql.includes("auth.jwt()->'user_metadata'"));
 assert(edge.includes('getUser(token)')&&edge.includes('wwsolar_role!=="admin"'));
