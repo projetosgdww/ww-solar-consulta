@@ -16,12 +16,13 @@
 <div class="section-label">WW SOLAR / COMPOSIÇÃO TÉCNICA · DEV</div>
 <div class="kit-heading">
   <div><h1>Monte seus <em>próprios kits.</em></h1>
-    <p>12 modelos-base, três opções de telhado e custos reais informados pelo administrador.</p></div>
+    <p>12 modelos-base, três opções de telhado e preços estimados automaticamente com a base central de equipamentos.</p></div>
   <span class="kit-draft-tag">SOMENTE RASCUNHOS</span>
 </div>
 <p id="kit-admin-status" class="client-status" role="status">Verificando autorização administrativa...</p>
 <section id="kit-admin-app" hidden>
   <div class="kit-progress" id="kit-progress">Carregando modelos...</div>
+  <div class="kit-sync-bar"><div><strong>Preços conectados ao catálogo WW Solar</strong><small id="kit-price-date">Origem: preços avulsos cadastrados no Supabase DEV.</small></div><button id="kit-refresh-prices" class="button button-outline" type="button">Atualizar preços e produtos ↻</button></div>
   <div class="kit-workspace">
     <section class="kit-control-panel" aria-labelledby="kit-control-heading">
       <h2 id="kit-control-heading">Configurar composição</h2>
@@ -56,15 +57,15 @@
         <div><small>Cabo estimado</small><strong id="kit-cable">—</strong></div>
       </div>
       <h3>Lista preliminar de materiais</h3>
-      <p class="kit-small-note">Custos em reais por unidade comercial do fornecedor. Informe custos de aquisição, nunca preços já acrescidos de margem. Os custos são restritos ao administrador.</p>
+      <p class="kit-small-note">Custos estimados automaticamente ao retirar a margem comercial dos preços avulsos. Custos reais confirmados substituem essas estimativas. Não será necessário digitar os preços novamente. Valores somente administrativos.</p>
       <div class="kit-table-scroll"><table class="kit-bom-table"><thead><tr>
-        <th>Componente / SKU</th><th>Quantidade</th><th>Custo unitário (R$)</th><th>Subtotal</th></tr></thead>
+        <th>Componente / SKU</th><th>Quantidade</th><th>Custo de referência (R$)</th><th>Subtotal</th></tr></thead>
         <tbody id="kit-bom-body"></tbody></table></div>
-      <div class="kit-totals">
+      <div id="kit-source-note" class="kit-source-note">Carregando origem dos custos...</div><div class="kit-totals">
         <div><span>Custo completo dos itens</span><strong id="kit-total-cost">Pendente</strong></div>
         <div><span>Preço de referência (custo + 15%)</span><strong id="kit-sale-price">Pendente</strong></div>
       </div>
-      <p id="kit-price-caveat" class="kit-small-note">Valores bloqueados enquanto houver peças, quantidades ou custos pendentes.</p>
+      <p id="kit-price-caveat" class="kit-small-note">Valores bloqueados enquanto houver peças, quantidades ou preços sem origem. Estimativas nunca são publicadas automaticamente.</p>
       <h3>Pendências para revisão técnica</h3>
       <ul id="kit-risks" class="kit-risk-list"></ul>
     </section>
