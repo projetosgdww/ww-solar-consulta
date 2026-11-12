@@ -65,15 +65,12 @@ Deno.serve(async req=>{
    if(readError)return result(500,{error:"read_failed"},origin);
    if(!existing)return result(404,{error:"order_not_found"},origin);
    if(existing.status===status)return result(200,{id,status,unchanged:true},origin);
+   // Trigger de banco grava auditoria na MESMA transacao e preserva o snapshot.
    const {data:changed,error:writeError}=await admin.from("wwsolar_quote_requests")
-     .update({status,updated_at:new Date().toISOString()})
+     .update({status,status_updated_by:user.id,updated_at:new Date().toISOString()})
      .eq("id",id).eq("status",existing.status).select("id,status").maybeSingle();
-   if(writeError)return result(500,{error:"update_failed"},origin);
+   if(writeError)return result(500,{error:"update_and_audit_failed"},origin);
    if(!changed)return result(409,{error:"concurrent_update"},origin);
-   const {error:eventError}=await admin.from("wwsolar_quote_status_events").insert({
-     request_id:id,changed_by:user.id,old_status:existing.status,new_status:status
-   });
-   if(eventError)return result(500,{error:"audit_failed_status_may_have_changed"},origin);
    return result(200,{id,status},origin);
  }
  if(payload.action!=="submit")return result(400,{error:"bad_action"},origin);
