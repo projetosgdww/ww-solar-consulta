@@ -36,6 +36,12 @@ revoke all on public.wwsolar_client_access from anon, authenticated;
 revoke all on public.wwsolar_catalog from anon, authenticated;
 revoke all on public.wwsolar_carts from anon, authenticated;
 
+-- A função Edge valida a sessão de administrador antes de criar clientes.
+-- BYPASSRLS não dispensa permissões SQL: sem INSERT, o cadastro retorna erro 500.
+-- Conceder somente à role privilegiada do backend, nunca a usuários públicos.
+grant usage on schema public to service_role;
+grant insert on public.wwsolar_client_access to service_role;
+
 grant select on public.wwsolar_client_access to authenticated;
 grant select on public.wwsolar_catalog to authenticated;
 grant select,insert,update,delete on public.wwsolar_carts to authenticated;
