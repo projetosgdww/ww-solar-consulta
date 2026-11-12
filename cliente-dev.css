@@ -134,3 +134,6 @@ body .header{position:sticky;top:0;z-index:80}
 .client-cart-clear:hover{color:#782a1d}
 .client-cart-clear:focus-visible{outline:3px solid #cc9b23;outline-offset:3px;border-radius:6px}
 .client-cart-clear:disabled{opacity:.4;cursor:not-allowed;text-decoration:none}
+
+/* V1: reserva espaco entre a lupa e o placeholder, sem alterar outros inputs. */
+#client-main .search-wrap #client-search{padding-left:46px}
