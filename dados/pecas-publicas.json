@@ -13,8 +13,7 @@
       "preco": 130,
       "precoAprovado": true,
       "disponibilidade": "a_confirmar",
-      "descricaoIncompleta": false,
-      "codigoProduto": "97082"
+      "descricaoIncompleta": false
     },
     {
       "id": "PAV-002",
@@ -23,8 +22,7 @@
       "preco": 130,
       "precoAprovado": true,
       "disponibilidade": "a_confirmar",
-      "descricaoIncompleta": false,
-      "codigoProduto": "97081"
+      "descricaoIncompleta": false
     },
     {
       "id": "PAV-003",
@@ -33,8 +31,7 @@
       "preco": 162.5,
       "precoAprovado": true,
       "disponibilidade": "a_confirmar",
-      "descricaoIncompleta": false,
-      "codigoProduto": "97079"
+      "descricaoIncompleta": false
     },
     {
       "id": "PAV-004",
@@ -43,8 +40,7 @@
       "preco": 162.5,
       "precoAprovado": true,
       "disponibilidade": "a_confirmar",
-      "descricaoIncompleta": false,
-      "codigoProduto": "97080"
+      "descricaoIncompleta": false
     },
     {
       "id": "PAV-005",
@@ -53,8 +49,7 @@
       "preco": 325,
       "precoAprovado": true,
       "disponibilidade": "a_confirmar",
-      "descricaoIncompleta": false,
-      "codigoProduto": "392784"
+      "descricaoIncompleta": false
     },
     {
       "id": "PAV-006",
@@ -63,8 +58,7 @@
       "preco": 12.86,
       "precoAprovado": true,
       "disponibilidade": "a_confirmar",
-      "descricaoIncompleta": false,
-      "codigoProduto": "427256"
+      "descricaoIncompleta": false
     },
     {
       "id": "PAV-007",
@@ -73,8 +67,7 @@
       "preco": 13,
       "precoAprovado": true,
       "disponibilidade": "a_confirmar",
-      "descricaoIncompleta": false,
-      "codigoProduto": "440111"
+      "descricaoIncompleta": false
     },
     {
       "id": "PAV-008",
@@ -83,8 +76,7 @@
       "preco": 168.86,
       "precoAprovado": true,
       "disponibilidade": "a_confirmar",
-      "descricaoIncompleta": false,
-      "codigoProduto": "466838"
+      "descricaoIncompleta": false
     },
     {
       "id": "PAV-009",
@@ -93,8 +85,7 @@
       "preco": 90.87,
       "precoAprovado": true,
       "disponibilidade": "a_confirmar",
-      "descricaoIncompleta": false,
-      "codigoProduto": "404690"
+      "descricaoIncompleta": false
     },
     {
       "id": "PAV-010",
@@ -103,8 +94,7 @@
       "preco": 402.87,
       "precoAprovado": true,
       "disponibilidade": "a_confirmar",
-      "descricaoIncompleta": false,
-      "codigoProduto": "382030"
+      "descricaoIncompleta": false
     },
     {
       "id": "PAV-011",
@@ -113,8 +103,7 @@
       "preco": 558.87,
       "precoAprovado": true,
       "disponibilidade": "a_confirmar",
-      "descricaoIncompleta": false,
-      "codigoProduto": "392057"
+      "descricaoIncompleta": false
     },
     {
       "id": "PAV-012",
@@ -123,8 +112,7 @@
       "preco": 598.01,
       "precoAprovado": true,
       "disponibilidade": "a_confirmar",
-      "descricaoIncompleta": false,
-      "codigoProduto": "49672"
+      "descricaoIncompleta": false
     },
     {
       "id": "PAV-014",
@@ -133,8 +121,7 @@
       "preco": 701.87,
       "precoAprovado": true,
       "disponibilidade": "a_confirmar",
-      "descricaoIncompleta": false,
-      "codigoProduto": "44765"
+      "descricaoIncompleta": false
     },
     {
       "id": "PAV-015",
@@ -143,8 +130,7 @@
       "preco": 778.7,
       "precoAprovado": true,
       "disponibilidade": "a_confirmar",
-      "descricaoIncompleta": false,
-      "codigoProduto": "385175"
+      "descricaoIncompleta": false
     },
     {
       "id": "PAV-016",
@@ -153,8 +139,7 @@
       "preco": 1169.88,
       "precoAprovado": true,
       "disponibilidade": "a_confirmar",
-      "descricaoIncompleta": false,
-      "codigoProduto": "45787"
+      "descricaoIncompleta": false
     },
     {
       "id": "PAV-021",
@@ -163,8 +148,7 @@
       "preco": 41.86,
       "precoAprovado": true,
       "disponibilidade": "a_confirmar",
-      "descricaoIncompleta": false,
-      "codigoProduto": "391010"
+      "descricaoIncompleta": false
     },
     {
       "id": "PAV-022",
@@ -182,8 +166,7 @@
       "preco": 41.86,
       "precoAprovado": true,
       "disponibilidade": "a_confirmar",
-      "descricaoIncompleta": false,
-      "codigoProduto": "391007"
+      "descricaoIncompleta": false
     },
     {
       "id": "PAV-024",
@@ -192,8 +175,7 @@
       "preco": 63,
       "precoAprovado": true,
       "disponibilidade": "a_confirmar",
-      "descricaoIncompleta": false,
-      "codigoProduto": "525714"
+      "descricaoIncompleta": false
     },
     {
       "id": "PAV-025",
@@ -202,8 +184,7 @@
       "preco": 63.01,
       "precoAprovado": true,
       "disponibilidade": "a_confirmar",
-      "descricaoIncompleta": false,
-      "codigoProduto": "566317"
+      "descricaoIncompleta": false
     },
     {
       "id": "PAV-026",
@@ -212,8 +193,7 @@
       "preco": 97.86,
       "precoAprovado": true,
       "disponibilidade": "a_confirmar",
-      "descricaoIncompleta": false,
-      "codigoProduto": "417636"
+      "descricaoIncompleta": false
     },
     {
       "id": "PAV-027",
@@ -222,8 +202,7 @@
       "preco": 138.6,
       "precoAprovado": true,
       "disponibilidade": "a_confirmar",
-      "descricaoIncompleta": false,
-      "codigoProduto": "391004"
+      "descricaoIncompleta": false
     },
     {
       "id": "PAV-028",
@@ -232,8 +211,7 @@
       "preco": 166.6,
       "precoAprovado": true,
       "disponibilidade": "a_confirmar",
-      "descricaoIncompleta": false,
-      "codigoProduto": "391003"
+      "descricaoIncompleta": false
     },
     {
       "id": "PAV-029",
@@ -242,8 +220,7 @@
       "preco": 139.86,
       "precoAprovado": true,
       "disponibilidade": "a_confirmar",
-      "descricaoIncompleta": false,
-      "codigoProduto": "361047"
+      "descricaoIncompleta": false
     },
     {
       "id": "PAV-030",
@@ -252,8 +229,7 @@
       "preco": 139.86,
       "precoAprovado": true,
       "disponibilidade": "a_confirmar",
-      "descricaoIncompleta": false,
-      "codigoProduto": "391006"
+      "descricaoIncompleta": false
     },
     {
       "id": "PAV-031",
@@ -262,8 +238,7 @@
       "preco": 167.86,
       "precoAprovado": true,
       "disponibilidade": "a_confirmar",
-      "descricaoIncompleta": false,
-      "codigoProduto": "361049"
+      "descricaoIncompleta": false
     },
     {
       "id": "PAV-032",
@@ -272,8 +247,7 @@
       "preco": 167.86,
       "precoAprovado": true,
       "disponibilidade": "a_confirmar",
-      "descricaoIncompleta": false,
-      "codigoProduto": "391005"
+      "descricaoIncompleta": false
     },
     {
       "id": "PAV-033",
@@ -282,8 +256,7 @@
       "preco": 209.85,
       "precoAprovado": true,
       "disponibilidade": "a_confirmar",
-      "descricaoIncompleta": false,
-      "codigoProduto": "427255"
+      "descricaoIncompleta": false
     },
     {
       "id": "PAV-034",
@@ -292,8 +265,7 @@
       "preco": 999.88,
       "precoAprovado": true,
       "disponibilidade": "a_confirmar",
-      "descricaoIncompleta": false,
-      "codigoProduto": "655554"
+      "descricaoIncompleta": false
     },
     {
       "id": "PAV-035",
@@ -302,8 +274,7 @@
       "preco": 1249.88,
       "precoAprovado": true,
       "disponibilidade": "a_confirmar",
-      "descricaoIncompleta": false,
-      "codigoProduto": "671779"
+      "descricaoIncompleta": false
     },
     {
       "id": "PAV-036",
@@ -312,8 +283,7 @@
       "preco": 1624.88,
       "precoAprovado": true,
       "disponibilidade": "a_confirmar",
-      "descricaoIncompleta": false,
-      "codigoProduto": "677351"
+      "descricaoIncompleta": false
     },
     {
       "id": "PAV-037",
@@ -322,8 +292,7 @@
       "preco": 2249.88,
       "precoAprovado": true,
       "disponibilidade": "a_confirmar",
-      "descricaoIncompleta": false,
-      "codigoProduto": "665286"
+      "descricaoIncompleta": false
     },
     {
       "id": "PAV-038",
@@ -332,8 +301,7 @@
       "preco": 1874.89,
       "precoAprovado": true,
       "disponibilidade": "a_confirmar",
-      "descricaoIncompleta": false,
-      "codigoProduto": "665373"
+      "descricaoIncompleta": false
     },
     {
       "id": "PAV-039",
@@ -342,8 +310,7 @@
       "preco": 2499.88,
       "precoAprovado": true,
       "disponibilidade": "a_confirmar",
-      "descricaoIncompleta": false,
-      "codigoProduto": "704256"
+      "descricaoIncompleta": false
     },
     {
       "id": "PAV-040",
@@ -352,8 +319,7 @@
       "preco": 3162.18,
       "precoAprovado": true,
       "disponibilidade": "a_confirmar",
-      "descricaoIncompleta": false,
-      "codigoProduto": "657996"
+      "descricaoIncompleta": false
     },
     {
       "id": "PAV-041",
@@ -362,8 +328,7 @@
       "preco": 3575.11,
       "precoAprovado": true,
       "disponibilidade": "a_confirmar",
-      "descricaoIncompleta": false,
-      "codigoProduto": "657985"
+      "descricaoIncompleta": false
     },
     {
       "id": "PAV-042",
@@ -372,8 +337,7 @@
       "preco": 691.59,
       "precoAprovado": true,
       "disponibilidade": "a_confirmar",
-      "descricaoIncompleta": false,
-      "codigoProduto": "645512"
+      "descricaoIncompleta": false
     },
     {
       "id": "PAV-043",
@@ -382,8 +346,7 @@
       "preco": 760,
       "precoAprovado": true,
       "disponibilidade": "a_confirmar",
-      "descricaoIncompleta": false,
-      "codigoProduto": "434675"
+      "descricaoIncompleta": false
     },
     {
       "id": "PAV-044",
@@ -392,8 +355,7 @@
       "preco": 775,
       "precoAprovado": true,
       "disponibilidade": "a_confirmar",
-      "descricaoIncompleta": false,
-      "codigoProduto": "545852"
+      "descricaoIncompleta": false
     },
     {
       "id": "PAV-045",
@@ -402,8 +364,7 @@
       "preco": 775,
       "precoAprovado": true,
       "disponibilidade": "a_confirmar",
-      "descricaoIncompleta": false,
-      "codigoProduto": "574558"
+      "descricaoIncompleta": false
     },
     {
       "id": "PAV-046",
@@ -412,8 +373,7 @@
       "preco": 785,
       "precoAprovado": true,
       "disponibilidade": "a_confirmar",
-      "descricaoIncompleta": false,
-      "codigoProduto": "432443"
+      "descricaoIncompleta": false
     },
     {
       "id": "PAV-047",
@@ -422,18 +382,16 @@
       "preco": 795,
       "precoAprovado": true,
       "disponibilidade": "a_confirmar",
-      "descricaoIncompleta": false,
-      "codigoProduto": "658183"
+      "descricaoIncompleta": false
     },
     {
       "id": "PAV-048",
       "categoria": "modulos",
-      "nome": "MODULO 620W RENEPV BIFACIAL 30MM",
+      "nome": "MODULO 620W RENEPV BIFACIAL 30MM (REF. 432446)",
       "preco": 795,
       "precoAprovado": true,
       "disponibilidade": "a_confirmar",
-      "descricaoIncompleta": false,
-      "codigoProduto": "432446"
+      "descricaoIncompleta": false
     },
     {
       "id": "PAV-049",
@@ -442,8 +400,7 @@
       "preco": 800,
       "precoAprovado": true,
       "disponibilidade": "a_confirmar",
-      "descricaoIncompleta": false,
-      "codigoProduto": "665572"
+      "descricaoIncompleta": false
     },
     {
       "id": "PAV-050",
@@ -452,8 +409,7 @@
       "preco": 805,
       "precoAprovado": true,
       "disponibilidade": "a_confirmar",
-      "descricaoIncompleta": false,
-      "codigoProduto": "628706"
+      "descricaoIncompleta": false
     },
     {
       "id": "PAV-051",
@@ -462,8 +418,7 @@
       "preco": 805,
       "precoAprovado": true,
       "disponibilidade": "a_confirmar",
-      "descricaoIncompleta": false,
-      "codigoProduto": "676051"
+      "descricaoIncompleta": false
     },
     {
       "id": "PAV-052",
@@ -472,8 +427,7 @@
       "preco": 805,
       "precoAprovado": true,
       "disponibilidade": "a_confirmar",
-      "descricaoIncompleta": false,
-      "codigoProduto": "545865"
+      "descricaoIncompleta": false
     },
     {
       "id": "PAV-053",
@@ -482,8 +436,7 @@
       "preco": 845,
       "precoAprovado": true,
       "disponibilidade": "a_confirmar",
-      "descricaoIncompleta": false,
-      "codigoProduto": "657998"
+      "descricaoIncompleta": false
     },
     {
       "id": "PAV-054",
@@ -492,8 +445,7 @@
       "preco": 885,
       "precoAprovado": true,
       "disponibilidade": "a_confirmar",
-      "descricaoIncompleta": false,
-      "codigoProduto": "665575"
+      "descricaoIncompleta": false
     },
     {
       "id": "PAV-056",
@@ -502,8 +454,7 @@
       "preco": 795,
       "precoAprovado": true,
       "disponibilidade": "a_confirmar",
-      "descricaoIncompleta": false,
-      "codigoProduto": "563396"
+      "descricaoIncompleta": false
     }
   ]
 }
