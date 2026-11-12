@@ -66,5 +66,16 @@
     }
     return [...byId.values()];
   }
-  return Object.freeze({quantity,money,sumCart,recommendedKit,buildMessage,cleanLines});
+  const QUOTE_MINUTES=25;
+  function quoteRemainingMs(updatedAt,nowMs) {
+    const start=Date.parse(String(updatedAt||''));
+    const now=Number(nowMs);
+    if(!Number.isFinite(start)||!Number.isFinite(now)) return 0;
+    return Math.max(0,(QUOTE_MINUTES*60*1000)-(now-start));
+  }
+  function quoteClock(remainingMs) {
+    const seconds=Math.max(0,Math.ceil(Number(remainingMs||0)/1000));
+    return String(Math.floor(seconds/60)).padStart(2,'0')+':'+String(seconds%60).padStart(2,'0');
+  }
+  return Object.freeze({quantity,money,sumCart,recommendedKit,buildMessage,cleanLines,quoteRemainingMs,quoteClock,QUOTE_MINUTES});
 });
