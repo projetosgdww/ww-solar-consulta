@@ -41,14 +41,14 @@
       if(cartError)throw cartError;
       S.user=user;S.admin=user.app_metadata?.wwsolar_role==='admin';
       S.catalog=data||[];S.lines=C.cleanLines(cart?.lines||[]);
-      show('client-login',false);show('client-app',true);
+      show('client-entry',false);show('client-app',true);show('client-nav',true);
       show('client-admin-link',S.admin);
       $('client-identity').textContent=user.email||'Conta autorizada';
       renderAll();
     }catch(e){
       S.user=null;S.catalog=[];S.lines=[];
       await S.db.auth.signOut();
-      show('client-login',true);show('client-app',false);
+      show('client-entry',true);show('client-app',false);show('client-nav',false);
       status('Não foi possível carregar os produtos. Solicite atendimento.','client-login-status');
     }
   }
@@ -82,23 +82,51 @@
   async function logout(){
     if(S.db)await S.db.auth.signOut();
     S.user=null;S.catalog=[];S.lines=[];S.admin=false;
-    show('client-app',false);show('client-login',true);
+    show('client-app',false);show('client-entry',true);show('client-nav',false);
     $('client-password').value='';status('','client-login-status');
   }
+  const number=n=>new Intl.NumberFormat('pt-BR',{maximumFractionDigits:0}).format(Number(n)||0);
+  const decimal=n=>new Intl.NumberFormat('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}).format(Number(n)||0);
   function setTarget(v){
     const n=Number(v);if(!Number.isFinite(n))return;
     S.target=Math.max(300,Math.min(14600,Math.round(n)));
     $('client-target').value=S.target;$('client-target-slider').value=S.target;
+    $('client-target-slider').style.setProperty('--range-progress',((S.target-300)/(14600-300)*100)+'%');
     renderRecommendation();
   }
   function renderRecommendation(){
-    const a=$('client-recommendation');a.replaceChildren();
     const kit=C.recommendedKit(available(),S.target);
-    if(!kit){a.append(el('p','Nenhum kit homologado está disponível neste ambiente.'));return;}
-    a.append(el('strong',kit.title));
-    a.append(el('span',String(kit.payload?.geracaoMensalKwh||'—')+' kWh/mês estimados'));
-    a.append(el('strong',euro(kit.price)));
-    a.append(btn('Adicionar kit ao carrinho ↗',()=>add(kit.id),'button button-accent'));
+    $('client-result-button').disabled=!kit;
+    if(!kit){
+      $('result-title').textContent='Kits em preparação';
+      $('result-description').textContent='Os kits antigos foram retirados da oferta. Novas composições estão em revisão técnica.';
+      $('result-status').textContent='AGUARDANDO HOMOLOGAÇÃO';
+      $('result-generation').textContent='—';
+      $('result-power').textContent='—';
+      $('result-panels').textContent='—';
+      $('result-inverter').textContent='—';
+      $('result-price').textContent='Sob consulta';
+      return;
+    }
+    const x=kit.payload||{};
+    const target=Number(x.geracaoMensalKwh)||0;
+    $('result-status').textContent=target>=S.target?'ATENDE À REFERÊNCIA':'ABAIXO DO SOLICITADO';
+    $('result-title').textContent=kit.title;
+    $('result-description').textContent=kit.id+' · '+number(x.moduloWp)+' Wp por módulo';
+    $('result-generation').textContent=number(target);
+    $('result-power').textContent=decimal(x.potenciaKwp)+' kWp';
+    $('result-panels').textContent=number(x.placas)+' × '+number(x.moduloWp)+' Wp';
+    $('result-inverter').textContent=String(x.inversor||'A confirmar');
+    $('result-price').textContent=euro(kit.price);
+  }
+  function setKind(kind){
+    S.kind=kind;
+    for(const x of document.querySelectorAll('[data-kind]')){
+      const active=x.dataset.kind===kind;
+      x.classList.toggle('active',active);
+      x.setAttribute('aria-pressed',String(active));
+    }
+    renderProducts();
   }
   function renderProducts(){
     const q=S.query.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
@@ -107,18 +135,46 @@
         .some(v=>String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().includes(q)))
       .slice(0,150);
     const grid=$('client-product-grid');grid.replaceChildren();
-    $('client-result-count').textContent=products.length+' produtos disponíveis para consulta';
-    if(!products.length){grid.append(el('p','Nenhum produto nesta categoria.','client-muted'));return;}
+    $('client-result-count').textContent=products.length+' '+(products.length===1?'equipamento encontrado':'equipamentos encontrados')+' · preço sujeito a confirmação';
+    if(!products.length){
+      const box=el('div',undefined,'empty-state');
+      box.append(el('h3',S.kind==='kit'?'Kits em preparação':'Nenhum equipamento encontrado'));
+      box.append(el('p',S.kind==='kit'
+        ?'Estamos montando nossos próprios kits e conferindo inversor, estruturas e materiais. Enquanto isso, consulte as peças avulsas já aprovadas.'
+        :'Experimente outra potência, fabricante ou nome.'));
+      if(S.kind==='kit')box.append(btn('Ver peças avulsas ↗',()=>setKind('piece'),'button button-accent'));
+      grid.append(box);return;
+    }
     for(const p of products){
-      const card=el('article',undefined,'client-product');
-      card.append(el('span',p.kind==='kit'?'KIT FOTOVOLTAICO':'EQUIPAMENTO AVULSO','section-label'));
-      card.append(el('h3',p.title));
+      const card=el('article',undefined,'kit-card');
+      const top=el('div',undefined,'kit-top');
+      top.append(el('span',p.id,'kit-id'),el('span','Cotação a confirmar','kit-status'));
+      card.append(top);
+      const heading=el('h3',p.kind==='kit'?decimal(p.payload?.potenciaKwp)+' kWp':p.title);
+      card.append(heading);
       if(p.kind==='kit'){
         const x=p.payload||{};
-        card.append(el('p',String(x.placas||'—')+' módulos · '+String(x.potenciaKwp||'—')+' kWp · '+String(x.geracaoMensalKwh||'—')+' kWh/mês estimados','client-meta'));
-      }else card.append(el('p',p.payload?.categoria||p.id,'client-meta'));
-      card.append(el('strong',euro(p.price)));
-      card.append(btn('Adicionar +',()=>add(p.id),'button button-accent'));
+        const gen=el('p',undefined,'kit-generation');
+        gen.append(el('strong',number(x.geracaoMensalKwh)+' kWh/mês'),document.createTextNode(' estimados*'));
+        card.append(gen);
+        const facts=el('div',undefined,'kit-facts');
+        for(const [title,value] of [
+          ['Módulos',number(x.placas)+' × '+number(x.moduloWp)+' Wp'],
+          ['Inversor',String(x.inversor||'A confirmar')],
+          ['Referência',p.id]
+        ]){
+          const row=el('div');row.append(el('span',title),el('strong',value));facts.append(row);
+        }
+        card.append(facts);
+      }else{
+        const facts=el('div',undefined,'kit-facts');
+        const row=el('div');row.append(el('span','Categoria'),el('strong',String(p.payload?.categoria||'Equipamento')));
+        facts.append(row);card.append(facts);
+      }
+      const bottom=el('div',undefined,'kit-bottom');
+      const price=el('div');price.append(el('small','Valor dos equipamentos'),el('b',euro(p.price)));
+      bottom.append(price,btn('Adicionar ao carrinho +',()=>add(p.id),'details-button'));
+      card.append(bottom);
       grid.append(card);
     }
   }
@@ -163,7 +219,7 @@
       area.append(row);
     }
   }
-  function renderAll(){renderRecommendation();renderProducts();renderCart();}
+  function renderAll(){ $('client-available-count').textContent=String(available().length);renderRecommendation();renderProducts();renderCart();setTarget(S.target);}
   async function checkout(){
     if(!S.user||!S.lines.length)return;
     $('client-checkout').disabled=true;status('Atualizando valores...');
@@ -186,15 +242,13 @@
   $('client-target-slider').addEventListener('input',ev=>setTarget(ev.target.value));
   $('client-search').addEventListener('input',ev=>{S.query=ev.target.value;renderProducts();});
   for(const tab of document.querySelectorAll('[data-kind]')){
-    tab.addEventListener('click',()=>{
-      S.kind=tab.dataset.kind;
-      for(const x of document.querySelectorAll('[data-kind]')){
-        const active=x.dataset.kind===S.kind;
-        x.classList.toggle('active',active);x.setAttribute('aria-pressed',String(active));
-      }
-      renderProducts();
-    });
+    tab.addEventListener('click',()=>setKind(tab.dataset.kind));
   }
+  $('client-pieces-link').addEventListener('click',()=>setKind('piece'));
+  $('client-result-button').addEventListener('click',()=>{
+    const kit=C.recommendedKit(available(),S.target);
+    if(kit)add(kit.id);
+  });
   $('client-checkout').addEventListener('click',checkout);
   init();
 })();
