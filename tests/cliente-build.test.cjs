@@ -12,7 +12,7 @@ test('vitrine preserva estrutura original, mas exige login',()=>{
 });
 test('build público só contém arquivos permitidos',()=>{
   const files=fs.readdirSync(out).sort();
-  const expected=['404.html','_headers','admin-dev.html','admin-dev.js','cliente-core.js','cliente-dev-config.js','cliente-dev.css','cliente-dev.html','cliente-dev.js','favicon.svg','index.html','styles.css','kit-builder-core.js','kits-admin-dev.html','kits-admin-dev.js','kits-admin-dev.css'].sort();
+  const expected=['404.html','_headers','admin-dev.html','admin-dev.js','cliente-core.js','cliente-dev-config.js','cliente-dev.css','cliente-dev.html','cliente-dev.js','favicon.svg','index.html','styles.css','kit-builder-core.js','kits-admin-dev.html','kits-admin-dev.js','kits-admin-dev.css','admin-dev.css'].sort();
   assert.deepEqual(files,expected);
   for(const p of ['dados/catalogo-publico.json','dados/pecas-publicas.json','app.js','pecas.html','supabase/wwsolar-dev-schema.sql'])
     assert(!fs.existsSync(path.join(out,p)),p+' não deve ir para Pages DEV');
