@@ -45,15 +45,34 @@ Deno.serve(async(req)=>{
 
   let email="";
   let action="create";
+  let enabled:unknown=undefined;
   try{
     const payload=await req.json();
     email=String(payload?.email||"").trim().toLowerCase();
     action=String(payload?.action||"create");
+    enabled=payload?.enabled;
   }catch{ return reply(400,{error:"invalid_payload"},origin); }
   if(email.length>254||!emailRE.test(email))
     return reply(400,{error:"invalid_email"},origin);
-  if(action!=="create"&&action!=="rotate")
+  if(action!=="create"&&action!=="rotate"&&action!=="set_access")
     return reply(400,{error:"invalid_action"},origin);
+
+  if(action==="set_access"){
+    if(typeof enabled!=="boolean")return reply(400,{error:"invalid_status"},origin);
+    const {data:access,error:lookupError}=await admin.from("wwsolar_client_access")
+      .select("user_id,email,active").eq("email",email).maybeSingle();
+    if(lookupError)return reply(500,{error:"access_lookup_failed"},origin);
+    if(!access)return reply(404,{error:"client_not_found"},origin);
+    const {data:target,error:targetError}=await admin.auth.admin.getUserById(access.user_id);
+    if(targetError||!target?.user
+      ||target.user.email?.trim().toLowerCase()!==email
+      ||target.user.app_metadata?.wwsolar_role!=="client")
+      return reply(409,{error:"client_identity_not_valid"},origin);
+    const {error:upErr}=await admin.from("wwsolar_client_access")
+      .update({active:enabled}).eq("user_id",access.user_id);
+    if(upErr)return reply(500,{error:"access_update_failed"},origin);
+    return reply(200,{email,active:enabled,action:"set_access"},origin);
+  }
 
   // 72 bits reais de aleatoriedade: prefixo de marca + 12 caracteres aleatórios.
   // Exemplo de FORMATO (não é senha válida): GDWW-Ab12Cd-Ef34Gh.
