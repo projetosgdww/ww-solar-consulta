@@ -1,0 +1,13 @@
+# WW Solar — nunca versionar backups, dados privados ou segredos
+*.sql.gz
+*.dump
+*.backup
+*.bak
+*.env
+.env*
+!.env.example
+backups/
+Backups/
+backup-privado/
+*.pem
+*.key
