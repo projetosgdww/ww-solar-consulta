@@ -94,5 +94,5 @@ Deno.serve(async(req)=>{
     await admin.auth.admin.deleteUser(created.user.id);
     return reply(500,{error:"cannot_activate_customer"},origin);
   }
-  return reply(201,{email,password},origin);
+  return reply(201,{email,password,action:"create"},origin);
 });
