@@ -47,3 +47,23 @@
 [hidden]{display:none!important}
 @media(max-width:920px){.client-product-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.client-cart-line{grid-template-columns:1fr auto;gap:8px}.client-cart-line .client-qty{grid-column:1}.client-cart-line .client-remove{grid-column:2;justify-self:end}}
 @media(max-width:620px){.client-main{padding:34px 0 56px}.client-login{padding:22px}.client-welcome{align-items:start;flex-direction:column}.client-product-grid{grid-template-columns:1fr}.client-cart-bottom{align-items:stretch;flex-direction:column}.client-cart-bottom .button{width:100%}.client-filter-row{display:block}#client-search{margin-top:12px;max-width:none}.client-recommendation button{width:100%;margin-left:0}.client-tools{width:100%}}
+
+/* Vitrine autenticada reutiliza a geometria e os estilos originais do WW Solar. */
+#client-main.client-main{padding:0;min-height:calc(100vh - 150px)}
+#client-main .client-entry{padding:64px 0 82px}
+#client-app .client-welcome{padding-top:24px;padding-bottom:20px;margin:0 auto}
+#client-app .client-greeting{font-size:clamp(24px,3vw,34px);line-height:1.1;margin:0 0 8px}
+#client-app .catalogue-section{padding:72px 0 84px}
+#client-app .client-product-grid{padding-top:0}
+#client-app .client-product-grid .kit-card{min-height:255px}
+#client-app .client-product-grid .kit-card h3{font-size:clamp(18px,2.1vw,26px);overflow-wrap:anywhere}
+#client-app .client-product-grid .empty-state{grid-column:1/-1;width:100%;padding:32px}
+#client-app .client-product-grid .empty-state .button{margin-top:18px}
+#client-app .client-cart{margin:0;background:#fff;border:1px solid var(--line);border-radius:16px;padding:clamp(22px,3vw,34px);box-shadow:0 6px 20px rgba(17,37,38,.03)}
+#client-app .client-cart-bottom>strong{font-size:27px;color:var(--deep)}
+#client-app .client-cart-line .client-remove{color:#9b4529}
+#client-app .client-filter-tabs{display:flex;gap:10px;flex-wrap:wrap}
+#client-app .client-filter-tabs button{border:1px solid #d9e5e1;background:#fff;color:var(--deep);border-radius:99px;padding:11px 17px;font-weight:800;font-size:12px}
+#client-app .client-filter-tabs button.active{background:var(--deep);color:#fff;border-color:var(--deep)}
+#client-app .client-cart button:focus-visible,#client-app .client-filter-tabs button:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+@media(max-width:840px){#client-app .client-welcome{padding:20px 0;flex-direction:column;align-items:flex-start}#client-app .catalogue-section{padding:46px 0 60px}}
