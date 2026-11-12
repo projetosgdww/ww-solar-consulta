@@ -339,6 +339,7 @@
     const count=S.lines.reduce((n,x)=>n+x.qty,0);
     $('client-cart-count').textContent=String(count);
     $('client-top-count').textContent=String(count);
+    $('client-drawer-clear').disabled=S.lines.length===0;
     const sumText=S.cartInvalid?'A revisar':euro(cents/100);
     for(const id of ['client-cart-total','client-top-total','client-preview-total','client-drawer-total'])
       $(id).textContent=sumText;
@@ -480,6 +481,11 @@
   $('client-drawer-checkout').addEventListener('click',checkout);
   $('client-cart-refresh').addEventListener('click',refreshQuote);
   $('client-drawer-refresh').addEventListener('click',refreshQuote);
+  $('client-drawer-clear').addEventListener('click',()=>{
+    if(!S.user||S.lines.length===0)return;
+    if(!window.confirm('Limpar todos os itens do carrinho? Os pedidos já registrados permanecerão no histórico.'))return;
+    void save([],'Carrinho limpo.');
+  });
   $('client-cart-trigger').addEventListener('click',openDrawer);
   $('client-cart-close').addEventListener('click',closeDrawer);
   $('client-cart-shade').addEventListener('click',closeDrawer);
