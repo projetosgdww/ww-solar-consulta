@@ -19,6 +19,7 @@ assert(edge.includes('createUser(')&&edge.includes('email_confirm:true'));
 assert(edge.includes('crypto.getRandomValues'));
 assert(!edge.includes('console.log(password)'));
 assert(login.includes('type="password"')&&!login.includes('Esqueci minha senha'));
+assert(!/id="client-password"[^>]*minlength=/.test(login),'login não deve impor tamanho mínimo diferente da senha existente');
 assert(config.includes('supabaseUrl: "https://drutoqwkjzdsirqthdux.supabase.co"'));
 assert(config.includes('publishableKey: "sb_publishable_'));
 assert(!/sb_secret_|service_role|SERVICE_ROLE/.test(config));
