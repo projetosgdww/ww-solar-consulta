@@ -17,6 +17,14 @@ Revisado em 12/11/2026. **Estratégia custo zero aprovada: um único Supabase ex
 - Ausência de cópia de segurança ou restauração testada impede promover o único banco para atendimento de produção hoje.
 - Compensação do plano Free: senhas geradas aleatoriamente pelo administrador; ainda necessário revisar rate limiting, configurações de Auth e política de recuperação.
 
+## Procedimento de backup gratuito — preparado, ainda NÃO executado
+- A rotina Windows `backup-wwsolar-gratis.ps1` é disponibilizada como artefato da homologação. Usa Supabase CLI v3 `supabase db dump --remote=drutoqwkjzdsirqthdux` e exporta *schema* e dados de `public` separadamente.
+- Destino local: `%LOCALAPPDATA%\\WW-Solar\\Backups\\AAAAmmdd-HHMMSS`, **fora do GitHub**. Gera manifesto de tamanho e SHA-256 e falha se SQLs estiverem vazios.
+- Para executar: instalar Supabase CLI oficial e Docker quando requerido, autenticar-se na conta `Catálogo Online`, executar PowerShell `powershell -NoProfile -ExecutionPolicy Bypass -File .\\backup-wwsolar-gratis.ps1`, conferir hashes e guardar cópia criptografada offline.
+- **Limite técnico:** `supabase db dump` exclui esquemas gerenciados (especialmente `auth`), Storage, segredos e código das Edge Functions. Esses componentes exigem plano de recuperação complementar e teste de restauração isolado. Nunca declarar backup completo só porque os arquivos SQL foram gerados.
+- **Estado:** nenhum dump foi gerado nesta sessão (sem conexão CLI de banco nem execução no computador do operador); nenhuma restauração foi testada. Não promover a PROD até validar os arquivos.
+- A branch release contém `.gitignore` para reduzir commits acidentais de arquivos privados; ele não substitui a disciplina de nunca colocá-los na pasta Git.
+
 ## Escopo comercial
 - Somente 50 peças aprovadas. Nunca publicar automaticamente os 58 kits legados nem os 12 rascunhos sem aprovação de engenharia.
 - Administração Clientes/Pedidos, senha emitida pelo admin, sem convite/recuperação self-service.
