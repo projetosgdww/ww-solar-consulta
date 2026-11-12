@@ -25,6 +25,14 @@ Revisado em 12/11/2026. **Estratégia custo zero aprovada: um único Supabase ex
 - **Estado:** nenhum dump foi gerado nesta sessão (sem conexão CLI de banco nem execução no computador do operador); nenhuma restauração foi testada. Não promover a PROD até validar os arquivos.
 - A branch release contém `.gitignore` para reduzir commits acidentais de arquivos privados; ele não substitui a disciplina de nunca colocá-los na pasta Git.
 
+## Backup manual executado pelo operador em 12/11/2026
+- Pasta: `C:\Users\Rina Brasil\WW-Solar-Backup\Backup-2026-11-12_17-26` (apenas no Windows do operador; nenhum SQL foi enviado ao GitHub).
+- `estrutura.sql`: 18,11 KB, SHA-256 `373977DA6B621FCFE358EE5F8519168D08D6F75AF2663E2093BE6B2674BF9008`.
+- `dados.sql`: 26,64 KB, SHA-256 `5377A50C5DDEA335DA6FDCC093135EA56A213BC982F577D83A6E1FE092C73EC6`.
+- Saída CLI Supabase 3.1.0: ambos os dumps concluídos para `drutoqwkjzdsirqthdux`; Docker Engine 29.9.3 ativo.
+- **Validação parcial:** existência, tamanho não zero e hashes confirmados pelo operador. Não foi realizada comparação de integridade de tabelas, restore, Auth, Storage nem recuperação integral.
+- Próximas etapas: inventário local sem imprimir registros, segunda cópia criptografada, estratégia Auth e ensaio de restauração isolada. Não apagar dados de homologação.
+
 ## Escopo comercial
 - Somente 50 peças aprovadas. Nunca publicar automaticamente os 58 kits legados nem os 12 rascunhos sem aprovação de engenharia.
 - Administração Clientes/Pedidos, senha emitida pelo admin, sem convite/recuperação self-service.
