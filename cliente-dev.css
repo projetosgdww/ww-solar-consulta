@@ -146,3 +146,17 @@ body .header{position:sticky;top:0;z-index:80}
 .client-custom-kit-cta a{display:inline-flex;align-items:center;justify-content:center;min-height:44px;text-align:center;text-decoration:none;font-weight:750}
 .client-custom-kit-cta a:focus-visible{outline:3px solid #e5b433;outline-offset:3px}
 @media(max-width:700px){.client-custom-kit-cta{padding:16px}.client-custom-kit-cta a{width:100%}}
+
+/* WW Solar — projetos elétricos opcionais (preços sem TRT). */
+.client-projects-card{max-width:950px;margin:20px auto 30px;padding:clamp(22px,3vw,34px);background:#fff;border:1px solid #dbe8e2;border-radius:18px;box-shadow:0 12px 38px rgba(15,42,35,.04)}
+.client-projects-head{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;padding-bottom:16px;border-bottom:1px solid #e3ece7}
+.client-projects-head strong{display:block;font-size:19px;color:#102b27}
+.client-projects-head small{display:block;margin-top:5px;font-size:12px;color:#58746c}
+.client-projects-head>span{padding:7px 12px;background:#fff2ce;color:#7b5710;border-radius:30px;font-size:11px;font-weight:800}
+.client-projects-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 28px;margin:15px 0}
+.client-projects-grid>div{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 0;border-bottom:1px solid #e9efec;font-size:13px;color:#536c62}
+.client-projects-grid strong{font-size:16px;white-space:nowrap;color:#16352e}
+.client-projects-important{padding:13px 16px;background:#fff8e7;border:1px solid #fae7b8;border-radius:11px;font-size:13px;color:#634a20;line-height:1.6}
+.result-footer{flex-wrap:wrap}
+.result-footer #client-result-project-button{white-space:normal}
+@media(max-width:700px){.client-projects-grid{grid-template-columns:1fr}.client-projects-grid>div{padding:11px 0}.result-footer #client-result-project-button{width:100%}}
