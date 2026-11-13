@@ -332,6 +332,8 @@
     const row=next.find(x=>x.id===id);
     if(row){if(row.qty>=99){status('Limite por produto: 99 unidades.');return;}row.qty++;}
     else{if(next.length>=25){status('Máximo de 25 tipos de produto.');return;}next.push({id,qty:1});}
+    const linked=next.find(x=>x.id==='PRJ-'+id);
+    if(linked)linked.qty=next.find(x=>x.id===id).qty;
     save(next,'Produto adicionado ao carrinho!');
   }
   // Cada kit tem uma referência própria de projeto; isso evita misturar
