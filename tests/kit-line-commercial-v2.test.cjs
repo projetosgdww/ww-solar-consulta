@@ -32,10 +32,11 @@ test('128 por kWp e inversor de menor potência >= CC vezes 0.77',()=>{
  assert.equal(p.generationKwhMonth,480);
  assert.equal(p.inverterReferenceKw,2.8875);
  const q=K.compose(p.code,products,{dcInputsUsed:1});
- assert.equal(q.inverterCandidate.acKw,7.3);
+ assert.equal(q.inverterCandidate.acKw,3);
  assert.equal(q.candidateOptions.find(x=>x.sku==='PAV-036').electrical.status,'incompativel_preliminar');
  assert.equal(q.candidateOptions.find(x=>x.sku==='PAV-035').electrical.status,'sem_ficha_modelo');
- assert.equal(q.inverterCandidate.electrical.status,'pendente_engenharia');
+ assert.equal(q.inverterCandidate.electrical.status,'incompativel_preliminar');
+ assert.equal(q.technicallyBlocked,true);
  assert.equal(q.engineeringApproved,false);
  assert.equal(q.published,false);
 });
@@ -56,8 +57,8 @@ test('perfis separados da fixação e rolos por cor; acima de 4 módulos usa 6mm
 });
 test('preço é soma de preços AVULSOS vezes 1,15 e não custo reverso',()=>{
  const p=K.compose('WW-D625-06',products,{dcInputsUsed:1});
- assert.equal(p.subtotal,7670.61);
- assert.equal(p.previewPrice,8821.20);
+ assert.equal(p.subtotal,7420.60);
+ assert.equal(p.previewPrice,8533.69);
  assert.equal(p.pending.length,0);
 });
 test('estimativa automática de conectores sem homologação elétrica',()=>{
@@ -91,10 +92,10 @@ test('DMEGC 710 W no Deye 7,3k fica pendente por variante e ganho bifacial',()=>
 
 test('distribui strings por MPPT sob limites STC e mantém temperatura pendente',()=>{
  const p=K.compose('WW-D625-12',products);
- assert.equal(p.preliminaryStrings.inputsUsed,2);
- assert.deepEqual(p.preliminaryStrings.strings.map(x=>x.modules),[6,6]);
- assert.equal(p.preliminaryStrings.strings[0].vmpStcV,246.3);
- assert.equal(p.preliminaryStrings.strings[0].vocStcV,295.74);
+ assert.equal(p.inverterCandidate.acKw,6);
+ assert.equal(p.preliminaryStrings,null);
+ assert.equal(p.dcInputsUsed,2);
+ assert.equal(p.dcInputsSource,'estimativa_comercial_nao_homologada');
  assert.equal(p.dcInputsEstimated,true);
  assert.equal(p.engineeringApproved,false);
 });
@@ -119,4 +120,19 @@ test('SAJ 15 kW entra como peça avulsa sem entrar nas propostas de kits',()=>{
  const catalog=[...products,novo];
  assert(catalog.some(x=>x.id==='PAV-057'));
  assert(!K.options(catalog,12.5).some(x=>x.id==='PAV-057'));
+});
+
+test('menor inversor comercial da base para 8 modulos, 4.8 kWp, e ficha fica pendente',()=>{
+ const p=K.compose('WW-Z600-08',products);
+ assert.equal(p.inverterReferenceKw,3.696);
+ assert.equal(p.inverterCandidate.acKw,6);
+ assert.equal(p.inverterCandidate.sku,'PAV-035');
+ assert.equal(p.candidateSelectionStatus,'ficha_modelo_pendente');
+ assert.equal(p.engineeringApproved,false);
+ assert(p.previewPrice>0);
+});
+test('quando precisa mais de 7.3 kW fica sem inversor e sem preço',()=>{
+ const p=K.compose('WW-D625-16',products);
+ assert.equal(p.inverterCandidate,null);
+ assert.equal(p.previewPrice,null);
 });
