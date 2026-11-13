@@ -103,8 +103,7 @@
     const kit=C.recommendedKit(available(),S.target);
     const hasKits=available().some(p=>p.kind==='kit');
     $('client-result-button').disabled=!kit;
-    const linkedProject=kit?projectForKit(kit):null;
-    $('client-result-project-button').disabled=!kit||!linkedProject;
+
     const custom=$('client-custom-kit-cta');
     custom.hidden=Boolean(kit);
     if(!kit){
@@ -133,7 +132,7 @@
     $('result-panels').textContent=number(x.placas)+' × '+number(x.moduloWp)+' Wp';
     $('result-inverter').textContent=String(x.inversor||'A confirmar');
     $('result-price').textContent=euro(kit.price);
-    if(linkedProject&&!$('client-result-project-button').disabled) $('client-result-project-button').textContent='Kit + projeto ('+euro(linkedProject.price)+') ↗';
+
   }
   function setKind(kind){
     S.kind=kind;
@@ -224,13 +223,6 @@
       const bottom=el('div',undefined,'kit-bottom');
       const price=el('div');price.append(el('small','Valor dos equipamentos'),el('b',euro(p.price)));
       bottom.append(price,btn(p.kind==='kit'?'Solicitar cotação +':'Adicionar ao carrinho +',()=>add(p.id),'details-button'));
-      if(p.kind==='kit'){
-        const project=projectForKit(p);
-        if(project){
-          bottom.append(btn('Kit + projeto ('+euro(project.price)+') ↗',()=>addWithProject(p.id),'button button-outline'));
-          card.append(el('small','Projeto opcional. TRT não inclusa; pagamento pelo contratante.','client-muted'));
-        }
-      }
       card.append(bottom);
       if(p.kind==='kit')card.append(el('small','Estimativa de geração. Equipamentos, compatibilidade e instalação sujeitos à validação técnica antes da contratação.','client-muted'));
       grid.append(card);
@@ -259,7 +251,7 @@
     // Sincroniza o botão em todo tick, inclusive após trocas de sessão/cache.
     $('client-drawer-clear').disabled=!S.user||S.lines.length===0;
     $('client-cart-refresh').textContent=expired()?'Renovar cotação':'Atualizar preços';
-    $('client-drawer-refresh').textContent=expired()?'Renovar cotação':'Atualizar valores';
+    $('client-drawer-refresh').textContent=expired()?'↻ Renovar cotação':'↻ Atualizar valores';
     for(const id of ['client-top-clock','client-cart-timer','client-drawer-timer'])
       $(id).classList.toggle('client-clock-expired',expired());
     if(expired()&&!S.expiryNotified){
@@ -399,7 +391,7 @@
         checkbox.addEventListener('change',()=>setKitProject(x.id,checkbox.checked));
         const caption=el('span');
         caption.append(el('strong','Incluir projeto elétrico · '+euro(project.price)),
-          el('small','Opcional · TRT não inclusa; paga pelo contratante'));
+          el('small','Não incluído no kit · TRT paga pelo contratante'));
         option.append(checkbox,caption);label.append(option);
       }
     }
@@ -573,10 +565,6 @@
   $('client-result-button').addEventListener('click',()=>{
     const kit=C.recommendedKit(available(),S.target);
     if(kit)add(kit.id);
-  });
-  $('client-result-project-button').addEventListener('click',()=>{
-    const kit=C.recommendedKit(available(),S.target);
-    if(kit)addWithProject(kit.id);
   });
   $('client-checkout').addEventListener('click',checkout);
   $('client-drawer-checkout').addEventListener('click',checkout);
