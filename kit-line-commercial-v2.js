@@ -112,15 +112,29 @@
     const map=new Map(products.filter(p=>p&&p.kind==='piece'&&p.active===true&&p.approved===true)
       .map(p=>[p.id,p]));
     const candidates=screenedOptions(products,preset);
-    const validCandidates=candidates.filter(p=>p.electrical.status==='pendente_engenharia');
-    const chosen=config.inverterSku?candidates.find(p=>p.sku===config.inverterSku):validCandidates[0];
-    const candidateSelectionStatus=chosen?'candidato_pendente':(candidates.length?'ficha_modelo_pendente':'sem_inversor_na_base');
+    // Escolha COMERCIAL: menor potência nominal >= CC × 0,77, independentemente da
+    // ficha elétrica. Bloqueios técnicos são sinalizados à parte, jamais ocultados
+    // escolhendo um inversor maior automaticamente.
+    const chosen=config.inverterSku?candidates.find(p=>p.sku===config.inverterSku):candidates[0];
+    const candidateSelectionStatus=!chosen?'sem_inversor_na_base':
+      chosen.electrical.status==='incompativel_preliminar'?'incompativel_preliminar':
+      chosen.electrical.status==='sem_ficha_modelo'?'ficha_modelo_pendente':
+      'candidato_pendente';
     if(config.inverterSku&&!chosen)throw Error('Inversor fora da triagem mínima de potência');
-    if(chosen?.electrical.status==='incompativel_preliminar')throw Error('Inversor incompatível nos parâmetros elétricos preliminares');
+    // Não ocultar uma combinação comercial incompatível; ela aparece como
+    // rascunho técnico BLOQUEADO e jamais é publicada.
+    if(config.inverterSku&&chosen?.electrical.status==='incompativel_preliminar')
+      throw Error('Inversor incompatível nos parâmetros elétricos preliminares');
     const gauge=preset.panels===4?4:6;
     const eachColorMeters=preset.panels*2.5;
     const rollsPerColor=Math.max(1,Math.ceil(eachColorMeters/25));
-    const automaticInputs=chosen?.electrical.plannedStrings?.inputsUsed??null;
+    // Para modelos sem ficha exata, a quantidade de MPPTs do próprio anúncio
+    // informa apenas um LIMITE de orçamento, não a distribuição aprovada.
+    const matchMppt=chosen?.name?.match(/(\d+)\s*MPPT/i);
+    const advertisedMppts=matchMppt?Number(matchMppt[1]):null;
+    const commercialInputsEstimate=advertisedMppts?
+      Math.min(advertisedMppts,Math.ceil(preset.panels/10)):null;
+    const automaticInputs=chosen?.electrical.plannedStrings?.inputsUsed??commercialInputsEstimate;
     const inputs=config.dcInputsUsed===undefined?automaticInputs:Number(config.dcInputsUsed);
     if(inputs!==null&&(!Number.isInteger(inputs)||inputs<1||inputs>24))
       throw Error('Quantidade de entradas CC inválida');
@@ -149,13 +163,21 @@
       inverterCandidate:chosen?{sku:chosen.sku,name:chosen.name,acKw:chosen.acKw,electrical:chosen.electrical}:null,
       candidateOptions:candidates,
       dcInputsUsed:inputs,dcInputsEstimated:config.dcInputsUsed===undefined&&inputs!==null,
+      dcInputsSource:config.dcInputsUsed!==undefined?'informado_manualmente':
+        chosen?.electrical.plannedStrings?.inputsUsed?'triagem_stc':
+        commercialInputsEstimate?'estimativa_comercial_nao_homologada':'indefinido',
       preliminaryStrings:chosen?.electrical.plannedStrings||null,
       candidateSelectionStatus,rows,pending,
       subtotal:pending.length?null:subtotalCents/100,
       previewPrice:pending.length?null:Math.round(subtotalCents*markup)/100,
       commercialMarkupPercent:15,
       engineeringApproved:false,published:false,
+      technicallyBlocked:chosen?.electrical.status==='incompativel_preliminar',
       engineeringPending:[
+        ...(chosen?.electrical.status==='incompativel_preliminar'?
+          ['BLOQUEIO: inversor sugerido comercialmente falhou na triagem elétrica; não liberar como kit']:[]),
+        ...(chosen?.electrical.status==='sem_ficha_modelo'?
+          ['FALTA FICHA: confirmar parâmetros exatos do inversor antes de homologar']:[]),
         'Confirmar limites CC/MPPT, Isc e Imp por entrada, Voc corrigida por temperatura e topologia das strings',
         'Validar o percurso real, queda de tensão e bitola (4 ou 6 mm² são premissas comerciais)',
         'Confirmar entradas CC efetivamente usadas e conectores fornecidos pelo inversor; o cálculo automático é SOMENTE estimativa de orçamento',
