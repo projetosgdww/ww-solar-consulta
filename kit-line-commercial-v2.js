@@ -6,9 +6,9 @@
 })(typeof globalThis==='undefined'?this:globalThis,function(){
   'use strict';
   const FAMILY=Object.freeze([
-    {prefix:'WW-Z600',moduleSku:'PAV-044',moduleWp:600,min:6,max:26,brand:'ZNSHINE'},
-    {prefix:'WW-D625',moduleSku:'PAV-049',moduleWp:625,min:6,max:26,brand:'DMEGC'},
-    {prefix:'WW-D710',moduleSku:'PAV-054',moduleWp:710,min:4,max:22,brand:'DMEGC'}
+    {prefix:'WW-Z600',moduleSku:'PAV-044',moduleWp:600,min:6,max:26,brand:'ZNSHINE',imp:15.55,isc:16.43,vmp:38.60,voc:45.80,bifacial:false},
+    {prefix:'WW-D625',moduleSku:'PAV-049',moduleWp:625,min:6,max:26,brand:'DMEGC',imp:15.25,isc:16.17,vmp:41.05,voc:49.29,bifacial:true},
+    {prefix:'WW-D710',moduleSku:'PAV-054',moduleWp:710,min:4,max:22,brand:'DMEGC',imp:17.45,isc:18.52,vmp:40.76,voc:48.82,bifacial:true}
   ]);
   const generationFactor=128, inverterRatio=.77, markup=1.15;
   const roundCents=n=>Math.round((Number(n)+Number.EPSILON)*100);
@@ -19,7 +19,7 @@
       if(kwp>=2.75&&kwp<=16.25)rows.push(Object.freeze({
         code:f.prefix+'-'+String(count).padStart(2,'0'),panels:count,
         moduleSku:f.moduleSku,moduleWp:f.moduleWp,brand:f.brand,
-        kwp,generationKwhMonth:Math.round(kwp*generationFactor*100)/100,
+        kwp,imp:f.imp,isc:f.isc,vmp:f.vmp,voc:f.voc,bifacial:f.bifacial,generationKwhMonth:Math.round(kwp*generationFactor*100)/100,
         inverterReferenceKw:Math.round(kwp*inverterRatio*10000)/10000
       }));
     }
@@ -40,15 +40,49 @@
       .filter(p=>p.acKw!==null&&p.acKw>=requiredKw)
       .sort((a,b)=>a.acKw-b.acKw||Number(a.price)-Number(b.price)||a.id.localeCompare(b.id));
   }
+  // Dados obtidos das fichas encaminhadas em 13/11/2026. A descrição comercial
+  // não demonstra equivalência exata de variante/modelo; por isso a situação
+  // nunca se torna "aprovado" automaticamente.
+  const inverterElectricalEvidence=Object.freeze({
+    'PAV-036':Object.freeze({datasheet:'SAJ R5-3K-S1-15 (modelo comercial precisa conferência)',maxOperatingCurrentA:15,maxShortCircuitA:null,maxDcWp:5310,mpptMinV:50,mpptMaxV:450,maxDcVoltageV:500,modelExact:false}),
+    'PAV-038':Object.freeze({datasheet:'Deye SUN-7.3K-G05P1-EU-CM2 (confirmar sufixo do produto)',maxOperatingCurrentA:18,maxShortCircuitA:27,maxDcWp:10950,mpptMinV:70,mpptMaxV:500,maxDcVoltageV:550,modelExact:false}),
+    'PAV-040':Object.freeze({datasheet:'SAJ R5-7.3K-S2-15 (confirmar variante do produto)',maxOperatingCurrentA:15,maxShortCircuitA:18,maxDcWp:15000,mpptMinV:90,mpptMaxV:550,maxDcVoltageV:600,modelExact:false})
+  });
+  function electricalScreen(preset,product){
+    if(!product)return {status:'sem_inversor',reasons:['Não existe inversor com potência nominal suficiente na base']};
+    const evidence=inverterElectricalEvidence[product.id];
+    if(!evidence)return {status:'sem_ficha_modelo',reasons:['Ficha elétrica do modelo/SKU não foi associada ao catálogo'],datasheet:null};
+    const reasons=[];
+    if(preset.imp>evidence.maxOperatingCurrentA)
+      reasons.push('Imp do módulo '+preset.imp+' A excede corrente operacional de entrada '+evidence.maxOperatingCurrentA+' A');
+    if(evidence.maxShortCircuitA!==null&&preset.isc>evidence.maxShortCircuitA)
+      reasons.push('Isc do módulo '+preset.isc+' A excede limite de curto-circuito '+evidence.maxShortCircuitA+' A');
+    if(preset.kwp*1000>evidence.maxDcWp)
+      reasons.push('Potência CC '+preset.kwp+' kWp excede limite nominal da ficha de '+evidence.maxDcWp+' Wp');
+    // Valores de Voc e Vmp de UMA string, ainda não configurada, não são suficientes
+    // para validar inversores. Fica pendente stringing e Voc em baixa temperatura.
+    if(reasons.length)return {status:'incompativel_preliminar',reasons,datasheet:evidence.datasheet};
+    const pending=['Confirmar equivalência exata entre o SKU comercial e o modelo da ficha','Configurar strings por MPPT, conferir Vmp, Voc corrigida para temperatura mínima e compatibilidade dos conectores'];
+    if(preset.bifacial)pending.push('Verificar ganho bifacial e limites de corrente da entrada nas condições reais');
+    return {status:'pendente_engenharia',reasons:pending,datasheet:evidence.datasheet};
+  }
+  function screenedOptions(products,preset){
+    return options(products,preset.inverterReferenceKw).map(p=>({
+      sku:p.id,name:p.title,acKw:p.acKw,price:Number(p.price),
+      electrical:electricalScreen(preset,p)
+    }));
+  }
   function compose(code,products,config={}){
     const preset=allPresets.find(x=>x.code===code);
     if(!preset)throw Error('Configuração fora da linha de 32 kits');
     if(!Array.isArray(products))throw Error('Catálogo inválido');
     const map=new Map(products.filter(p=>p&&p.kind==='piece'&&p.active===true&&p.approved===true)
       .map(p=>[p.id,p]));
-    const candidates=options(products,preset.inverterReferenceKw);
-    const chosen=config.inverterSku?candidates.find(p=>p.id===config.inverterSku):candidates[0];
+    const candidates=screenedOptions(products,preset);
+    const validCandidates=candidates.filter(p=>p.electrical.status==='pendente_engenharia');
+    const chosen=config.inverterSku?candidates.find(p=>p.sku===config.inverterSku):validCandidates[0];
     if(config.inverterSku&&!chosen)throw Error('Inversor fora da triagem mínima de potência');
+    if(chosen?.electrical.status==='incompativel_preliminar')throw Error('Inversor incompatível nos parâmetros elétricos preliminares');
     const gauge=preset.panels===4?4:6;
     const eachColorMeters=preset.panels*2.5;
     const rollsPerColor=Math.max(1,Math.ceil(eachColorMeters/25));
@@ -57,7 +91,7 @@
       throw Error('Quantidade de entradas CC inválida');
     const items=[
       ['Módulos',preset.moduleSku,preset.panels],
-      ['Inversor candidato (potência apenas)',chosen?.id||null,1],
+      ['Inversor candidato (triagem elétrica preliminar)',chosen?.sku||null,1],
       ['Fixação cerâmica para 4 módulos','PAV-029',Math.ceil(preset.panels/4)],
       ['Perfis de alumínio de 2,36 m','PAV-024',preset.panels],
       ['Cabo solar vermelho '+gauge+' mm² — rolo de 25 m',gauge===4?'PAV-001':'PAV-004',rollsPerColor],
@@ -77,8 +111,8 @@
       return {label,sku,quantity,unitPrice:roundCents(price)/100,subtotal:cents/100};
     });
     return {...preset,gauge,metersPerColor:eachColorMeters,rollsPerColor,
-      inverterCandidate:chosen?{sku:chosen.id,name:chosen.title,acKw:chosen.acKw}:null,
-      candidateOptions:candidates.map(x=>({sku:x.id,name:x.title,acKw:x.acKw})),
+      inverterCandidate:chosen?{sku:chosen.sku,name:chosen.name,acKw:chosen.acKw,electrical:chosen.electrical}:null,
+      candidateOptions:candidates,
       dcInputsUsed:inputs,rows,pending,
       subtotal:pending.length?null:subtotalCents/100,
       previewPrice:pending.length?null:Math.round(subtotalCents*markup)/100,
