@@ -57,3 +57,32 @@ test('faixa de geração lista somente kits aprovados acima da demanda',()=>{
   assert.equal(C.recommendedKit(kits,470).id,'D6');
   assert.equal(C.recommendedKit(kits,1000),null);
 });
+
+test('projeto opcional segue tabela Grupo B e excepcional até 3 kW',()=>{
+ const examples=[
+  [2.4,'PRJ-B-003',300],[3,'PRJ-B-003',300],
+  [4.2,'PRJ-B-010',400],[6.25,'PRJ-B-010',400],
+  [8.4,'PRJ-B-010',400],[9.6,'PRJ-B-010',400],
+  [10,'PRJ-B-020',500],[12,'PRJ-B-020',500],
+  [14.4,'PRJ-B-020',500],[16.25,'PRJ-B-020',500],
+  [20,'PRJ-B-030',600],[30,'PRJ-B-040',700],
+  [40,'PRJ-B-050',800],[50,'PRJ-B-060',900],[60,'PRJ-B-060',900]
+ ];
+ for(const [kwp,id,price] of examples){
+  assert.equal(C.projectForKwp(kwp)?.id,id);
+  assert.equal(C.projectForKwp(kwp)?.price,price);
+ }
+ assert.equal(C.projectForKwp(0),null);
+ assert.equal(C.projectForKwp(60.01),null);
+});
+test('cotação kit + projeto inclui serviço separadamente e preserva TRT por conta do contratante',()=>{
+ const kit={id:'WW-500',kind:'kit',title:'Kit solar 500 kWh/mês',price:8527.68,
+  active:true,approved:true,payload:{potenciaKwp:4.2}};
+ const project={id:'PRJ-B-010',kind:'piece',title:'Projeto elétrico fotovoltaico Grupo B — acima de 3 e abaixo de 10 kW (TRT não inclusa; paga pelo contratante)',
+  price:400,active:true,approved:true,payload:{categoria:'projetos'}};
+ const result=C.sumCart([{id:kit.id,qty:1},{id:project.id,qty:1}],[kit,project]);
+ assert.equal(result.cents,892768);
+ const message=C.buildMessage('teste@exemplo.com',result.selected,result.cents);
+ assert.match(message,/TRT não inclusa; paga pelo contratante/);
+ assert.match(message,/R\$\s*8\.927,68/);
+});
