@@ -24,7 +24,7 @@ test('WW-500 escolhe SAJ 3 kW e mantém alerta de corrente',()=>{
  const q=K.compose(K.specifications[1],products);
  assert.equal(q.inverter,'PAV-036');
  assert.equal(q.panels,7);
- assert(q.engineeringPending.some(x=>x.includes('15,55 A')));
+ assert(q.engineeringPending.some(x=>x.includes('15.55 A')));
 });
 test('WW-800 e WW-1000 usam apenas SAJ 6 kW sem Deye',()=>{
  for(const code of ['WW-800','WW-1000']){
