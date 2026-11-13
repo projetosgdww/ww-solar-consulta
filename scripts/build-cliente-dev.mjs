@@ -9,7 +9,7 @@ const root=process.cwd();
 const out=resolve(root,'dist-cliente-dev');
 const allowed=[
   'cliente-dev.html','cliente-dev.js','cliente-dev.css','cliente-dev-config.js',
-  'cliente-core.js','kit-line-commercial-v2.js','kit-line-eight-review.js','admin-dev.html','admin-dev.js','admin-dev.css','styles.css','favicon.svg'
+  'cliente-core.js','kit-line-commercial-v2.js','kit-line-eight-review.js','manifest.webmanifest','sw.js','admin-dev.html','admin-dev.js','admin-dev.css','styles.css','favicon.svg'
 ];
 await rm(out,{recursive:true,force:true});
 await mkdir(out,{recursive:true});
@@ -19,6 +19,7 @@ for(const file of allowed){
   if(!info.isFile())throw Error('Arquivo esperado não encontrado: '+file);
   await cp(source,join(out,file));
 }
+execFileSync(process.execPath,['scripts/generate-wwsolar-icons.mjs'],{stdio:'inherit'});
 // URLs comerciais limpas sem mudar IDs internos, scripts ou estilos já homologados.
 const customer=(await readFile(join(out,'cliente-dev.html'),'utf8'))
   .replaceAll('./admin-dev.html','./admin.html');
@@ -37,5 +38,5 @@ await writeFile(join(out,'admin-dev.html'),redirect('./admin.html'));
 await writeFile(join(out,'404.html'),
   '<!doctype html><html lang="pt-BR"><head><meta charset="UTF-8"><meta name="robots" content="noindex,nofollow"><title>Página não encontrada</title></head><body><h1>Página não encontrada</h1><p><a href="/">Abrir WW Solar</a></p></body></html>\\n');
 await writeFile(join(out,'_headers'),
-  '/*\n  X-Robots-Tag: noindex, nofollow\n  X-Content-Type-Options: nosniff\n  Referrer-Policy: strict-origin-when-cross-origin\n  Permissions-Policy: camera=(), microphone=(), geolocation=()\n\n/*.html\n  Cache-Control: no-store\n');
+  '/*\n  X-Robots-Tag: noindex, nofollow\n  X-Content-Type-Options: nosniff\n  Referrer-Policy: strict-origin-when-cross-origin\n  Permissions-Policy: camera=(), microphone=(), geolocation=()\n\n/*.html\n  Cache-Control: no-store\n\n/sw.js\n  Cache-Control: no-cache\n\n/manifest.webmanifest\n  Cache-Control: no-cache\n');
 console.log('Build V1 isolado concluído; nenhum catálogo JSON nem arquivo do site público foi copiado.');
