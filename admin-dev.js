@@ -280,7 +280,7 @@ function renderKitPreviews(){
      lines.append(item);
    }
    detail.append(lines);
-   detail.append(element('p','Subtotal: '+(kit.subtotal===null?'pendente':kitCurrency(kit.subtotal))+' · Acréscimo comercial: 15%','client-muted'));
+   detail.append(element('p','Subtotal: '+(kit.subtotal===null?'pendente':kitCurrency(kit.subtotal))+' · Acréscimo comercial: '+kit.markupPercent+'%','client-muted'));
    detail.append(element('p','PENDÊNCIAS TÉCNICAS: '+kit.engineeringPending.join(' · '),'client-muted'));
    card.append(detail);target.append(card);
  }
