@@ -34,13 +34,34 @@
     }
     return {selected, cents};
   }
-  function recommendedKit(kits,target) {
+  // Regra comercial WW Solar: kWp instalado × 128 = kWh/mês estimados.
+  // Nunca tratar estimativa como produção garantida.
+  const GENERATION_FACTOR=128;
+  function kitKwp(p) {
+    const x=p?.payload||{};
+    const kwp=Number(x.potenciaKwp);
+    if(Number.isFinite(kwp)&&kwp>0&&kwp<=100)return kwp;
+    const panels=Number(x.placas),wp=Number(x.moduloWp);
+    if(Number.isInteger(panels)&&panels>0&&Number.isFinite(wp)&&wp>0)
+      return panels*wp/1000;
+    return null;
+  }
+  function estimatedGeneration(p) {
+    const kwp=kitKwp(p);
+    return kwp===null?null:Math.round(kwp*GENERATION_FACTOR*100)/100;
+  }
+  function matchingKits(products,target) {
     const t=Number(target);
-    if(!Number.isFinite(t)||t<=0) return null;
-    const filtered=kits.filter(p=>p.kind==='kit'&&p.active===true&&p.approved===true
-      &&Number.isFinite(Number(p.payload?.geracaoMensalKwh)))
-      .sort((a,b)=>Number(a.payload.geracaoMensalKwh)-Number(b.payload.geracaoMensalKwh));
-    return filtered.find(p=>Number(p.payload.geracaoMensalKwh)>=t)||filtered.at(-1)||null;
+    if(!Number.isFinite(t)||t<=0)return [];
+    return (Array.isArray(products)?products:[])
+      .filter(p=>p?.kind==='kit'&&p.active===true&&p.approved===true&&Number(p.price)>0)
+      .map(p=>({product:p,generation:estimatedGeneration(p)}))
+      .filter(x=>x.generation!==null&&x.generation>=t)
+      .sort((a,b)=>a.generation-b.generation||Number(a.product.price)-Number(b.product.price)||String(a.product.id).localeCompare(String(b.product.id)))
+      .map(x=>x.product);
+  }
+  function recommendedKit(products,target) {
+    return matchingKits(products,target)[0]||null;
   }
   function buildMessage(userEmail,selected,cents) {
     const email=String(userEmail||'').trim();
@@ -77,5 +98,5 @@
     const seconds=Math.max(0,Math.ceil(Number(remainingMs||0)/1000));
     return String(Math.floor(seconds/60)).padStart(2,'0')+':'+String(seconds%60).padStart(2,'0');
   }
-  return Object.freeze({quantity,money,sumCart,recommendedKit,buildMessage,cleanLines,quoteRemainingMs,quoteClock,QUOTE_MINUTES});
+  return Object.freeze({quantity,money,sumCart,GENERATION_FACTOR,kitKwp,estimatedGeneration,matchingKits,recommendedKit,buildMessage,cleanLines,quoteRemainingMs,quoteClock,QUOTE_MINUTES});
 });
