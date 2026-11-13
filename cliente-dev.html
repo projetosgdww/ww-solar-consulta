@@ -6,13 +6,13 @@
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <title>WW Solar | Área do Cliente</title>
 <link rel="icon" href="./favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="./styles.css"><link rel="stylesheet" href="./cliente-dev.css?v=20261113-geracao-media-v1">
+<link rel="stylesheet" href="./styles.css"><link rel="stylesheet" href="./cliente-dev.css?v=20261113-projetos-v1">
 </head>
 <body>
 <a class="skip-link" href="#client-main">Ir para o conteúdo</a>
 <header class="header"><div class="shell header-inner">
 <a class="brand" href="./index.html" aria-label="WW Solar, início"><span class="brand-symbol" aria-hidden="true"><svg viewBox="0 0 44 44" fill="none"><circle cx="22" cy="22" r="12" stroke="currentColor" stroke-width="4"/><path d="M22 2v7M22 35v7M2 22h7M35 22h7M8 8l5 5M31 31l5 5M36 8l-5 5M13 31l-5 5" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/></svg></span><span class="brand-copy"><strong>WW<span>SOLAR</span></strong><small>CATÁLOGO FOTOVOLTAICO</small></span></a>
-<nav class="nav" id="client-nav" aria-label="Navegação principal" hidden><a href="#simulador">Simular</a><a href="#catalogo">Ver kits</a><a href="#catalogo" id="client-pieces-link">Peças</a></nav>
+<nav class="nav" id="client-nav" aria-label="Navegação principal" hidden><a href="#simulador">Simular</a><a href="#catalogo">Ver kits</a><a href="#catalogo" id="client-pieces-link">Peças</a><a href="#projetos">Projetos</a></nav>
 <div id="client-cart-top" class="client-cart-top" hidden>
   <button id="client-cart-trigger" class="client-cart-trigger" type="button" aria-label="Abrir carrinho" aria-controls="client-cart-drawer" aria-expanded="false">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M3 3h2l2.5 12.5h11L21 7H6M10 21h.01M18 21h.01"/></svg>
@@ -77,7 +77,7 @@
           </div>
           <div class="result-generation"><strong id="result-generation">—</strong><span>kWh/mês <small>geração média estimada</small></span></div>
           <div class="result-stats"><div><small>Potência do kit</small><strong id="result-power">—</strong></div><div><small>Quantidade de módulos</small><strong id="result-panels">—</strong></div><div><small>Inversor</small><strong id="result-inverter">—</strong></div></div>
-          <div class="result-footer"><div><small>Preço dos equipamentos</small><strong id="result-price">Sob consulta</strong></div><button type="button" id="client-result-button" class="button button-dark">Adicionar à cotação <span>↗</span></button></div>
+          <div class="result-footer"><div><small>Preço dos equipamentos</small><strong id="result-price">Sob consulta</strong></div><button type="button" id="client-result-button" class="button button-dark">Adicionar à cotação <span>↗</span></button><button type="button" id="client-result-project-button" class="button button-outline" disabled>Kit + projeto ↗</button></div>
         </div>
       </div>
     </section>
@@ -90,7 +90,27 @@
 <div class="kit-grid client-product-grid" id="client-product-grid"></div>
       </div>
     </section>
-<section class="main-section shell" id="carrinho" aria-labelledby="client-cart-title"><div class="section-title"><div><div class="section-label">03 / SOLICITAÇÃO</div><h2 id="client-cart-title">Seu carrinho <span id="client-cart-count">0</span></h2><p>Monte sua solicitação de equipamentos. Ao finalizar, o WhatsApp abrirá a mensagem para sua negociação.</p></div></div>
+<section class="main-section shell client-projects" id="projetos" aria-labelledby="client-projects-title">
+ <div class="section-title"><div><div class="section-label">03 / PROJETO ELÉTRICO FOTOVOLTAICO</div>
+ <h2 id="client-projects-title">Precisa também do projeto?</h2>
+ <p>Você pode incluir o projeto elétrico fotovoltaico na solicitação do seu kit. O valor é calculado conforme a potência instalada.</p></div></div>
+ <div class="client-projects-card">
+  <div class="client-projects-head"><div><strong>Valores de projetos · Grupo B</strong><small>Até 60 kW de potência fotovoltaica instalada</small></div><span>Serviço opcional</span></div>
+  <div class="client-projects-grid">
+   <div><span>Até 3 kW</span><strong>R$ 300,00</strong></div>
+   <div><span>Acima de 3 e abaixo de 10 kW</span><strong>R$ 400,00</strong></div>
+   <div><span>De 10 a menos de 20 kW</span><strong>R$ 500,00</strong></div>
+   <div><span>De 20 a menos de 30 kW</span><strong>R$ 600,00</strong></div>
+   <div><span>De 30 a menos de 40 kW</span><strong>R$ 700,00</strong></div>
+   <div><span>De 40 a menos de 50 kW</span><strong>R$ 800,00</strong></div>
+   <div><span>De 50 a 60 kW</span><strong>R$ 900,00</strong></div>
+  </div>
+  <p class="client-projects-important"><strong>Importante:</strong> a Taxa de Responsabilidade Técnica (TRT) <strong>não está inclusa</strong> e deverá ser paga pelo contratante.</p>
+  <p class="client-muted">Para instalações enquadradas no Grupo A ou acima de 60 kW, solicite um orçamento específico. O enquadramento é confirmado na análise da unidade consumidora.</p>
+  <a href="https://wa.me/5585992723637?text=Ol%C3%A1%21%20Gostaria%20de%20uma%20cota%C3%A7%C3%A3o%20de%20projeto%20el%C3%A9trico%20fotovoltaico." target="_blank" rel="noopener noreferrer" class="button button-outline">Consultar projeto personalizado ↗</a>
+ </div>
+</section>
+<section class="main-section shell" id="carrinho" aria-labelledby="client-cart-title"><div class="section-title"><div><div class="section-label">04 / SOLICITAÇÃO</div><h2 id="client-cart-title">Seu carrinho <span id="client-cart-count">0</span></h2><p>Monte sua solicitação de equipamentos. Ao finalizar, o WhatsApp abrirá a mensagem para sua negociação.</p></div></div>
 <div class="client-cart"><div id="client-cart-lines" class="client-cart-lines"></div><div class="client-cart-bottom"><strong id="client-cart-total">R$ 0,00</strong><button type="button" id="client-checkout" class="button button-accent" disabled>Enviar cotação pelo WhatsApp <span>↗</span></button></div><p class="client-muted">Sem pagamento automático. Preços, estoque, frete e condições sujeitos à confirmação.</p><div class="client-quote-footer"><span class="client-quote-note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg> Cotação válida por <strong id="client-cart-timer">25:00</strong> desde a última atualização; não reserva estoque.</span><button id="client-cart-refresh" class="button button-outline" type="button">Atualizar preços</button></div>
 <p id="client-action-status" class="client-status" role="status"></p></div></section>
 <section class="bottom-section shell" id="informacoes"><div class="explain-block"><div class="section-label">03 / INFORMAÇÕES IMPORTANTES</div><h2>Simples na consulta.<br><em>Claro nas condições.</em></h2><p>A seleção é uma referência para iniciar uma cotação comercial. O kit indicado deve ser confirmado quanto à disponibilidade, compatibilidade e valores atualizados.</p><div class="notes"><div><span>01</span><p><b>Somente equipamentos</b>Não inclui instalação, projeto, homologação ou mão de obra.</p></div><div><span>02</span><p><b>Frete à parte</b>O custo de envio deve ser confirmado no atendimento.</p></div><div><span>03</span><p><b>Geração média estimada</b>Os valores reproduzem a base técnica e não representam garantia de produção.</p></div></div></div><div class="contact-block"><div class="contact-mark">☀</div><h3>Encontrou um kit interessante?</h3><p>Abra os detalhes, confira a configuração e prepare sua solicitação de cotação.</p><a class="button button-accent" href="#catalogo">Explorar opções <span>↗</span></a></div></section>
@@ -107,6 +127,6 @@
 <footer class="footer"><div class="shell footer-inner"><span><strong>WW</strong>SOLAR</span><span>Ambiente de clientes · Solicitação de cotação</span><span>Atendimento comercial (85) 99272-3637 · Canindé/CE</span></div></footer>
 <script src="./cliente-dev-config.js" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0/dist/umd/supabase.min.js" defer></script>
-<script src="./cliente-core.js?v=20261113-geracao-media-v1" defer></script>
-<script src="./cliente-dev.js?v=20261113-geracao-media-v1" defer></script>
+<script src="./cliente-core.js?v=20261113-projetos-v1" defer></script>
+<script src="./cliente-dev.js?v=20261113-projetos-v1" defer></script>
 </body></html>
