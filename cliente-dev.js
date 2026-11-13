@@ -561,6 +561,7 @@
   $('client-search').addEventListener('input',ev=>{S.query=ev.target.value;renderProducts();});
   for(const tab of document.querySelectorAll('[data-kind]'))
     tab.addEventListener('click',()=>setKind(tab.dataset.kind));
+  $('client-kits-link').addEventListener('click',()=>setKind('kit'));
   $('client-pieces-link').addEventListener('click',()=>setKind('piece'));
   $('client-result-button').addEventListener('click',()=>{
     const kit=C.recommendedKit(available(),S.target);
