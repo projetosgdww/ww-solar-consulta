@@ -125,7 +125,7 @@
     const target=C.estimatedGeneration(kit)||0;
     $('result-status').textContent=target>=S.target?'ATENDE À REFERÊNCIA':'ABAIXO DO SOLICITADO';
     $('result-title').textContent=kit.title;
-    $('result-description').textContent='Geração mensal estimada · '+number(x.moduloWp)+' W por módulo · confirmar instalação';
+    $('result-description').textContent='Geração média mensal estimada · '+number(x.moduloWp)+' W por módulo · confirmar instalação';
     $('result-generation').textContent=number(target);
     $('result-power').textContent=decimal(x.potenciaKwp)+' kWp';
     $('result-panels').textContent=number(x.placas)+' × '+number(x.moduloWp)+' Wp';
@@ -181,7 +181,7 @@
         .some(v=>String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().includes(q)))
       .slice(0,150);
     const grid=$('client-product-grid');grid.replaceChildren();
-    $('client-result-count').textContent=products.length+' '+(products.length===1?'equipamento encontrado':'equipamentos encontrados')+(S.kind==='kit'?' · geração estimada ≥ '+number(S.target)+' kWh/mês':'')+' · preço sujeito a confirmação';
+    $('client-result-count').textContent=products.length+' '+(products.length===1?'equipamento encontrado':'equipamentos encontrados')+(S.kind==='kit'?' · geração média estimada ≥ '+number(S.target)+' kWh/mês':'')+' · preço sujeito a confirmação';
     if(!products.length){
       const box=el('div',undefined,'empty-state');
       box.append(el('h3',S.kind==='kit'?'Kits em preparação':'Nenhum equipamento encontrado'));
