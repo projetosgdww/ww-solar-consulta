@@ -240,3 +240,21 @@ body .header{position:sticky;top:0;z-index:80}
   .header .brand-symbol svg{width:32px;height:32px}
   .header #client-nav a{font-size:11px;min-height:38px}
 }
+
+/* Saudação compacta: preserva bem-vindo, conta e ações sem bloco branco alto. */
+#client-app .client-welcome{display:flex;flex-direction:row;align-items:center;justify-content:space-between;gap:12px;padding:10px 0 11px;margin:0 auto;min-width:0}
+#client-app .client-welcome>div:first-child{min-width:0;flex:1}
+#client-app .client-greeting{font-size:clamp(17px,2vw,21px);line-height:1.18;margin:0 0 3px}
+#client-app #client-identity{margin:0;font-size:11px;line-height:1.4;overflow-wrap:anywhere}
+#client-app .client-tools{display:flex;align-items:center;justify-content:flex-end;flex-wrap:wrap;gap:6px;width:auto;flex:0 0 auto}
+#client-app .client-tools .button{min-height:30px;padding:5px 9px;border-radius:8px;font-size:11px;font-weight:700;line-height:1.25;white-space:nowrap}
+@media(max-width:840px){
+ #client-app .client-welcome{display:flex;flex-direction:row;align-items:center;gap:9px;padding:10px 0 11px}
+ #client-app .client-greeting{font-size:18px}
+ #client-app .client-tools{width:auto;flex:0 0 auto;gap:5px}
+ #client-app .client-tools .button{min-height:29px;padding:5px 7px;font-size:10px}
+}
+@media(max-width:380px){
+ #client-app .client-welcome{flex-wrap:wrap;gap:5px;padding:9px 0}
+ #client-app .client-tools{margin-left:auto}
+}
