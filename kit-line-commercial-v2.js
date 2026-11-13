@@ -81,6 +81,7 @@
     const candidates=screenedOptions(products,preset);
     const validCandidates=candidates.filter(p=>p.electrical.status==='pendente_engenharia');
     const chosen=config.inverterSku?candidates.find(p=>p.sku===config.inverterSku):validCandidates[0];
+    const candidateSelectionStatus=chosen?'candidato_pendente':(candidates.length?'ficha_modelo_pendente':'sem_inversor_na_base');
     if(config.inverterSku&&!chosen)throw Error('Inversor fora da triagem mínima de potência');
     if(chosen?.electrical.status==='incompativel_preliminar')throw Error('Inversor incompatível nos parâmetros elétricos preliminares');
     const gauge=preset.panels===4?4:6;
@@ -113,7 +114,7 @@
     return {...preset,gauge,metersPerColor:eachColorMeters,rollsPerColor,
       inverterCandidate:chosen?{sku:chosen.sku,name:chosen.name,acKw:chosen.acKw,electrical:chosen.electrical}:null,
       candidateOptions:candidates,
-      dcInputsUsed:inputs,rows,pending,
+      dcInputsUsed:inputs,candidateSelectionStatus,rows,pending,
       subtotal:pending.length?null:subtotalCents/100,
       previewPrice:pending.length?null:Math.round(subtotalCents*markup)/100,
       commercialMarkupPercent:15,
