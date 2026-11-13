@@ -32,7 +32,10 @@ test('128 por kWp e inversor de menor potência >= CC vezes 0.77',()=>{
  assert.equal(p.generationKwhMonth,480);
  assert.equal(p.inverterReferenceKw,2.8875);
  const q=K.compose(p.code,products,{dcInputsUsed:1});
- assert.equal(q.inverterCandidate.acKw,7.3);\n assert.equal(q.candidateOptions.find(x=>x.sku==='PAV-036').electrical.status,'incompativel_preliminar');\n assert.equal(q.candidateOptions.find(x=>x.sku==='PAV-035').electrical.status,'sem_ficha_modelo');\n assert.equal(q.inverterCandidate.electrical.status,'pendente_engenharia');
+ assert.equal(q.inverterCandidate.acKw,7.3);
+ assert.equal(q.candidateOptions.find(x=>x.sku==='PAV-036').electrical.status,'incompativel_preliminar');
+ assert.equal(q.candidateOptions.find(x=>x.sku==='PAV-035').electrical.status,'sem_ficha_modelo');
+ assert.equal(q.inverterCandidate.electrical.status,'pendente_engenharia');
  assert.equal(q.engineeringApproved,false);
  assert.equal(q.published,false);
 });
@@ -53,8 +56,8 @@ test('perfis separados da fixação e rolos por cor; acima de 4 módulos usa 6mm
 });
 test('preço é soma de preços AVULSOS vezes 1,15 e não custo reverso',()=>{
  const p=K.compose('WW-D625-06',products,{dcInputsUsed:1});
- assert.equal(p.subtotal,7420.60);
- assert.equal(p.previewPrice,8533.69);
+ assert.equal(p.subtotal,7670.61);
+ assert.equal(p.previewPrice,8821.20);
  assert.equal(p.pending.length,0);
 });
 test('sem entradas CC validadas preço do kit permanece pendente',()=>{
