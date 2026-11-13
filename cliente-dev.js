@@ -382,12 +382,34 @@
     if(service)service.qty=r.qty;
     save(next.filter(x=>x.qty>0),'Quantidade atualizada.');
   }
-  function makeCartRow(x,missing=false){
+  function makeCartRow(x,missing=false,inDrawer=false){
     const row=el('div',undefined,'client-cart-line'),label=el('div'),tools=el('div',undefined,'client-qty');
-    label.append(el('strong',x.title),el('p',missing?'Indisponível — remova este item':euro(x.unit/100)+' por unidade','client-muted'));
-    tools.append(btn('−',()=>quantity(x.id,-1)),el('output',x.qty),btn('+',()=>quantity(x.id,1)));
+    const isLinkedService=x.id.startsWith('PRJ-WW-');
+    const itemName=isLinkedService?'Projeto elétrico do kit ('+x.id.slice(7)+')':x.title;
+    label.append(el('strong',itemName),el('p',missing?'Indisponível — remova este item':euro(x.unit/100)+' por unidade','client-muted'));
+    if(inDrawer&&!missing&&x.id.startsWith('WW-')){
+      const kit=available().find(p=>p.id===x.id),project=projectForKit(kit);
+      if(project){
+        const option=el('label',undefined,'client-project-option');
+        const checkbox=el('input');checkbox.type='checkbox';
+        checkbox.checked=S.lines.some(item=>item.id===project.id);
+        checkbox.setAttribute('aria-label','Incluir projeto elétrico para '+x.title);
+        checkbox.addEventListener('change',()=>setKitProject(x.id,checkbox.checked));
+        const caption=el('span');
+        caption.append(el('strong','Incluir projeto elétrico · '+euro(project.price)),
+          el('small','Opcional · TRT não inclusa; paga pelo contratante'));
+        option.append(checkbox,caption);label.append(option);
+      }
+    }
+    if(!isLinkedService){
+      tools.append(btn('−',()=>quantity(x.id,-1)),el('output',x.qty),btn('+',()=>quantity(x.id,1)));
+    }else{
+      tools.append(el('small','Serviço opcional','client-muted'));
+    }
     row.append(label,tools,el('strong',missing?'Indisponível':euro(x.amount/100)),
-      btn('Remover',()=>save(S.lines.filter(z=>z.id!==x.id),'Produto removido.'),'client-remove'));
+      btn('Remover',()=>removeCartItem(x.id),'client-remove'));
+    if(inDrawer)row.classList.add('client-drawer-item-compact');
+    if(isLinkedService)row.classList.add('client-linked-project-item');
     return row;
   }
   function renderCart(){
@@ -411,7 +433,7 @@
       $(id).textContent=sumText;
     for(const x of [...valid,...bad]){
       const missing=bad.includes(x);
-      area.append(makeCartRow(x,missing));drawer.append(makeCartRow(x,missing));
+      area.append(makeCartRow(x,missing));drawer.append(makeCartRow(x,missing,true));
     }
     if(!S.lines.length){
       area.append(el('p','Seu carrinho está vazio.','client-muted'));
