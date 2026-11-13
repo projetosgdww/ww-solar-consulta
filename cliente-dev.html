@@ -11,13 +11,14 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="WW Solar">
-<link rel="stylesheet" href="./styles.css"><link rel="stylesheet" href="./cliente-dev.css?v=20261113-welcome-compact-v1">
+<link rel="stylesheet" href="./styles.css"><link rel="stylesheet" href="./cliente-dev.css?v=20261113-welcome-header-v2">
 </head>
 <body>
 <a class="skip-link" href="#client-main">Ir para o conteúdo</a>
 <header class="header"><div class="shell header-inner">
 <a class="brand" href="./index.html" aria-label="WW Solar, início"><span class="brand-symbol" aria-hidden="true"><svg viewBox="0 0 44 44" fill="none"><circle cx="22" cy="22" r="12" stroke="currentColor" stroke-width="4"/><path d="M22 2v7M22 35v7M2 22h7M35 22h7M8 8l5 5M31 31l5 5M36 8l-5 5M13 31l-5 5" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/></svg></span><span class="brand-copy"><strong>WW<span>SOLAR</span></strong><small>CATÁLOGO FOTOVOLTAICO</small></span></a>
 <nav class="nav" id="client-nav" aria-label="Navegação do catálogo" hidden><a href="#simulador" id="client-nav-simulate">Simular</a><a href="#catalogo" id="client-kits-link">Ver kits</a><a href="#catalogo" id="client-pieces-link">Peças</a><a href="#projetos" id="client-projects-link">Projetos</a></nav>
+<div class="client-header-actions"><a id="client-admin-link" class="client-account-link" href="./admin-dev.html" hidden>Admin</a><button id="client-logout" class="client-account-link client-exit" type="button" hidden aria-label="Sair da conta">Sair ↗</button></div>
 <div id="client-cart-top" class="client-cart-top" hidden>
   <button id="client-cart-trigger" class="client-cart-trigger" type="button" aria-label="Abrir carrinho" aria-controls="client-cart-drawer" aria-expanded="false">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M3 3h2l2.5 12.5h11L21 7H6M10 21h.01M18 21h.01"/></svg>
@@ -40,7 +41,7 @@
 <p class="client-helper">O cadastro e o acesso são fornecidos diretamente pelo atendimento WW Solar. Não há cadastro público.</p>
 </section></div>
 <section id="client-app" hidden>
-<div class="shell client-welcome" id="client-welcome"><div><h2 class="client-greeting">Olá, bem-vindo.</h2><p id="client-identity" class="client-muted"></p></div><div class="client-tools"><button id="client-install-app" class="button button-outline" type="button" hidden>Instalar app ↗</button><a id="client-admin-link" class="button button-outline" href="./admin-dev.html" hidden>Administrar clientes</a><button id="client-logout" class="button button-outline" type="button">Sair</button></div></div>
+<div class="shell client-welcome" id="client-welcome"><div><h2 class="client-greeting">Olá, bem-vindo.</h2><p id="client-identity" class="client-muted"></p></div></div>
 <section class="hero">
       <div class="hero-grid shell">
         <div class="hero-copy">
@@ -130,9 +131,9 @@
 <div id="client-toast" class="client-toast" role="status" aria-live="polite" hidden><span aria-hidden="true">✓</span><span id="client-toast-text">Produto adicionado ao carrinho</span></div>
 </main>
 <footer class="footer"><div class="shell footer-inner"><span><strong>WW</strong>SOLAR</span><span>Ambiente de clientes · Solicitação de cotação</span><span>Atendimento comercial (85) 99272-3637 · Canindé/CE</span></div></footer>
-<script src="./cliente-dev-config.js?v=20261113-pwa-mobile-v1" defer></script>
+<script src="./cliente-dev-config.js?v=20261113-pwa-nobutton-v2" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0/dist/umd/supabase.min.js" defer></script>
-<script src="./cliente-core.js?v=20261113-pwa-mobile-v1" defer></script>
-<script src="./cliente-dev.js?v=20261113-pwa-mobile-v1" defer></script>
-<script src="./cliente-pwa.js?v=20261113-pwa-mobile-v1" defer></script>
+<script src="./cliente-core.js?v=20261113-pwa-nobutton-v2" defer></script>
+<script src="./cliente-dev.js?v=20261113-pwa-nobutton-v2" defer></script>
+<script src="./cliente-pwa.js?v=20261113-pwa-nobutton-v2" defer></script>
 </body></html>
