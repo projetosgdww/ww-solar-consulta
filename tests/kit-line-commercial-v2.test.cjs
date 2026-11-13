@@ -32,7 +32,7 @@ test('128 por kWp e inversor de menor potência >= CC vezes 0.77',()=>{
  assert.equal(p.generationKwhMonth,480);
  assert.equal(p.inverterReferenceKw,2.8875);
  const q=K.compose(p.code,products,{dcInputsUsed:1});
- assert.equal(q.inverterCandidate.acKw,3);
+ assert.equal(q.inverterCandidate.acKw,7.3);\n assert.equal(q.candidateOptions.find(x=>x.sku==='PAV-036').electrical.status,'incompativel_preliminar');\n assert.equal(q.candidateOptions.find(x=>x.sku==='PAV-035').electrical.status,'sem_ficha_modelo');\n assert.equal(q.inverterCandidate.electrical.status,'pendente_engenharia');
  assert.equal(q.engineeringApproved,false);
  assert.equal(q.published,false);
 });
@@ -68,4 +68,18 @@ test('não inventa inversor para kits maiores sem modelo disponível',()=>{
  assert.equal(p.inverterCandidate,null);
  assert.equal(p.previewPrice,null);
  assert(p.pending.some(x=>x.startsWith('Inversor')));
+});
+
+test('não aceita selecionar manualmente inversor com Imp acima do limite',()=>{
+ assert.throws(()=>K.compose('WW-D625-06',products,{dcInputsUsed:1,inverterSku:'PAV-036'}),/incompatível/);
+});
+test('comercial sem ficha associada não é automaticamente aprovado',()=>{
+ const p=K.compose('WW-D625-06',products,{dcInputsUsed:1,inverterSku:'PAV-035'});
+ assert.equal(p.inverterCandidate.electrical.status,'sem_ficha_modelo');
+ assert.equal(p.engineeringApproved,false);
+});
+test('DMEGC 710 W no Deye 7,3k fica pendente por variante e ganho bifacial',()=>{
+ const p=K.compose('WW-D710-08',products,{dcInputsUsed:1,inverterSku:'PAV-038'});
+ assert.equal(p.inverterCandidate.electrical.status,'pendente_engenharia');
+ assert(p.inverterCandidate.electrical.reasons.some(x=>x.includes('bifacial')));
 });
