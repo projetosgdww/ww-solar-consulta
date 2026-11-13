@@ -243,64 +243,45 @@ const kitLabels={
  incompativel_preliminar:'ALERTA ELÉTRICO: revisão obrigatória antes da homologação'
 };
 async function loadKitPreviews(){
- if(!ready||!window.WWSolarKitLineV2)return;
- const K=window.WWSolarKitLineV2;
- $('admin-kit-status').textContent='Atualizando preços e composições...';
- const [cat,drafts]=await Promise.all([
-   db.from('wwsolar_catalog').select('id,kind,title,price,payload,active,approved').eq('kind','piece').eq('active',true).eq('approved',true),
-   db.from('wwsolar_kit_drafts').select('code,status,engineering_approved,published').like('code','WW-%')
- ]);
- if(cat.error||drafts.error){
-   $('admin-kit-status').textContent='Falha ao consultar o catálogo ou os rascunhos. Confira as permissões.';
-   return;
- }
+ if(!ready||!window.WWSolarEightKits)return;
+ const K=window.WWSolarEightKits;
+ $('admin-kit-status').textContent='Atualizando as oito propostas comerciais...';
+ const cat=await db.from('wwsolar_catalog').select('id,kind,title,price,payload,active,approved')
+    .eq('kind','piece').eq('active',true).eq('approved',true);
+ if(cat.error){$('admin-kit-status').textContent='Erro ao carregar as peças. Verifique as permissões.';return;}
  kitCatalog=cat.data||[];
- const authorizedDrafts=new Set((drafts.data||[]).filter(x=>x.status==='rascunho'&&!x.published&&!x.engineering_approved).map(x=>x.code));
- kitPreviews=K.allPresets.filter(p=>authorizedDrafts.has(p.code)&&!K.KIT_OVERRIDES[p.code]?.excluded)
-   .map(p=>K.compose(p.code,kitCatalog));
- $('admin-kit-status').textContent=kitPreviews.length+' composições em revisão (2 retiradas da oferta a seu pedido). Nenhuma publicada aos clientes. Valores e estoque sujeitos a confirmação.';
+ kitPreviews=K.specifications.map(p=>K.compose(p,kitCatalog));
+ $('admin-kit-status').textContent='8 propostas padronizadas em revisão técnica; nenhuma publicada para venda. Os 32 rascunhos antigos continuam preservados.';
  renderKitPreviews();
 }
 function renderKitPreviews(){
- const brand=$('admin-kit-brand').value,status=$('admin-kit-status-filter').value;
- const shown=kitPreviews.filter(p=>(brand==='all'||p.code.startsWith('WW-'+brand+'-'))
-     &&(status==='all'||p.candidateSelectionStatus===status));
- $('admin-kit-count').textContent=shown.length+' de '+kitPreviews.length+' exibidos';
+ const status=$('admin-kit-status-filter').value;
+ const shown=kitPreviews.filter(p=>status==='all'||(status==='pendente_engenharia'&&p.engineeringPending.length>0));
+ $('admin-kit-count').textContent=shown.length+' de '+kitPreviews.length+' kits';
  const target=$('admin-kit-list');target.replaceChildren();
- if(!shown.length){target.append(element('p','Nenhuma composição nesta seleção.','client-muted'));return;}
+ if(!shown.length){target.append(element('p','Sem kits nesta seleção.','client-muted'));return;}
  for(const kit of shown){
    const card=element('article',undefined,'admin-order-card');
-   const header=element('div',undefined,'admin-order-header');
+   const head=element('div',undefined,'admin-order-header');
    const desc=element('div');
    desc.append(element('strong',kit.code+' · '+kitNumber(kit.kwp)+' kWp'));
-   desc.append(element('small',kit.panels+' módulos '+kit.brand+' '+kit.moduleWp+' W · '+kitNumber(kit.generationKwhMonth)+' kWh/mês estimados'));
-   const price=element('strong',kit.previewPrice===null?'Preço pendente':kitCurrency(kit.previewPrice),'admin-order-money');
-   header.append(desc,price,element('span','RASCUNHO · NÃO PUBLICADO','admin-pill'));
-   card.append(header);
-   card.append(element('p',kitLabels[kit.candidateSelectionStatus]||'Revisão necessária',kit.technicallyBlocked?'client-status':'client-muted'));
-   if(kit.commerciallyReviewed)card.append(element('p','REVISÃO COMERCIAL REGISTRADA · homologação elétrica ainda pendente','client-muted'));
-   if(kit.gridRequired==='trifasica')card.append(element('small','ℹ️ Atenção ao padrão de entrada: esta composição com dois inversores string pressupõe ligação trifásica no local. Confirme o padrão existente e as condições de conexão com a distribuidora.','client-muted'));
-   const info=element('div',undefined,'admin-order-items');
+   desc.append(element('small',kit.panels+' módulos '+kit.brand+' '+kit.moduleWp+' W · meta '+kitNumber(kit.target)+' kWh/mês · estimativa '+kitNumber(kit.generationKwhMonth)+' kWh/mês'));
+   head.append(desc,element('strong',kit.previewPrice===null?'Preço pendente':kitCurrency(kit.previewPrice),'admin-order-money'),element('span','EM REVISÃO · NÃO PUBLICADO','admin-pill'));
+   card.append(head);
+   card.append(element('p','Inversor previsto: '+kit.inverterName,'client-muted'));
+   if(kit.gridRequired==='trifasica_380')card.append(element('small','ℹ️ Requer padrão de entrada trifásico compatível com 380 V. Confirmar condições da distribuidora.','client-muted'));
    const detail=element('details',undefined,'admin-order-detail');
-   detail.append(element('summary','Conferir peças, quantidades e pendências'));
+   detail.append(element('summary','Conferir composição, preço e pendências'));
+   const lines=element('div',undefined,'admin-order-items');
    for(const row of kit.rows){
-     const r=element('div',undefined,'admin-order-item');
-     r.append(element('span',(row.quantity===null?'?':row.quantity)+' × '+row.label+(row.sku?' ['+row.sku+']':'')));
-     r.append(element('strong',row.subtotal===null?'Pendente':kitCurrency(row.subtotal)));
-     info.append(r);
+     const item=element('div',undefined,'admin-order-item');
+     item.append(element('span',row.quantity+' × '+row.label+' ['+row.sku+']'));
+     item.append(element('strong',row.subtotal===null?'Pendente':kitCurrency(row.subtotal)));
+     lines.append(item);
    }
-   detail.append(info);
-   const meta=element('p',
-     'Inversores: '+(kit.selectedInverters.length?kit.selectedInverters.map(x=>x.name+' ('+x.modules+' módulos)').join(' + '):'não selecionados')+
-     ' · Potência CA mínima: '+kitNumber(kit.inverterReferenceKw)+' kW'+
-     ' · Divisão preliminar: '+(kit.modulesPerInverter.length?kit.modulesPerInverter.join(' + ')+' módulos':'pendente')+
-     ' · Entradas CC estimadas: '+(kit.dcInputsUsed??'pendentes')+
-     ' ('+kit.dcInputsSource+')'+
-     ' · Subtotal: '+(kit.subtotal===null?'pendente':kitCurrency(kit.subtotal))+
-     ' · Adicional: 15%','client-muted');
-   detail.append(meta);
-   const pend=element('p','PENDÊNCIAS TÉCNICAS: '+kit.engineeringPending.join(' · '),'client-muted');
-   detail.append(pend);
+   detail.append(lines);
+   detail.append(element('p','Subtotal: '+(kit.subtotal===null?'pendente':kitCurrency(kit.subtotal))+' · Acréscimo comercial: 15%','client-muted'));
+   detail.append(element('p','PENDÊNCIAS TÉCNICAS: '+kit.engineeringPending.join(' · '),'client-muted'));
    card.append(detail);target.append(card);
  }
 }
@@ -316,7 +297,7 @@ $('admin-tab-clients').addEventListener('click',()=>showPanel('clients'));
 $('admin-tab-orders').addEventListener('click',()=>showPanel('orders'));
 $('admin-tab-kits').addEventListener('click',()=>showPanel('kits'));
 $('admin-refresh-kits').addEventListener('click',()=>void loadKitPreviews());
-$('admin-kit-brand').addEventListener('change',renderKitPreviews);
+
 $('admin-kit-status-filter').addEventListener('change',renderKitPreviews);
 $('admin-refresh-clients').addEventListener('click',()=>void loadClients());
 $('admin-refresh-orders').addEventListener('click',()=>void loadOrders());
