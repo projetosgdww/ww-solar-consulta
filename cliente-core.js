@@ -69,7 +69,7 @@
     const lines=[
       'Olá! Gostaria de solicitar uma cotação WW Solar.',
       'Cliente: '+email,'',
-      ...selected.map(p=>'- '+p.qty+' × '+p.title+' ['+p.id+'] — '+money(p.amount/100)),
+      ...selected.map(p=>'- '+p.qty+' × '+p.title+(p.id.startsWith('WW-')?'':' ['+p.id+']')+' — '+money(p.amount/100)),
       '', 'Total de referência: '+money(cents/100),
       'Confirmar preço final, disponibilidade, frete e condições de pagamento.',
       'Pedido para negociação; não é compra concluída.'
