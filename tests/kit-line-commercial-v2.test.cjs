@@ -112,7 +112,7 @@ test('inversores de 10 e 10,5 kW não participam dos kits, sem afetar peças avu
  assert(!options.some(x=>x.acKw===10||x.acKw===10.5));
  assert(products.some(x=>x.id==='PAV-039'));
  assert(products.some(x=>x.id==='PAV-041'));
- assert.throws(()=>K.compose('WW-D625-12',products,{inverterSku:'PAV-041'}),/fora da triagem/);
+ assert.throws(()=>K.compose('WW-Z600-12',products,{inverterSku:'PAV-041'}),/fora da triagem/);
 });
 
 test('SAJ 15 kW entra como peça avulsa sem entrar nas propostas de kits',()=>{
@@ -135,4 +135,50 @@ test('quando precisa mais de 7.3 kW fica sem inversor e sem preço',()=>{
  const p=K.compose('WW-D625-16',products);
  assert.equal(p.inverterCandidate,null);
  assert.equal(p.previewPrice,null);
+});
+
+test('lista de ajustes individuais preserva saídas e regras trifásicas',()=>{
+ const excluded=['WW-Z600-18','WW-D625-16'];
+ for(const code of excluded){
+   const kit=K.compose(code,products);
+   assert.equal(kit.excluded,true);
+   assert.equal(kit.previewPrice,null);
+   assert.equal(kit.published,false);
+ }
+ for(const code of ['WW-Z600-20','WW-Z600-22','WW-Z600-24','WW-Z600-26',
+                     'WW-D625-18','WW-D625-20','WW-D625-22','WW-D625-24']){
+   const kit=K.compose(code,products);
+   assert.equal(kit.gridRequired,'trifasica');
+   assert.equal(kit.selectedInverters.length,2);
+   assert.equal(kit.published,false);
+ }
+});
+test('ZNSHINE 16 painéis usa 7,3 kW sob alerta por 0,77',()=>{
+ const kit=K.compose('WW-Z600-16',products);
+ assert.equal(kit.inverterCandidate.sku,'PAV-038');
+ assert.equal(kit.technicallyBlocked,true);
+ assert(kit.engineeringPending.some(x=>x.includes('7,392')));
+});
+test('20 módulos ZNSHINE tem 6 + 3 kW e restrição trifásica',()=>{
+ const kit=K.compose('WW-Z600-20',products);
+ assert.deepEqual(kit.selectedInverters.map(x=>x.kw),[6,3]);
+ assert.equal(kit.gridRequired,'trifasica');
+ assert.equal(kit.modulesPerInverter.reduce((s,n)=>s+n,0),20);
+ assert.equal(kit.technicallyBlocked,true);
+});
+test('DMEGC 8 painéis utiliza dois microinversores como rascunho',()=>{
+ const kit=K.compose('WW-D625-08',products);
+ assert.equal(kit.selectedInverters.length,2);
+ assert.equal(kit.selectedInverters[0].sku,'PAV-034');
+ assert.deepEqual(kit.modulesPerInverter,[4,4]);
+ assert.equal(kit.gridRequired,'a_confirmar');
+ assert.equal(kit.engineeringApproved,false);
+});
+test('DMEGC 26 painéis usa SAJ 15 kW especial trifásico',()=>{
+ const novo={id:'PAV-057',title:'INVERSOR SAJ AFCI 15KW-R6-T2-32 ON-GRID TRIFASICO 380V 2MPPT',price:3874.88,kind:'piece',active:true,approved:true,payload:{categoria:'inversores'}};
+ const kit=K.compose('WW-D625-26',[...products,novo]);
+ assert.equal(kit.inverterCandidate.sku,'PAV-057');
+ assert.equal(kit.gridRequired,'trifasica');
+ assert(kit.previewPrice>0);
+ assert.equal(kit.published,false);
 });
