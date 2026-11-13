@@ -179,7 +179,7 @@
       const box=el('div',undefined,'empty-state');
       box.append(el('h3',S.kind==='kit'?'Kits em preparação':'Nenhum equipamento encontrado'));
       box.append(el('p',S.kind==='kit'
-        ?(available().some(p=>p.kind==='kit')?'Nenhum kit homologado atende à geração solicitada. Reduza a geração desejada ou consulte as peças avulsas.':'Os kits seguem em homologação técnica. Enquanto isso, consulte as peças avulsas já aprovadas.')
+        ?(available().some(p=>p.kind==='kit')?'Nenhum kit atende à geração informada. Escolha outra faixa ou solicite orientação. Reduza a geração desejada ou consulte as peças avulsas.':'As opções estão sendo preparadas para cotação. Consulte também as peças avulsas.')
         :'Experimente outra potência, fabricante ou nome.'));
       if(S.kind==='kit')box.append(btn('Ver peças avulsas ↗',()=>setKind('piece'),'button button-accent'));
       grid.append(box);return;
