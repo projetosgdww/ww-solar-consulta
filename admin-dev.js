@@ -251,7 +251,7 @@ async function loadKitPreviews(){
  if(cat.error){$('admin-kit-status').textContent='Erro ao carregar as peças. Verifique as permissões.';return;}
  kitCatalog=cat.data||[];
  kitPreviews=K.specifications.map(p=>K.compose(p,kitCatalog));
- $('admin-kit-status').textContent='8 propostas padronizadas em revisão técnica; nenhuma publicada para venda. Os 32 rascunhos antigos continuam preservados.';
+ $('admin-kit-status').textContent='8 kits disponíveis para solicitar cotação, sujeitos à conferência técnica da instalação. Os 32 rascunhos antigos continuam preservados.';
  renderKitPreviews();
 }
 function renderKitPreviews(){
