@@ -151,6 +151,13 @@
     const allowed=products.filter(p=>p?.kind==='piece'&&p.active===true&&p.approved===true);
     const catalog=new Map(allowed.map(p=>[p.id,p]));
     const candidates=screenedOptions(products,preset);
+    if(config.inverterSku){
+      if(rule.inverters)throw Error('Esta composição possui inversores definidos pela revisão comercial; altere a regra primeiro');
+      const manual=candidates.find(p=>p.sku===config.inverterSku);
+      if(!manual)throw Error('Inversor fora da triagem mínima comercial');
+      if(manual.electrical.status==='incompativel_preliminar')
+        throw Error('Inversor incompatível nos parâmetros elétricos preliminares');
+    }
     let selected=[];
     if(!rule.excluded){
       if(rule.inverters){
