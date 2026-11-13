@@ -99,8 +99,9 @@ test('distribui strings por MPPT sob limites STC e mantém temperatura pendente'
  assert.equal(p.engineeringApproved,false);
 });
 test('inversor 7.3 kW não ultrapassa capacidade máxima CC informada na ficha',()=>{
- const p=K.compose('WW-D625-18',products);
- const c=p.candidateOptions.find(x=>x.sku==='PAV-038');
- assert.equal(c.electrical.status,'incompativel_preliminar');
- assert(c.electrical.reasons.some(x=>x.includes('Potência CC')));
+ const p=K.allPresets.find(x=>x.code==='WW-D625-18');
+ const inverter=products.find(x=>x.id==='PAV-038');
+ const check=K.electricalScreen(p,inverter);
+ assert.equal(check.status,'incompativel_preliminar');
+ assert(check.reasons.some(x=>x.includes('Potência CC')));
 });
