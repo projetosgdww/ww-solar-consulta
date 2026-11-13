@@ -279,7 +279,7 @@ function renderKitPreviews(){
    card.append(header);
    card.append(element('p',kitLabels[kit.candidateSelectionStatus]||'Revisão necessária',kit.technicallyBlocked?'client-status':'client-muted'));
    if(kit.commerciallyReviewed)card.append(element('p','REVISÃO COMERCIAL REGISTRADA · homologação elétrica ainda pendente','client-muted'));
-   if(kit.gridRequired==='trifasica')card.append(element('p','⚡ LIGAÇÃO TRIFÁSICA OBRIGATÓRIA PARA ESTA COMPOSIÇÃO','client-status'));
+   if(kit.gridRequired==='trifasica')card.append(element('small','ℹ️ Atenção ao padrão de entrada: esta composição com dois inversores string pressupõe ligação trifásica no local. Confirme o padrão existente e as condições de conexão com a distribuidora.','client-muted'));
    const info=element('div',undefined,'admin-order-items');
    const detail=element('details',undefined,'admin-order-detail');
    detail.append(element('summary','Conferir peças, quantidades e pendências'));
