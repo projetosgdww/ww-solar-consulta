@@ -60,11 +60,13 @@ test('preço é soma de preços AVULSOS vezes 1,15 e não custo reverso',()=>{
  assert.equal(p.previewPrice,8821.20);
  assert.equal(p.pending.length,0);
 });
-test('sem entradas CC validadas preço do kit permanece pendente',()=>{
+test('estimativa automática de conectores sem homologação elétrica',()=>{
  const p=K.compose('WW-Z600-06',products);
- assert.equal(p.previewPrice,null);
- assert.equal(p.pending.length,1);
- assert.match(p.pending[0],/MC4/);
+ assert(p.previewPrice>0);
+ assert.equal(p.dcInputsUsed,1);
+ assert.equal(p.dcInputsEstimated,true);
+ assert.equal(p.engineeringApproved,false);
+ assert.equal(p.published,false);
 });
 test('não inventa inversor para kits maiores sem modelo disponível',()=>{
  const p=K.compose('WW-D625-26',products,{dcInputsUsed:2});
@@ -85,4 +87,20 @@ test('DMEGC 710 W no Deye 7,3k fica pendente por variante e ganho bifacial',()=>
  const p=K.compose('WW-D710-08',products,{dcInputsUsed:1,inverterSku:'PAV-038'});
  assert.equal(p.inverterCandidate.electrical.status,'pendente_engenharia');
  assert(p.inverterCandidate.electrical.reasons.some(x=>x.includes('bifacial')));
+});
+
+test('distribui strings por MPPT sob limites STC e mantém temperatura pendente',()=>{
+ const p=K.compose('WW-D625-12',products);
+ assert.equal(p.preliminaryStrings.inputsUsed,2);
+ assert.deepEqual(p.preliminaryStrings.strings.map(x=>x.modules),[6,6]);
+ assert.equal(p.preliminaryStrings.strings[0].vmpStcV,246.3);
+ assert.equal(p.preliminaryStrings.strings[0].vocStcV,295.74);
+ assert.equal(p.dcInputsEstimated,true);
+ assert.equal(p.engineeringApproved,false);
+});
+test('inversor 7.3 kW não ultrapassa capacidade máxima CC informada na ficha',()=>{
+ const p=K.compose('WW-D625-18',products);
+ const c=p.candidateOptions.find(x=>x.sku==='PAV-038');
+ assert.equal(c.electrical.status,'incompativel_preliminar');
+ assert(c.electrical.reasons.some(x=>x.includes('Potência CC')));
 });
