@@ -39,7 +39,7 @@
       .map(p=>({...p,acKw:inverterKw(p.title)}))
       // Decisão comercial: excluir inversores de 10 e 10,5 kW dos kits por enquanto.
       // Permanecem disponíveis como peças avulsas; não alterar o catálogo.
-      .filter(p=>p.acKw!==null&&p.acKw>=requiredKw&&p.acKw!==10&&p.acKw!==10.5)
+      .filter(p=>p.acKw!==null&&p.acKw>=requiredKw&&p.acKw!==10&&p.acKw!==10.5&&p.acKw!==15)
       .sort((a,b)=>a.acKw-b.acKw||Number(a.price)-Number(b.price)||a.id.localeCompare(b.id));
   }
   // Dados obtidos das fichas encaminhadas em 13/11/2026. A descrição comercial
