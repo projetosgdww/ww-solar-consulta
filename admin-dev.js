@@ -239,7 +239,8 @@ const kitNumber=v=>new Intl.NumberFormat('pt-BR',{maximumFractionDigits:2}).form
 const kitLabels={
  candidato_pendente:'Candidato preliminar · homologação pendente',
  ficha_modelo_pendente:'Ficha do inversor pendente',
- sem_inversor_na_base:'Sem inversor na potência de referência'
+ sem_inversor_na_base:'Sem inversor na potência de referência',
+ incompativel_preliminar:'BLOQUEADO: corrente/tensão/potência CC fora do limite preliminar'
 };
 async function loadKitPreviews(){
  if(!ready||!window.WWSolarKitLineV2)return;
@@ -275,7 +276,7 @@ function renderKitPreviews(){
    const price=element('strong',kit.previewPrice===null?'Preço pendente':kitCurrency(kit.previewPrice),'admin-order-money');
    header.append(desc,price,element('span','RASCUNHO · NÃO PUBLICADO','admin-pill'));
    card.append(header);
-   card.append(element('p',kitLabels[kit.candidateSelectionStatus]||'Revisão necessária','client-muted'));
+   card.append(element('p',kitLabels[kit.candidateSelectionStatus]||'Revisão necessária',kit.technicallyBlocked?'client-status':'client-muted'));
    const info=element('div',undefined,'admin-order-items');
    const detail=element('details',undefined,'admin-order-detail');
    detail.append(element('summary','Conferir peças, quantidades e pendências'));
@@ -291,6 +292,7 @@ function renderKitPreviews(){
      ' · Potência CA mínima: '+kitNumber(kit.inverterReferenceKw)+' kW'+
      ' · Strings preliminares: '+(kit.preliminaryStrings?.strings.map(s=>s.modules+' módulos / MPPT '+s.mppt).join(' + ')||'pendentes')+
      ' · Entradas CC estimadas: '+(kit.dcInputsUsed??'pendentes')+
+     ' ('+kit.dcInputsSource+')'+
      ' · Subtotal: '+(kit.subtotal===null?'pendente':kitCurrency(kit.subtotal))+
      ' · Adicional: 15%','client-muted');
    detail.append(meta);
