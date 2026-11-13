@@ -93,18 +93,20 @@
   const decimal=n=>new Intl.NumberFormat('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}).format(Number(n)||0);
   function setTarget(v){
     const n=Number(v);if(!Number.isFinite(n))return;
-    S.target=Math.max(300,Math.min(14600,Math.round(n)));
+    S.target=Math.max(300,Math.min(2200,Math.round(n)));
     $('client-target').value=S.target;$('client-target-slider').value=S.target;
-    $('client-target-slider').style.setProperty('--range-progress',((S.target-300)/(14600-300)*100)+'%');
+    $('client-target-slider').style.setProperty('--range-progress',((S.target-300)/(2200-300)*100)+'%');
     renderRecommendation();
+    if(S.kind==='kit')renderProducts();
   }
   function renderRecommendation(){
     const kit=C.recommendedKit(available(),S.target);
+    const hasKits=available().some(p=>p.kind==='kit');
     $('client-result-button').disabled=!kit;
     if(!kit){
-      $('result-title').textContent='Kits em preparação';
-      $('result-description').textContent='Os kits antigos foram retirados da oferta. Novas composições estão em revisão técnica.';
-      $('result-status').textContent='AGUARDANDO HOMOLOGAÇÃO';
+      $('result-title').textContent=hasKits?'Nenhum kit atende à geração informada':'Kits em preparação';
+      $('result-description').textContent=hasKits?'Experimente uma geração menor para ver os kits disponíveis.':'As novas composições estão em revisão técnica e ainda não foram liberadas.';
+      $('result-status').textContent=hasKits?'SEM KIT NA FAIXA':'AGUARDANDO HOMOLOGAÇÃO';
       $('result-generation').textContent='—';
       $('result-power').textContent='—';
       $('result-panels').textContent='—';
@@ -113,7 +115,7 @@
       return;
     }
     const x=kit.payload||{};
-    const target=Number(x.geracaoMensalKwh)||0;
+    const target=C.estimatedGeneration(kit)||0;
     $('result-status').textContent=target>=S.target?'ATENDE À REFERÊNCIA':'ABAIXO DO SOLICITADO';
     $('result-title').textContent=kit.title;
     $('result-description').textContent=kit.id+' · '+number(x.moduloWp)+' Wp por módulo';
@@ -166,18 +168,18 @@
   }
   function renderProducts(){
     const q=S.query.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
-    const products=available().filter(p=>p.kind===S.kind)
+    const products=(S.kind==='kit'?C.matchingKits(available(),S.target):available().filter(p=>p.kind==='piece'))
       .filter(p=>S.kind==='kit'||S.category==='all'||String(p.payload?.categoria||'').toLowerCase()===S.category)
       .filter(p=>!q||[p.id,p.title,p.payload?.inversor,p.payload?.categoria]
         .some(v=>String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().includes(q)))
       .slice(0,150);
     const grid=$('client-product-grid');grid.replaceChildren();
-    $('client-result-count').textContent=products.length+' '+(products.length===1?'equipamento encontrado':'equipamentos encontrados')+' · preço sujeito a confirmação';
+    $('client-result-count').textContent=products.length+' '+(products.length===1?'equipamento encontrado':'equipamentos encontrados')+(S.kind==='kit'?' · geração estimada ≥ '+number(S.target)+' kWh/mês':'')+' · preço sujeito a confirmação';
     if(!products.length){
       const box=el('div',undefined,'empty-state');
       box.append(el('h3',S.kind==='kit'?'Kits em preparação':'Nenhum equipamento encontrado'));
       box.append(el('p',S.kind==='kit'
-        ?'Estamos montando nossos próprios kits e conferindo inversor, estruturas e materiais. Enquanto isso, consulte as peças avulsas já aprovadas.'
+        ?(available().some(p=>p.kind==='kit')?'Nenhum kit homologado atende à geração solicitada. Reduza a geração desejada ou consulte as peças avulsas.':'Os kits seguem em homologação técnica. Enquanto isso, consulte as peças avulsas já aprovadas.')
         :'Experimente outra potência, fabricante ou nome.'));
       if(S.kind==='kit')box.append(btn('Ver peças avulsas ↗',()=>setKind('piece'),'button button-accent'));
       grid.append(box);return;
@@ -192,7 +194,7 @@
       if(p.kind==='kit'){
         const x=p.payload||{};
         const gen=el('p',undefined,'kit-generation');
-        gen.append(el('strong',number(x.geracaoMensalKwh)+' kWh/mês'),document.createTextNode(' estimados*'));
+        gen.append(el('strong',number(C.estimatedGeneration(p))+' kWh/mês'),document.createTextNode(' estimados*'));
         card.append(gen);
         const facts=el('div',undefined,'kit-facts');
         for(const [title,value] of [
@@ -468,7 +470,12 @@
   $('client-target').addEventListener('keydown',ev=>{if(ev.key==='Enter'){ev.preventDefault();setTarget(ev.target.value);}});
   $('client-target-apply').addEventListener('click',()=>{
     setTarget($('client-target').value);
-    document.querySelector('.result-card')?.scrollIntoView({behavior:'smooth',block:'nearest'});
+    if(available().some(p=>p.kind==='kit')){
+      setKind('kit');
+      document.getElementById('catalogo')?.scrollIntoView({behavior:'smooth',block:'start'});
+    }else{
+      document.querySelector('.result-card')?.scrollIntoView({behavior:'smooth',block:'nearest'});
+    }
   });
   $('client-target-slider').addEventListener('input',ev=>setTarget(ev.target.value));
   $('client-search').addEventListener('input',ev=>{S.query=ev.target.value;renderProducts();});
