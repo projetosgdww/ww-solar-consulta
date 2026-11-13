@@ -33,8 +33,8 @@
   const m=modules[spec.module],inv=inverterData[spec.inverter];
   const kwp=spec.panels*m.wp/1000,gen=kwp*128;
   const gauge=spec.panels===4?4:6,rolls=Math.ceil(spec.panels*2.5/25);
-  // Para micro, não orçar MC4 adicional automaticamente: chicotes próprios do fabricante.
-  // Para strings, 1 pack MC4 de 2 pares é somente estimativa comercial.
+  // Regra comercial aprovada: 4 pares MC4 por kit = 2 embalagens PAV-007 (2 pares cada).
+  // Conferir conectores exigidos por cada inversor antes da liberação elétrica.
   const bill=[
    ['Módulos',spec.module,spec.panels],
    ['Inversor',spec.inverter,spec.inverterCount],
@@ -42,7 +42,7 @@
    ['Perfil alumínio 2,36m','PAV-024',spec.panels],
    ['Cabo solar vermelho '+gauge+' mm² (25m)',gauge===4?'PAV-001':'PAV-004',Math.max(1,rolls)],
    ['Cabo solar preto '+gauge+' mm² (25m)',gauge===4?'PAV-002':'PAV-003',Math.max(1,rolls)],
-   ...(!inv.micro?[['Kit MC4 2 pares (estimativa)','PAV-007',1]]:[])
+   ['Conectores MC4 — embalagem com 2 pares (total: 4 pares)','PAV-007',2]
   ];
   let subtotalCents=0;const pending=[];
   const rows=bill.map(([label,sku,quantity])=>{
@@ -65,8 +65,8 @@
   return {...spec,brand:m.brand,moduleWp:m.wp,kwp,generationKwhMonth:Math.round(gen*100)/100,
     inverterName:map.get(spec.inverter)?.title||spec.inverter,
     rows,pending,subtotal:pending.length?null:subtotalCents/100,
-    previewPrice:pending.length?null:Math.round(subtotalCents*1.15)/100,
-    engineeringPending:warnings,engineeringApproved:false,published:false,
+    previewPrice:pending.length?null:Math.round(subtotalCents*1.05)/100,
+    markupPercent:5,mc4Pairs:4,engineeringPending:warnings,engineeringApproved:false,published:false,
     candidateSelectionStatus:'pendente_engenharia',gridRequired:spec.grid||'a_confirmar'};
  }
  return Object.freeze({specifications,compose});
