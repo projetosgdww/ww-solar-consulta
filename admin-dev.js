@@ -26,14 +26,14 @@ function clearCredentials(){
 function showPanel(which){
  if(!ready)return;
  clearCredentials();
- const clients=which!=='orders';
- $('admin-clients-panel').hidden=!clients;
- $('admin-orders-panel').hidden=clients;
- $('admin-tab-clients').classList.toggle('active',clients);
- $('admin-tab-orders').classList.toggle('active',!clients);
- $('admin-tab-clients').setAttribute('aria-pressed',String(clients));
- $('admin-tab-orders').setAttribute('aria-pressed',String(!clients));
- if(clients)void loadClients();else void loadOrders();
+ for(const name of ['clients','orders','kits']){
+   $('admin-'+name+'-panel').hidden=which!==name;
+   $('admin-tab-'+name).classList.toggle('active',which===name);
+   $('admin-tab-'+name).setAttribute('aria-pressed',String(which===name));
+ }
+ if(which==='clients')void loadClients();
+ if(which==='orders')void loadOrders();
+ if(which==='kits')void loadKitPreviews();
 }
 async function init(){
  if(!/^https:\/\/[a-z0-9-]+\.supabase\.co$/.test(cfg.supabaseUrl||'')
@@ -232,6 +232,73 @@ async function changeOrder(item,select,buttonElement){
    orderStatus(e?.message||'Falha ao atualizar o pedido. Recarregue antes de tentar novamente.');
  }finally{buttonElement.disabled=false;}
 }
+// Painel de kits: SOMENTE LEITURA. Nunca publica, aprova ou cadastra produtos.
+let kitPreviews=[],kitCatalog=[];
+const kitCurrency=v=>new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(Number(v)||0);
+const kitNumber=v=>new Intl.NumberFormat('pt-BR',{maximumFractionDigits:2}).format(Number(v)||0);
+const kitLabels={
+ candidato_pendente:'Candidato preliminar · homologação pendente',
+ ficha_modelo_pendente:'Ficha do inversor pendente',
+ sem_inversor_na_base:'Sem inversor na potência de referência'
+};
+async function loadKitPreviews(){
+ if(!ready||!window.WWSolarKitLineV2)return;
+ const K=window.WWSolarKitLineV2;
+ $('admin-kit-status').textContent='Atualizando preços e composições...';
+ const [cat,drafts]=await Promise.all([
+   db.from('wwsolar_catalog').select('id,kind,title,price,payload,active,approved').eq('kind','piece').eq('active',true).eq('approved',true),
+   db.from('wwsolar_kit_drafts').select('code,status,engineering_approved,published').like('code','WW-%')
+ ]);
+ if(cat.error||drafts.error){
+   $('admin-kit-status').textContent='Falha ao consultar o catálogo ou os rascunhos. Confira as permissões.';
+   return;
+ }
+ kitCatalog=cat.data||[];
+ const authorizedDrafts=new Set((drafts.data||[]).filter(x=>x.status==='rascunho'&&!x.published&&!x.engineering_approved).map(x=>x.code));
+ kitPreviews=K.allPresets.filter(p=>authorizedDrafts.has(p.code)).map(p=>K.compose(p.code,kitCatalog));
+ $('admin-kit-status').textContent=kitPreviews.length+' composições em rascunho, sem publicação. Preços preliminares e estoque sujeito a confirmação.';
+ renderKitPreviews();
+}
+function renderKitPreviews(){
+ const brand=$('admin-kit-brand').value,status=$('admin-kit-status-filter').value;
+ const shown=kitPreviews.filter(p=>(brand==='all'||p.code.startsWith('WW-'+brand+'-'))
+     &&(status==='all'||p.candidateSelectionStatus===status));
+ $('admin-kit-count').textContent=shown.length+' de '+kitPreviews.length+' exibidos';
+ const target=$('admin-kit-list');target.replaceChildren();
+ if(!shown.length){target.append(element('p','Nenhuma composição nesta seleção.','client-muted'));return;}
+ for(const kit of shown){
+   const card=element('article',undefined,'admin-order-card');
+   const header=element('div',undefined,'admin-order-header');
+   const desc=element('div');
+   desc.append(element('strong',kit.code+' · '+kitNumber(kit.kwp)+' kWp'));
+   desc.append(element('small',kit.panels+' módulos '+kit.brand+' '+kit.moduleWp+' W · '+kitNumber(kit.generationKwhMonth)+' kWh/mês estimados'));
+   const price=element('strong',kit.previewPrice===null?'Preço pendente':kitCurrency(kit.previewPrice),'admin-order-money');
+   header.append(desc,price,element('span','RASCUNHO · NÃO PUBLICADO','admin-pill'));
+   card.append(header);
+   card.append(element('p',kitLabels[kit.candidateSelectionStatus]||'Revisão necessária','client-muted'));
+   const info=element('div',undefined,'admin-order-items');
+   const detail=element('details',undefined,'admin-order-detail');
+   detail.append(element('summary','Conferir peças, quantidades e pendências'));
+   for(const row of kit.rows){
+     const r=element('div',undefined,'admin-order-item');
+     r.append(element('span',(row.quantity===null?'?':row.quantity)+' × '+row.label+(row.sku?' ['+row.sku+']':'')));
+     r.append(element('strong',row.subtotal===null?'Pendente':kitCurrency(row.subtotal)));
+     info.append(r);
+   }
+   detail.append(info);
+   const meta=element('p',
+     'Inversor: '+(kit.inverterCandidate?.name||'não selecionado')+
+     ' · Potência CA mínima: '+kitNumber(kit.inverterReferenceKw)+' kW'+
+     ' · Strings preliminares: '+(kit.preliminaryStrings?.strings.map(s=>s.modules+' módulos / MPPT '+s.mppt).join(' + ')||'pendentes')+
+     ' · Entradas CC estimadas: '+(kit.dcInputsUsed??'pendentes')+
+     ' · Subtotal: '+(kit.subtotal===null?'pendente':kitCurrency(kit.subtotal))+
+     ' · Adicional: 15%','client-muted');
+   detail.append(meta);
+   const pend=element('p','PENDÊNCIAS TÉCNICAS: '+kit.engineeringPending.join(' · '),'client-muted');
+   detail.append(pend);
+   card.append(detail);target.append(card);
+ }
+}
 $('admin-dev-form').addEventListener('submit',ev=>{ev.preventDefault();void sendAction('create');});
 $('admin-dev-rotate').addEventListener('click',()=>void sendAction('rotate'));
 $('admin-dev-copy').addEventListener('click',async()=>{
@@ -242,6 +309,10 @@ $('admin-dev-copy').addEventListener('click',async()=>{
 $('admin-dev-clear').addEventListener('click',()=>{clearCredentials();status('Credenciais retiradas da tela.');});
 $('admin-tab-clients').addEventListener('click',()=>showPanel('clients'));
 $('admin-tab-orders').addEventListener('click',()=>showPanel('orders'));
+$('admin-tab-kits').addEventListener('click',()=>showPanel('kits'));
+$('admin-refresh-kits').addEventListener('click',()=>void loadKitPreviews());
+$('admin-kit-brand').addEventListener('change',renderKitPreviews);
+$('admin-kit-status-filter').addEventListener('change',renderKitPreviews);
 $('admin-refresh-clients').addEventListener('click',()=>void loadClients());
 $('admin-refresh-orders').addEventListener('click',()=>void loadOrders());
 $('admin-order-filter').addEventListener('change',renderOrders);
