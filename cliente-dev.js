@@ -43,6 +43,7 @@
       S.catalog=data||[];S.lines=C.cleanLines(cart?.lines||[]);S.cartUpdatedAt=cart?.updated_at||null;
       show('client-entry',false);show('client-app',true);show('client-nav',true);show('client-cart-top',true);
       show('client-admin-link',S.admin);
+      show('client-logout',true);
       $('client-identity').textContent=user.email||'Conta autorizada';
       renderAll();
       if(S.timer)clearInterval(S.timer);
@@ -51,6 +52,7 @@
       S.user=null;S.catalog=[];S.lines=[];
       await S.db.auth.signOut();
       show('client-entry',true);show('client-app',false);show('client-nav',false);show('client-cart-top',false);
+      show('client-logout',false);
       status('Não foi possível carregar os produtos. Solicite atendimento.','client-login-status');
     }
   }
@@ -87,6 +89,7 @@
     if(S.timer){clearInterval(S.timer);S.timer=null;}
     closeDrawer();
     show('client-app',false);show('client-entry',true);show('client-nav',false);show('client-cart-top',false);
+    show('client-logout',false);
     $('client-password').value='';status('','client-login-status');
   }
   const number=n=>new Intl.NumberFormat('pt-BR',{maximumFractionDigits:0}).format(Number(n)||0);
