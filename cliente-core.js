@@ -34,6 +34,27 @@
     }
     return {selected, cents};
   }
+  // Valores do serviço de projeto informados pelo proprietário (13/11/2026).
+  // A TRT não integra estes preços e é paga separadamente pelo contratante.
+  const PROJECT_TIERS=Object.freeze([
+    Object.freeze({upTo:3,id:'PRJ-B-003',price:300}),
+    Object.freeze({upTo:10,id:'PRJ-B-010',price:400}),
+    Object.freeze({upTo:20,id:'PRJ-B-020',price:500}),
+    Object.freeze({upTo:30,id:'PRJ-B-030',price:600}),
+    Object.freeze({upTo:40,id:'PRJ-B-040',price:700}),
+    Object.freeze({upTo:50,id:'PRJ-B-050',price:800}),
+    Object.freeze({upTo:60,id:'PRJ-B-060',price:900})
+  ]);
+  function projectForKwp(kwp) {
+    const n=Number(kwp);
+    if(!Number.isFinite(n)||n<=0)return null;
+    if(n<=3)return PROJECT_TIERS[0];
+    // Faixas do material: menos de 10, 10 a 20, 20 a 30...
+    for(let i=1;i<PROJECT_TIERS.length;i++)
+      if(i===PROJECT_TIERS.length-1?n<=PROJECT_TIERS[i].upTo:n<PROJECT_TIERS[i].upTo)
+        return PROJECT_TIERS[i];
+    return null;
+  }
   // Regra comercial WW Solar: kWp instalado × 128 = kWh/mês estimados.
   // Nunca tratar estimativa como produção garantida.
   const GENERATION_FACTOR=128;
@@ -98,5 +119,5 @@
     const seconds=Math.max(0,Math.ceil(Number(remainingMs||0)/1000));
     return String(Math.floor(seconds/60)).padStart(2,'0')+':'+String(seconds%60).padStart(2,'0');
   }
-  return Object.freeze({quantity,money,sumCart,GENERATION_FACTOR,kitKwp,estimatedGeneration,matchingKits,recommendedKit,buildMessage,cleanLines,quoteRemainingMs,quoteClock,QUOTE_MINUTES});
+  return Object.freeze({quantity,money,sumCart,PROJECT_TIERS,projectForKwp,GENERATION_FACTOR,kitKwp,estimatedGeneration,matchingKits,recommendedKit,buildMessage,cleanLines,quoteRemainingMs,quoteClock,QUOTE_MINUTES});
 });
