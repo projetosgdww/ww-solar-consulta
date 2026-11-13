@@ -275,7 +275,7 @@ function renderKitPreviews(){
    const head=element('div',undefined,'admin-order-header');
    const desc=element('div');
    desc.append(element('strong','Kit '+kitNumber(kit.target)+' kWh/mês'));
-   desc.append(element('small',kit.panels+' módulos '+kit.brand+' de '+kit.moduleWp+' W · geração estimada: '+kitNumber(kit.generationKwhMonth)+' kWh/mês'));
+   desc.append(element('small',kit.panels+' módulos '+kit.brand+' de '+kit.moduleWp+' W · geração média estimada: '+kitNumber(kit.generationKwhMonth)+' kWh/mês'));
    head.append(desc,element('strong',kit.previewPrice===null?'Sob consulta':kitCurrency(kit.previewPrice),'admin-order-money'),element('span','COTAÇÃO SUJEITA À CONFERÊNCIA','admin-pill'));
    card.append(head);
    card.append(element('p','Inversor: '+kit.inverterName,'client-muted'));
