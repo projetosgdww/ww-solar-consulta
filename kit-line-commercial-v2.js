@@ -37,7 +37,9 @@
     return products.filter(p=>p&&p.kind==='piece'&&p.active===true&&p.approved===true
       &&String(p.payload?.categoria||'').toLowerCase()==='inversores')
       .map(p=>({...p,acKw:inverterKw(p.title)}))
-      .filter(p=>p.acKw!==null&&p.acKw>=requiredKw)
+      // Decisão comercial: excluir inversores de 10 e 10,5 kW dos kits por enquanto.
+      // Permanecem disponíveis como peças avulsas; não alterar o catálogo.
+      .filter(p=>p.acKw!==null&&p.acKw>=requiredKw&&p.acKw!==10&&p.acKw!==10.5)
       .sort((a,b)=>a.acKw-b.acKw||Number(a.price)-Number(b.price)||a.id.localeCompare(b.id));
   }
   // Dados obtidos das fichas encaminhadas em 13/11/2026. A descrição comercial
