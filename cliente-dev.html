@@ -61,10 +61,10 @@
         <div class="simulator-controls">
           <div class="segmented" role="group" aria-label="Modo de consulta"><span class="segment active" style="display:inline-block">Geração desejada</span></div>
           <div class="sim-intro"><label for="client-target" id="target-label">Quanto você deseja gerar por mês?</label><p id="target-description">Selecione a geração mensal estimada que procura.</p></div>
-          <div class="client-target-entry"><label for="client-target">Digite a geração desejada ou ajuste a barra:</label><div class="client-target-input-row"><div class="target-input-wrap"><input id="client-target" type="number" min="300" max="14600" step="1" value="750" inputmode="numeric" aria-label="Energia mensal em quilowatt-hora"><span>kWh/mês</span></div><button type="button" id="client-target-apply" class="button button-dark">Encontrar kit ↗</button></div></div>
-          <input id="client-target-slider" type="range" min="300" max="14600" step="50" value="750" aria-label="Ajustar energia mensal desejada">
-          <div class="slider-endpoints"><span>300 kWh</span><span>14.600 kWh</span></div>
-          <div class="sim-info"><span class="info-mark">i</span><span>Simulação comparativa com base na tabela de kits. A geração real varia com a localidade e as condições de instalação; consumo e energia compensada não são necessariamente iguais.</span></div>
+          <div class="client-target-entry"><label for="client-target">Digite a geração desejada ou ajuste a barra:</label><div class="client-target-input-row"><div class="target-input-wrap"><input id="client-target" type="number" min="300" max="2200" step="1" value="750" inputmode="numeric" aria-label="Energia mensal em quilowatt-hora"><span>kWh/mês</span></div><button type="button" id="client-target-apply" class="button button-dark">Encontrar kit ↗</button></div></div>
+          <input id="client-target-slider" type="range" min="300" max="2200" step="50" value="750" aria-label="Ajustar energia mensal desejada">
+          <div class="slider-endpoints"><span>300 kWh</span><span>2.200 kWh</span></div>
+          <div class="sim-info"><span class="info-mark">i</span><span>Estimativa mensal: potência do kit (kWp) × 128 kWh/kWp. A geração real varia com a localidade e as condições de instalação; consumo e energia compensada não são necessariamente iguais.</span></div>
         </div>
         <div class="result-card" aria-live="polite" aria-atomic="true">
           <div class="result-top"><span class="result-label">KIT HOMOLOGADO</span><span class="result-status" id="result-status">CALCULANDO</span></div>
@@ -102,6 +102,6 @@
 <footer class="footer"><div class="shell footer-inner"><span><strong>WW</strong>SOLAR</span><span>Ambiente de clientes · Solicitação de cotação</span><span>Atendimento comercial (85) 99272-3637</span></div></footer>
 <script src="./cliente-dev-config.js" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0/dist/umd/supabase.min.js" defer></script>
-<script src="./cliente-core.js" defer></script>
-<script src="./cliente-dev.js?v=20261112-clear2" defer></script>
+<script src="./cliente-core.js?v=20261112-gen128" defer></script>
+<script src="./cliente-dev.js?v=20261112-gen128" defer></script>
 </body></html>
