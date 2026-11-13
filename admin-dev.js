@@ -255,34 +255,51 @@ async function loadKitPreviews(){
  renderKitPreviews();
 }
 function renderKitPreviews(){
- const status=$('admin-kit-status-filter').value;
- const shown=kitPreviews.filter(p=>status==='all'||(status==='pendente_engenharia'&&p.engineeringPending.length>0));
+ const filter=$('admin-kit-status-filter').value;
+ const shown=kitPreviews.filter(p=>filter==='all'||(filter==='pendente_engenharia'&&p.engineeringPending.length>0));
  $('admin-kit-count').textContent=shown.length+' de '+kitPreviews.length+' kits';
  const target=$('admin-kit-list');target.replaceChildren();
  if(!shown.length){target.append(element('p','Sem kits nesta seleção.','client-muted'));return;}
+ const niceItem=row=>{
+   if(row.label==='Módulos')return 'Módulos fotovoltaicos';
+   if(row.label==='Inversor')return 'Inversor solar';
+   if(row.label.startsWith('Fixação'))return 'Kit de fixação para telhado cerâmico';
+   if(row.label.startsWith('Perfil'))return 'Perfis de alumínio';
+   if(row.label.startsWith('Cabo solar vermelho'))return 'Cabo solar vermelho — rolo de 25 m';
+   if(row.label.startsWith('Cabo solar preto'))return 'Cabo solar preto — rolo de 25 m';
+   if(row.sku==='PAV-007')return 'Conectores MC4 (2 pares por embalagem)';
+   return row.label;
+ };
  for(const kit of shown){
    const card=element('article',undefined,'admin-order-card');
    const head=element('div',undefined,'admin-order-header');
    const desc=element('div');
-   desc.append(element('strong',kit.code+' · '+kitNumber(kit.kwp)+' kWp'));
-   desc.append(element('small',kit.panels+' módulos '+kit.brand+' '+kit.moduleWp+' W · meta '+kitNumber(kit.target)+' kWh/mês · estimativa '+kitNumber(kit.generationKwhMonth)+' kWh/mês'));
-   head.append(desc,element('strong',kit.previewPrice===null?'Preço pendente':kitCurrency(kit.previewPrice),'admin-order-money'),element('span','EM REVISÃO · NÃO PUBLICADO','admin-pill'));
+   desc.append(element('strong','Kit '+kitNumber(kit.target)+' kWh/mês'));
+   desc.append(element('small',kit.panels+' módulos '+kit.brand+' de '+kit.moduleWp+' W · geração estimada: '+kitNumber(kit.generationKwhMonth)+' kWh/mês'));
+   head.append(desc,element('strong',kit.previewPrice===null?'Sob consulta':kitCurrency(kit.previewPrice),'admin-order-money'),element('span','COTAÇÃO SUJEITA À CONFERÊNCIA','admin-pill'));
    card.append(head);
-   card.append(element('p','Inversor previsto: '+kit.inverterName,'client-muted'));
-   if(kit.gridRequired==='trifasica_380')card.append(element('small','ℹ️ Requer padrão de entrada trifásico compatível com 380 V. Confirmar condições da distribuidora.','client-muted'));
+   card.append(element('p','Inversor: '+kit.inverterName,'client-muted'));
+   if(kit.gridRequired==='trifasica_380')
+     card.append(element('small','ℹ️ Indicado para instalação com rede trifásica 380 V.','client-muted'));
    const detail=element('details',undefined,'admin-order-detail');
-   detail.append(element('summary','Conferir composição, preço e pendências'));
+   detail.append(element('summary','Ver o que está incluído no kit'));
    const lines=element('div',undefined,'admin-order-items');
    for(const row of kit.rows){
      const item=element('div',undefined,'admin-order-item');
-     item.append(element('span',row.quantity+' × '+row.label+' ['+row.sku+']'));
-     item.append(element('strong',row.subtotal===null?'Pendente':kitCurrency(row.subtotal)));
+     const label=niceItem(row);
+     const extra=row.label==='Módulos'?' · '+kit.moduleWp+' W':row.label==='Inversor'?' · '+kit.inverterName:'';
+     item.append(element('span',row.quantity+' × '+label+extra));
+     item.append(element('strong',row.subtotal===null?'Sob consulta':kitCurrency(row.subtotal)));
      lines.append(item);
    }
    detail.append(lines);
-   detail.append(element('p','Subtotal: '+(kit.subtotal===null?'pendente':kitCurrency(kit.subtotal))+' · Acréscimo comercial: '+kit.markupPercent+'%','client-muted'));
-   detail.append(element('p','PENDÊNCIAS TÉCNICAS: '+kit.engineeringPending.join(' · '),'client-muted'));
-   card.append(detail);target.append(card);
+   detail.append(element('p','Valor do conjunto: '+(kit.previewPrice===null?'sob consulta':kitCurrency(kit.previewPrice))+'. Preço e disponibilidade sujeitos à confirmação.','client-muted'));
+   card.append(detail);
+   const internal=element('details',undefined,'admin-order-detail');
+   internal.append(element('summary','Análise interna (somente administrador)'));
+   internal.append(element('p','Referência interna: '+kit.code+' · Itens: '+kit.rows.map(x=>x.quantity+' × '+x.sku).join(', '),'admin-order-audit'));
+   internal.append(element('p',kit.engineeringPending.join(' · '),'admin-order-audit'));
+   card.append(internal);target.append(card);
  }
 }
 $('admin-dev-form').addEventListener('submit',ev=>{ev.preventDefault();void sendAction('create');});
