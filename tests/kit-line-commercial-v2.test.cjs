@@ -105,3 +105,11 @@ test('inversor 7.3 kW não ultrapassa capacidade máxima CC informada na ficha',
  assert.equal(check.status,'incompativel_preliminar');
  assert(check.reasons.some(x=>x.includes('Potência CC')));
 });
+
+test('inversores de 10 e 10,5 kW não participam dos kits, sem afetar peças avulsas',()=>{
+ const options=K.options(products,5.5);
+ assert(!options.some(x=>x.acKw===10||x.acKw===10.5));
+ assert(products.some(x=>x.id==='PAV-039'));
+ assert(products.some(x=>x.id==='PAV-041'));
+ assert.throws(()=>K.compose('WW-D625-12',products,{inverterSku:'PAV-041'}),/fora da triagem/);
+});
