@@ -38,21 +38,19 @@
 <p class="client-muted">São exibidas as 100 solicitações mais recentes neste piloto DEV. Nenhum pagamento ou compra é realizado automaticamente.</p>
 </section>
 <section id="admin-kits-panel" class="admin-orders-panel" hidden aria-label="Composições preliminares de kits">
- <div class="admin-section-row"><div><h2>Kits em revisão técnica</h2>
- <p class="client-muted">Composições comerciais calculadas com os preços avulsos atuais. Não são ofertas aprovadas nem aparecem aos clientes.</p></div>
+ <div class="admin-section-row"><div><h2>Nova linha · 8 kits em revisão</h2>
+ <p class="client-muted">Oito faixas padronizadas: 300, 500, 800, 1.000, 1.200, 1.500, 1.800 e 2.000 kWh/mês. Estimativas comerciais ainda não homologadas; não disponíveis aos clientes.</p></div>
  <button type="button" id="admin-refresh-kits" class="button button-outline">Atualizar prévias</button></div>
  <div class="admin-order-toolbar">
- <label for="admin-kit-brand">Linha</label>
- <select id="admin-kit-brand"><option value="all">Todas (30)</option><option value="Z600">ZNSHINE 600 W</option><option value="D625">DMEGC 625 W</option><option value="D710">DMEGC 710 W</option></select>
  <label for="admin-kit-status-filter">Situação</label>
- <select id="admin-kit-status-filter"><option value="all">Todas</option><option value="candidato_pendente">Candidato preliminar</option><option value="incompativel_preliminar">Alertas elétricos a revisar</option><option value="ficha_modelo_pendente">Falta vincular ficha</option><option value="sem_inversor_na_base">Sem potência CA disponível</option></select>
+ <select id="admin-kit-status-filter"><option value="all">Todos os 8 kits</option><option value="pendente_engenharia">Com pendências técnicas</option></select>
  <span id="admin-kit-count" aria-live="polite">—</span></div>
  <p id="admin-kit-status" class="client-status" role="status">Abra esta aba para carregar as composições.</p>
  <div id="admin-kit-list" class="admin-order-list"></div>
- <p class="client-muted">Premissas: geração = kWp × 128; inversor ≥ kWp × 0,77; estrutura cerâmica com 1 perfil por módulo; 2,5 m de cada cor por módulo, em rolos inteiros; proteção elétrica fora; preço avulso das peças + 15%. Conectores/strings são provisórios.</p>
+ <p class="client-muted">Estimativa: kWp × 128 kWh/mês. Composição comercial dos 8 kits com inversores escolhidos pelo administrador, estrutura cerâmica, cabos em rolos inteiros e acréscimo de 15%. Corrente, strings, conectores e demais requisitos elétricos aguardam validação.</p>
  <p class="client-muted"><small>Orientação de padrão de entrada: até 10 kW pode haver atendimento monofásico; acima de 10 kW e até 75 kW, confirmar se o fornecimento aplicável é bifásico ou trifásico. A definição depende da rede, das normas da distribuidora e da potência dos equipamentos; a indicação no kit não substitui a análise de conexão.</small></p>
 </section>
 </main>
 <footer class="footer"><div class="shell footer-inner"><span><strong>WW</strong>SOLAR</span><span>Administração restrita · DEV</span></div></footer>
-<script defer src="./cliente-dev-config.js"></script><script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0/dist/umd/supabase.min.js"></script><script defer src="./kit-line-commercial-v2.js?v=20261113-kits-v5-padrao"></script><script defer src="./admin-dev.js?v=20261113-kits-v3-077"></script>
+<script defer src="./cliente-dev-config.js"></script><script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0/dist/umd/supabase.min.js"></script><script defer src="./kit-line-eight-review.js?v=20261113-oito-1"></script><script defer src="./admin-dev.js?v=20261113-oito-1"></script>
 </body></html>
