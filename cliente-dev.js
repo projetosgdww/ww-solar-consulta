@@ -103,9 +103,16 @@
     const kit=C.recommendedKit(available(),S.target);
     const hasKits=available().some(p=>p.kind==='kit');
     $('client-result-button').disabled=!kit;
+    const custom=$('client-custom-kit-cta');
+    custom.hidden=Boolean(kit);
+    if(!kit){
+      const phone=String(cfg.whatsapp||'5585992723637');
+      const message='Olá! Não encontrei um kit para a geração de '+number(S.target)+' kWh/mês no catálogo WW Solar. Gostaria de uma cotação personalizada.';
+      $('client-custom-kit-whatsapp').href='https://wa.me/'+phone+'?text='+encodeURIComponent(message);
+    }
     if(!kit){
       $('result-title').textContent=hasKits?'Nenhum kit atende à geração informada':'Kits em preparação';
-      $('result-description').textContent=hasKits?'Experimente uma geração menor para ver os kits disponíveis.':'As novas composições estão em revisão técnica e ainda não foram liberadas.';
+      $('result-description').textContent=hasKits?'Não temos um kit nessa faixa no momento, mas podemos preparar uma proposta personalizada.':'Podemos preparar um kit personalizado para sua necessidade.';
       $('result-status').textContent=hasKits?'SEM KIT NA FAIXA':'AGUARDANDO HOMOLOGAÇÃO';
       $('result-generation').textContent='—';
       $('result-power').textContent='—';
@@ -472,7 +479,7 @@
   $('client-target').addEventListener('keydown',ev=>{if(ev.key==='Enter'){ev.preventDefault();setTarget(ev.target.value);}});
   $('client-target-apply').addEventListener('click',()=>{
     setTarget($('client-target').value);
-    if(available().some(p=>p.kind==='kit')){
+    if(C.recommendedKit(available(),S.target)){
       setKind('kit');
       document.getElementById('catalogo')?.scrollIntoView({behavior:'smooth',block:'start'});
     }else{
