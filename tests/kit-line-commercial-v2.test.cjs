@@ -113,3 +113,10 @@ test('inversores de 10 e 10,5 kW não participam dos kits, sem afetar peças avu
  assert(products.some(x=>x.id==='PAV-041'));
  assert.throws(()=>K.compose('WW-D625-12',products,{inverterSku:'PAV-041'}),/fora da triagem/);
 });
+
+test('SAJ 15 kW entra como peça avulsa sem entrar nas propostas de kits',()=>{
+ const novo={id:'PAV-057',title:'INVERSOR SAJ AFCI 15KW-R6-T2-32 ON-GRID TRIFASICO 380V 2MPPT',price:3874.88,kind:'piece',active:true,approved:true,payload:{categoria:'inversores'}};
+ const catalog=[...products,novo];
+ assert(catalog.some(x=>x.id==='PAV-057'));
+ assert(!K.options(catalog,12.5).some(x=>x.id==='PAV-057'));
+});
