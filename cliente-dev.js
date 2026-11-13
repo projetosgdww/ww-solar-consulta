@@ -103,8 +103,8 @@
     const kit=C.recommendedKit(available(),S.target);
     const hasKits=available().some(p=>p.kind==='kit');
     $('client-result-button').disabled=!kit;
-    const linkedProject=kit?C.projectForKwp(C.kitKwp(kit)):null;
-    $('client-result-project-button').disabled=!kit||!linkedProject||!available().some(p=>p.id===linkedProject.id);
+    const linkedProject=kit?projectForKit(kit):null;
+    $('client-result-project-button').disabled=!kit||!linkedProject;
     const custom=$('client-custom-kit-cta');
     custom.hidden=Boolean(kit);
     if(!kit){
@@ -225,8 +225,8 @@
       const price=el('div');price.append(el('small','Valor dos equipamentos'),el('b',euro(p.price)));
       bottom.append(price,btn(p.kind==='kit'?'Solicitar cotação +':'Adicionar ao carrinho +',()=>add(p.id),'details-button'));
       if(p.kind==='kit'){
-        const project=C.projectForKwp(C.kitKwp(p));
-        if(project&&available().some(item=>item.id===project.id)){
+        const project=projectForKit(p);
+        if(project){
           bottom.append(btn('Kit + projeto ('+euro(project.price)+') ↗',()=>addWithProject(p.id),'button button-outline'));
           card.append(el('small','Projeto opcional. TRT não inclusa; pagamento pelo contratante.','client-muted'));
         }
@@ -334,24 +334,52 @@
     else{if(next.length>=25){status('Máximo de 25 tipos de produto.');return;}next.push({id,qty:1});}
     save(next,'Produto adicionado ao carrinho!');
   }
-  function addWithProject(kitId){
-    const products=available();
-    const kit=products.find(p=>p.kind==='kit'&&p.id===kitId);
-    if(!kit){status('Kit indisponível no momento.');return;}
-    const pricing=C.projectForKwp(C.kitKwp(kit));
-    const service=pricing&&products.find(p=>p.id===pricing.id&&p.payload?.categoria==='projetos');
-    if(!service){status('Projeto para esta faixa sob consulta. Fale conosco para confirmar o valor.');return;}
-    const next=S.lines.map(x=>({...x}));
-    for(const id of [kitId,service.id]){
-      const existing=next.find(x=>x.id===id);
-      if(existing){if(existing.qty>=99){status('Limite de itens no carrinho.');return;}existing.qty++;}
-      else{if(next.length>=25){status('Máximo de 25 tipos de produto.');return;}next.push({id,qty:1});}
+  // Cada kit tem uma referência própria de projeto; isso evita misturar
+  // seleções quando dois kits utilizam a mesma faixa de preço.
+  function projectForKit(kit){
+    if(!kit||kit.kind!=='kit'||!/^WW-(300|500|800|1000|1200|1500|1800|2000)$/.test(kit.id))return null;
+    return available().find(p=>p.id==='PRJ-'+kit.id &&
+      p.payload?.categoria==='projetos' && p.payload?.kitCodigo===kit.id)||null;
+  }
+  function setKitProject(kitId,include){
+    const kit=available().find(p=>p.kind==='kit'&&p.id===kitId);
+    const line=S.lines.find(x=>x.id===kitId);
+    const project=projectForKit(kit);
+    if(!line||!project){status('Confira o kit e tente novamente.');return;}
+    let next=S.lines.map(x=>({...x})).filter(x=>x.id!==project.id);
+    if(include){
+      if(next.length>=25){status('Limite de 25 produtos por cotação.');return;}
+      next.push({id:project.id,qty:line.qty});
     }
-    save(next,'Kit e projeto incluídos na cotação. TRT não inclusa; pagamento pelo contratante.');
+    save(next,include?
+      'Projeto incluído. TRT não inclusa; paga pelo contratante.':
+      'Projeto retirado da cotação.');
+  }
+  function addWithProject(kitId){
+    const kit=available().find(p=>p.kind==='kit'&&p.id===kitId);
+    const project=projectForKit(kit);
+    if(!kit||!project){status('Projeto para esta faixa sob consulta. Fale conosco.');return;}
+    const next=S.lines.map(x=>({...x}));
+    const row=next.find(x=>x.id===kitId);
+    if(row){if(row.qty>=99){status('Limite por produto: 99 unidades.');return;}row.qty++;}
+    else{if(next.length>=24){status('Máximo de 25 tipos de produto.');return;}next.push({id:kitId,qty:1});}
+    const projectLine=next.find(x=>x.id===project.id);
+    if(projectLine)projectLine.qty=row?row.qty:1;
+    else if(next.length<25)next.push({id:project.id,qty:row?row.qty:1});
+    else {status('Limite de 25 tipos de produto.');return;}
+    save(next,'Kit e projeto incluídos. TRT não inclusa; paga pelo contratante.');
+  }
+  function removeCartItem(id){
+    const next=S.lines.filter(x=>x.id!==id && x.id!=='PRJ-'+id);
+    save(next,'Item removido.');
   }
   function quantity(id,delta){
     const next=S.lines.map(x=>({...x})),r=next.find(x=>x.id===id);if(!r)return;
+    // Serviços vinculados acompanham a quantidade de kits.
+    if(id.startsWith('PRJ-WW-'))return;
     r.qty=Math.max(0,Math.min(99,r.qty+delta));
+    const service=next.find(x=>x.id==='PRJ-'+id);
+    if(service)service.qty=r.qty;
     save(next.filter(x=>x.qty>0),'Quantidade atualizada.');
   }
   function makeCartRow(x,missing=false){
@@ -492,7 +520,9 @@
       const reference=String(data.order.id).slice(0,8).toUpperCase();
       status('Solicitação '+reference+' registrada no histórico. O envio da mensagem deve ser confirmado no WhatsApp.');
       showToast('Solicitação registrada! Abrindo WhatsApp...');
-      window.location.assign('https://wa.me/'+cfg.whatsapp+'?text='+encodeURIComponent(message));
+      const hasProject=S.lines.some(line=>available().some(p=>p.id===line.id&&p.payload?.categoria==='projetos'));
+      const destination=hasProject&&/^55\\d{10,11}$/.test(cfg.projectWhatsapp||'')?cfg.projectWhatsapp:cfg.whatsapp;
+      window.location.assign('https://wa.me/'+destination+'?text='+encodeURIComponent(message));
     }catch(e){
       status('Não foi possível completar a operação. Confira a conexão ou consulte seu atendimento.');
     }finally{S.checkoutPending=false;updateClock();}
