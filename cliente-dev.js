@@ -189,7 +189,7 @@
       const top=el('div',undefined,'kit-top');
       top.append(el('span',p.kind==='kit'?'Kit solar':'Peça avulsa','kit-id'),el('span','Cotação a confirmar','kit-status'));
       card.append(top);
-      const heading=el('h3',p.kind==='kit'?decimal(p.payload?.potenciaKwp)+' kWp':p.title);
+      const heading=el('h3',p.title);
       card.append(heading);
       if(p.kind==='kit'){
         const x=p.payload||{};
@@ -205,6 +205,7 @@
           const row=el('div');row.append(el('span',title),el('strong',value));facts.append(row);
         }
         card.append(facts);
+        card.append(el('small','Inclui módulos, inversor, fixação, perfis, cabos e conectores.','client-muted'));
       }else{
         const facts=el('div',undefined,'kit-facts');
         const row=el('div');row.append(el('span','Categoria'),el('strong',String(p.payload?.categoria||'Equipamento')));
