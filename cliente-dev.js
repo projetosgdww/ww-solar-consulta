@@ -103,6 +103,8 @@
     const kit=C.recommendedKit(available(),S.target);
     const hasKits=available().some(p=>p.kind==='kit');
     $('client-result-button').disabled=!kit;
+    const linkedProject=kit?C.projectForKwp(C.kitKwp(kit)):null;
+    $('client-result-project-button').disabled=!kit||!linkedProject||!available().some(p=>p.id===linkedProject.id);
     const custom=$('client-custom-kit-cta');
     custom.hidden=Boolean(kit);
     if(!kit){
@@ -131,6 +133,7 @@
     $('result-panels').textContent=number(x.placas)+' × '+number(x.moduloWp)+' Wp';
     $('result-inverter').textContent=String(x.inversor||'A confirmar');
     $('result-price').textContent=euro(kit.price);
+    if(linkedProject&&!$('client-result-project-button').disabled) $('client-result-project-button').textContent='Kit + projeto ('+euro(linkedProject.price)+') ↗';
   }
   function setKind(kind){
     S.kind=kind;
@@ -156,7 +159,7 @@
     wrap.hidden=S.kind!=='piece';
     wrap.replaceChildren();
     if(S.kind!=='piece')return;
-    const all=available().filter(p=>p.kind==='piece');
+    const all=available().filter(p=>p.kind==='piece'&&p.payload?.categoria!=='projetos');
     const groups=new Map();
     for(const p of all){
       const category=String(p.payload?.categoria||'').toLowerCase();
@@ -175,7 +178,7 @@
   }
   function renderProducts(){
     const q=S.query.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
-    const products=(S.kind==='kit'?C.matchingKits(available(),S.target):available().filter(p=>p.kind==='piece'))
+    const products=(S.kind==='kit'?C.matchingKits(available(),S.target):available().filter(p=>p.kind==='piece'&&p.payload?.categoria!=='projetos'))
       .filter(p=>S.kind==='kit'||S.category==='all'||String(p.payload?.categoria||'').toLowerCase()===S.category)
       .filter(p=>!q||[p.id,p.title,p.payload?.inversor,p.payload?.categoria]
         .some(v=>String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().includes(q)))
@@ -221,6 +224,13 @@
       const bottom=el('div',undefined,'kit-bottom');
       const price=el('div');price.append(el('small','Valor dos equipamentos'),el('b',euro(p.price)));
       bottom.append(price,btn(p.kind==='kit'?'Solicitar cotação +':'Adicionar ao carrinho +',()=>add(p.id),'details-button'));
+      if(p.kind==='kit'){
+        const project=C.projectForKwp(C.kitKwp(p));
+        if(project&&available().some(item=>item.id===project.id)){
+          bottom.append(btn('Kit + projeto ('+euro(project.price)+') ↗',()=>addWithProject(p.id),'button button-outline'));
+          card.append(el('small','Projeto opcional. TRT não inclusa; pagamento pelo contratante.','client-muted'));
+        }
+      }
       card.append(bottom);
       if(p.kind==='kit')card.append(el('small','Estimativa de geração. Equipamentos, compatibilidade e instalação sujeitos à validação técnica antes da contratação.','client-muted'));
       grid.append(card);
@@ -324,6 +334,21 @@
     else{if(next.length>=25){status('Máximo de 25 tipos de produto.');return;}next.push({id,qty:1});}
     save(next,'Produto adicionado ao carrinho!');
   }
+  function addWithProject(kitId){
+    const products=available();
+    const kit=products.find(p=>p.kind==='kit'&&p.id===kitId);
+    if(!kit){status('Kit indisponível no momento.');return;}
+    const pricing=C.projectForKwp(C.kitKwp(kit));
+    const service=pricing&&products.find(p=>p.id===pricing.id&&p.payload?.categoria==='projetos');
+    if(!service){status('Projeto para esta faixa sob consulta. Fale conosco para confirmar o valor.');return;}
+    const next=S.lines.map(x=>({...x}));
+    for(const id of [kitId,service.id]){
+      const existing=next.find(x=>x.id===id);
+      if(existing){if(existing.qty>=99){status('Limite de itens no carrinho.');return;}existing.qty++;}
+      else{if(next.length>=25){status('Máximo de 25 tipos de produto.');return;}next.push({id,qty:1});}
+    }
+    save(next,'Kit e projeto incluídos na cotação. TRT não inclusa; pagamento pelo contratante.');
+  }
   function quantity(id,delta){
     const next=S.lines.map(x=>({...x})),r=next.find(x=>x.id===id);if(!r)return;
     r.qty=Math.max(0,Math.min(99,r.qty+delta));
@@ -376,7 +401,7 @@
     updateClock();
   }
   function renderAll(){
-    $('client-available-count').textContent=String(available().length);
+    $('client-available-count').textContent=String(available().filter(p=>p.payload?.categoria!=='projetos').length);
     renderRecommendation();renderCategories();renderProducts();renderCart();setTarget(S.target);
   }
   async function refreshQuote(){
@@ -494,6 +519,10 @@
   $('client-result-button').addEventListener('click',()=>{
     const kit=C.recommendedKit(available(),S.target);
     if(kit)add(kit.id);
+  });
+  $('client-result-project-button').addEventListener('click',()=>{
+    const kit=C.recommendedKit(available(),S.target);
+    if(kit)addWithProject(kit.id);
   });
   $('client-checkout').addEventListener('click',checkout);
   $('client-drawer-checkout').addEventListener('click',checkout);
