@@ -2,12 +2,12 @@ const test=require('node:test');
 const assert=require('node:assert/strict');
 const C=require('../cliente-core.js');
 const products=[
-  {id:'KIT-008',kind:'kit',title:'Kit 6,25 kWp',price:10276.46,active:true,approved:true,payload:{geracaoMensalKwh:800}},
+  {id:'KIT-008',kind:'kit',title:'Kit 6,25 kWp',price:10276.46,active:true,approved:true,payload:{potenciaKwp:6.25,geracaoMensalKwh:9999}},
   {id:'PAV-036',kind:'piece',title:'Inversor 3 kW',price:1624.88,active:true,approved:true,payload:{}},
-  {id:'KIT-010',kind:'kit',title:'Kit 8 kWp',price:12500,active:true,approved:true,payload:{geracaoMensalKwh:1100}}
+  {id:'KIT-010',kind:'kit',title:'Kit 8 kWp',price:12500,active:true,approved:true,payload:{potenciaKwp:8,geracaoMensalKwh:9999}}
 ];
 test('simulador escolhe menor kit que atende',()=>assert.equal(C.recommendedKit(products,750).id,'KIT-008'));
-test('simulador escolhe o maior se nenhum atende',()=>assert.equal(C.recommendedKit(products,15000).id,'KIT-010'));
+test('simulador não indica kit abaixo da geração desejada',()=>assert.equal(C.recommendedKit(products,15000),null));
 test('carrinho soma em centavos sem floating point',()=>{
  const result=C.sumCart([{id:'PAV-036',qty:2},{id:'KIT-008',qty:1}],products);
  assert.equal(result.cents,1352622);
@@ -36,4 +36,24 @@ test('carrinho expira em 25 minutos sem virar reserva de estoque',()=>{
  assert.equal(C.quoteClock(25*60*1000),'25:00');
  assert.equal(C.quoteClock(79*1000),'01:19');
  assert.equal(C.quoteClock(0),'00:00');
+});
+
+test('geração mensal usa exclusivamente 128 vezes a potência em kWp',()=>{
+  assert.equal(C.GENERATION_FACTOR,128);
+  assert.equal(C.estimatedGeneration(products[0]),800);
+  assert.equal(C.estimatedGeneration(products[2]),1024);
+  assert.equal(C.estimatedGeneration({payload:{placas:6,moduloWp:625}}),480);
+  assert.equal(C.estimatedGeneration({payload:{potenciaKwp:16.25}}),2080);
+});
+test('faixa de geração lista somente kits aprovados acima da demanda',()=>{
+  const kits=[
+    {id:'Z6',kind:'kit',active:true,approved:true,price:100,payload:{potenciaKwp:3.60}},
+    {id:'D6',kind:'kit',active:true,approved:true,price:102,payload:{potenciaKwp:3.75}},
+    {id:'D8',kind:'kit',active:true,approved:true,price:110,payload:{potenciaKwp:5}},
+    {id:'LEGADO',kind:'kit',active:false,approved:false,price:5,payload:{potenciaKwp:7}}
+  ];
+  assert.deepEqual(C.matchingKits(kits,470).map(p=>p.id),['D6','D8']);
+  assert.deepEqual(C.matchingKits(kits,1000),[]);
+  assert.equal(C.recommendedKit(kits,470).id,'D6');
+  assert.equal(C.recommendedKit(kits,1000),null);
 });
