@@ -12,13 +12,13 @@ test('oito faixas padronizadas de 300 a 2000 kWh sem duplicidade',()=>{
  assert.deepEqual(K.specifications.map(x=>x.target),[300,500,800,1000,1200,1500,1800,2000]);
  assert.equal(new Set(K.specifications.map(x=>x.code)).size,8);
 });
-test('WW-300 tem 4 painéis, 4 perfis, 1 fixação e 25 m por cor, sem MC4 avulso',()=>{
+test('WW-300 tem 4 painéis, 4 perfis, 1 fixação e 25 m por cor, com 4 pares MC4',()=>{
  const q=K.compose(K.specifications[0],products);
  assert.deepEqual(q.rows.map(r=>[r.sku,r.quantity]),[
-  ['PAV-044',4],['PAV-034',1],['PAV-029',1],['PAV-024',4],['PAV-001',1],['PAV-002',1]
+  ['PAV-044',4],['PAV-034',1],['PAV-029',1],['PAV-024',4],['PAV-001',1],['PAV-002',1],['PAV-007',2]
  ]);
  assert.equal(q.generationKwhMonth,307.2);
- assert.equal(q.previewPrice,5464.5);
+ assert.equal(q.previewPrice,5016.63);
 });
 test('WW-500 escolhe SAJ 3 kW e mantém alerta de corrente',()=>{
  const q=K.compose(K.specifications[1],products);
@@ -40,14 +40,17 @@ test('WW-1200 usa SAJ 7,3 kW e três maiores têm aviso trifásico',()=>{
   assert.equal(q.gridRequired,'trifasica_380');
  }
 });
-test('todos os oito permanecem bloqueados para venda e mantêm preço das peças +15%',()=>{
+test('todos os oito usam 5% e quatro pares MC4, permanecendo bloqueados para venda',()=>{
  for(const spec of K.specifications){
   const q=K.compose(spec,products);
   assert.equal(q.engineeringApproved,false);
   assert.equal(q.published,false);
   assert(q.previewPrice>0);
   assert.equal(q.pending.length,0);
+  assert.equal(q.markupPercent,5);
+  assert.equal(q.mc4Pairs,4);
+  assert.equal(q.rows.find(r=>r.sku==='PAV-007').quantity,2);
   assert(q.engineeringPending.length>0);
-  assert.equal(q.previewPrice,Math.round(Math.round(q.subtotal*100)*1.15)/100);
+  assert.equal(q.previewPrice,Math.round(Math.round(q.subtotal*100)*1.05)/100);
  }
 });
