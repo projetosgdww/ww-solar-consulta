@@ -118,7 +118,7 @@
     const target=C.estimatedGeneration(kit)||0;
     $('result-status').textContent=target>=S.target?'ATENDE À REFERÊNCIA':'ABAIXO DO SOLICITADO';
     $('result-title').textContent=kit.title;
-    $('result-description').textContent=kit.id+' · '+number(x.moduloWp)+' Wp por módulo';
+    $('result-description').textContent='Geração mensal estimada · '+number(x.moduloWp)+' W por módulo · confirmar instalação';
     $('result-generation').textContent=number(target);
     $('result-power').textContent=decimal(x.potenciaKwp)+' kWp';
     $('result-panels').textContent=number(x.placas)+' × '+number(x.moduloWp)+' Wp';
@@ -187,7 +187,7 @@
     for(const p of products){
       const card=el('article',undefined,'kit-card');
       const top=el('div',undefined,'kit-top');
-      top.append(el('span',p.id,'kit-id'),el('span','Cotação a confirmar','kit-status'));
+      top.append(el('span',p.kind==='kit'?'Kit solar':'Peça avulsa','kit-id'),el('span','Cotação a confirmar','kit-status'));
       card.append(top);
       const heading=el('h3',p.kind==='kit'?decimal(p.payload?.potenciaKwp)+' kWp':p.title);
       card.append(heading);
@@ -200,7 +200,7 @@
         for(const [title,value] of [
           ['Módulos',number(x.placas)+' × '+number(x.moduloWp)+' Wp'],
           ['Inversor',String(x.inversor||'A confirmar')],
-          ['Referência',p.id]
+          ['Tipo de ligação',String(x.tipoRede||'Conforme avaliação do local')]
         ]){
           const row=el('div');row.append(el('span',title),el('strong',value));facts.append(row);
         }
@@ -212,8 +212,9 @@
       }
       const bottom=el('div',undefined,'kit-bottom');
       const price=el('div');price.append(el('small','Valor dos equipamentos'),el('b',euro(p.price)));
-      bottom.append(price,btn('Adicionar ao carrinho +',()=>add(p.id),'details-button'));
+      bottom.append(price,btn(p.kind==='kit'?'Solicitar cotação +':'Adicionar ao carrinho +',()=>add(p.id),'details-button'));
       card.append(bottom);
+      if(p.kind==='kit')card.append(el('small','Estimativa de geração. Equipamentos, compatibilidade e instalação sujeitos à validação técnica antes da contratação.','client-muted'));
       grid.append(card);
     }
   }
