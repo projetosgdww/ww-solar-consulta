@@ -7,6 +7,7 @@
 <div id="admin-tabs" class="admin-tabs" role="group" aria-label="Seções do painel" hidden>
   <button id="admin-tab-clients" class="active" type="button" aria-pressed="true" data-admin-panel="clients"><span>👥</span><strong>Clientes</strong><small>Cadastrar e gerenciar acessos</small></button>
   <button id="admin-tab-orders" type="button" aria-pressed="false" data-admin-panel="orders"><span>📋</span><strong>Pedidos</strong><small>Histórico e negociações</small></button>
+  <button id="admin-tab-kits" type="button" aria-pressed="false" data-admin-panel="kits"><span>☀️</span><strong>Kits em revisão</strong><small>32 composições preliminares</small></button>
 </div>
 <section class="client-login admin-clients-panel" id="admin-clients-panel">
 <h1>Liberação de <em>clientes.</em></h1><p>Informe apenas o e-mail do cliente. Para novos acessos, o sistema gera uma senha individual no formato <strong>GDWW-xxxxxx-xxxxxx</strong> com caracteres aleatórios, mostrada uma vez para copiar.</p><p>Perdeu a senha de um cliente? Use <strong>Reemitir senha</strong> para substituir a anterior, sem excluir sua conta ou carrinho.</p>
@@ -36,7 +37,21 @@
 <div id="admin-order-list" class="admin-order-list"></div>
 <p class="client-muted">São exibidas as 100 solicitações mais recentes neste piloto DEV. Nenhum pagamento ou compra é realizado automaticamente.</p>
 </section>
+<section id="admin-kits-panel" class="admin-orders-panel" hidden aria-label="Composições preliminares de kits">
+ <div class="admin-section-row"><div><h2>Kits em revisão técnica</h2>
+ <p class="client-muted">Composições comerciais calculadas com os preços avulsos atuais. Não são ofertas aprovadas nem aparecem aos clientes.</p></div>
+ <button type="button" id="admin-refresh-kits" class="button button-outline">Atualizar prévias</button></div>
+ <div class="admin-order-toolbar">
+ <label for="admin-kit-brand">Linha</label>
+ <select id="admin-kit-brand"><option value="all">Todas (32)</option><option value="Z600">ZNSHINE 600 W</option><option value="D625">DMEGC 625 W</option><option value="D710">DMEGC 710 W</option></select>
+ <label for="admin-kit-status-filter">Situação</label>
+ <select id="admin-kit-status-filter"><option value="all">Todas</option><option value="candidato_pendente">Candidato preliminar</option><option value="ficha_modelo_pendente">Falta vincular ficha</option><option value="sem_inversor_na_base">Sem potência CA disponível</option></select>
+ <span id="admin-kit-count" aria-live="polite">—</span></div>
+ <p id="admin-kit-status" class="client-status" role="status">Abra esta aba para carregar as composições.</p>
+ <div id="admin-kit-list" class="admin-order-list"></div>
+ <p class="client-muted">Premissas: geração = kWp × 128; inversor ≥ kWp × 0,77; estrutura cerâmica com 1 perfil por módulo; 2,5 m de cada cor por módulo, em rolos inteiros; proteção elétrica fora; preço avulso das peças + 15%. Conectores/strings são provisórios.</p>
+</section>
 </main>
 <footer class="footer"><div class="shell footer-inner"><span><strong>WW</strong>SOLAR</span><span>Administração restrita · DEV</span></div></footer>
-<script defer src="./cliente-dev-config.js"></script><script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0/dist/umd/supabase.min.js"></script><script defer src="./admin-dev.js"></script>
+<script defer src="./cliente-dev-config.js"></script><script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0/dist/umd/supabase.min.js"></script><script defer src="./kit-line-commercial-v2.js?v=20261113-kits-v2"></script><script defer src="./admin-dev.js?v=20261113-kits-v2"></script>
 </body></html>
