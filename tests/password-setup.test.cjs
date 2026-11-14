@@ -36,3 +36,14 @@ test('após salvar nova senha, inicia sessão nova em vez de atualizar token rev
  assert.match(flow,/email,password:first/);
  assert.match(flow,/Sua senha foi atualizada\. Entre novamente/);
 });
+
+test('link de recuperação preserva intenção de troca ao abrir o WW Solar',()=>{
+ assert.match(client,/searchParams\.set\('wwsolar_recovery','1'\)/);
+ assert.match(client,/queryParams\.get\('wwsolar_recovery'\)==='1'/);
+ assert.match(client,/showPasswordSetup\(S\.recoveryMode\?'recovery':'first'\)/);
+ assert.match(client,/S\.db\.auth\.resetPasswordForEmail\(email,\{/);
+});
+test('marcador de recuperação não permanece após salvar ou cancelar',()=>{
+ const count=(client.match(/searchParams\.delete\('wwsolar_recovery'\)/g)||[]).length;
+ assert.equal(count,2);
+});
