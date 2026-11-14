@@ -25,3 +25,13 @@ test('layout e arquivos incluídos na compilação DEV',()=>{
  const build=read('scripts/build-cliente-dev.mjs');
  assert.match(build,/'theme.js','theme.css'/);
 });
+
+test('botão de tema alterna por clique sem lista suspensa',()=>{
+ const js=read('theme.js'),css=read('theme.css');
+ assert.match(js,/\.ww-theme-button/);
+ assert.match(js,/addEventListener\('click'/);
+ assert.match(js,/options\[\(options\.indexOf\(preference\)\+1\)%options\.length\]/);
+ assert.doesNotMatch(js,/createElement\('select'\)/);
+ assert.match(css,/\.header \.header-inner #client-cart-top\{order:4/);
+ assert.match(css,/html\[data-theme=dark\] \.client-project-option\{/);
+});
