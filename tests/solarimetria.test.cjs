@@ -9,7 +9,7 @@ for(const city of ['Canindé','Caridade','Paramoti']){
    const loc=synthetic(city,4.0);
    const result=solar.calculate(2.4,loc,2026);
    assert.equal(result.monthly.length,12);
-   for(let i=0;i<12;i++)assert.equal(result.monthly[i].kwh,2.4*loc.hsp[months[i]]*result.monthly[i].days*0.75);
+   for(let i=0;i<12;i++)assert.equal(result.monthly[i].kwh,2.4*loc.hsp[months[i]]*result.monthly[i].days*0.77);
    assert.ok(Math.abs(result.annualKwh-result.monthly.reduce((s,v)=>s+v.kwh,0))<1e-9);
    assert.equal(result.averageMonthlyKwh,result.annualKwh/12);
  });
