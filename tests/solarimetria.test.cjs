@@ -18,7 +18,7 @@ test('fevereiro: 28 e 29 dias, respeitando o calendário',()=>{
  const loc=synthetic('Local teste',4.0);
  const a=solar.calculate(2.4,loc,2026),b=solar.calculate(2.4,loc,2024);
  assert.equal(a.monthly[1].days,28);assert.equal(b.monthly[1].days,29);
- assert.equal(b.monthly[1].kwh-a.monthly[1].kwh,2.4*loc.hsp.fev*.75);
+ assert.ok(Math.abs((b.monthly[1].kwh-a.monthly[1].kwh)-(2.4*loc.hsp.fev*.75))<1e-9);
 });
 test('sem dados reais ou município cadastrado: sem estimativa',()=>{
  for(const city of ['Canindé','Caridade','Paramoti'])assert.equal(data.find('CE',city),null);
