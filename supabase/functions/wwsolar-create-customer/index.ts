@@ -58,10 +58,15 @@ Deno.serve(async(req)=>{
       .select("active,email").eq("user_id",user.id).maybeSingle();
     if(accessError||!access?.active||access.email!==user.email?.trim().toLowerCase())
       return reply(403,{error:"access_inactive"},origin);
-    // Executar SOMENTE após updateUser({password}) no aplicativo.
-    // A flag é uma exigência do fluxo oficial de interface, não uma proteção
-    // contra clientes maliciosos que chamem diretamente esta API.
+    // A senha pessoal é definida e a exigência de troca é removida
+    // na MESMA chamada privilegiada. Não há ação separada que permita
+    // liberar a conta sem efetivamente alterar a senha temporária.
+    const newPassword=submitted?.new_password;
+    if(typeof newPassword!=="string"||newPassword.length<12||newPassword.length>128
+       ||/^GDWW-/i.test(newPassword))
+      return reply(400,{error:"invalid_new_password"},origin);
     const {error:completeError}=await admin.auth.admin.updateUserById(user.id,{
+      password:newPassword,
       app_metadata:{...user.app_metadata,wwsolar_password_change_required:false}
     });
     if(completeError)return reply(500,{error:"setup_completion_failed"},origin);
