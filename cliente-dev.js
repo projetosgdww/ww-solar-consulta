@@ -326,7 +326,7 @@
       if(p.kind==='kit'){
         const x=p.payload||{};
         const gen=el('p',undefined,'kit-generation');
-        gen.append(el('strong',number(C.estimatedGeneration(p))+' kWh/mês'),document.createTextNode(' estimados*'));
+        gen.append(el('strong',number(C.estimatedGeneration(p))+' kWh/mês'),document.createTextNode(' de média mensal estimada*'));
         card.append(gen);
         const facts=el('div',undefined,'kit-facts');
         for(const [title,value] of [
