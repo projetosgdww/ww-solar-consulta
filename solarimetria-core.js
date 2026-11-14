@@ -6,7 +6,7 @@
  else root.WWSolarSolarCore=api;
 })(typeof globalThis==='undefined'?this:globalThis,function(){
  'use strict';
- const PERFORMANCE_RATIO=0.75;
+ const PERFORMANCE_RATIO=0.77;
  const MONTH_LABELS=Object.freeze(['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro']);
  const KEYS=Object.freeze(['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez']);
  function days(year,monthIndex){
