@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="WW Solar">
-<link rel="stylesheet" href="./styles.css?v=20261114-legal-v1"><link rel="stylesheet" href="./cliente-dev.css?v=20261114-password-setup-v2">
+<link rel="stylesheet" href="./styles.css?v=20261114-legal-v1"><link rel="stylesheet" href="./cliente-dev.css?v=20261114-solar-mensal-v1">
 </head>
 <body>
 <a class="skip-link" href="#client-main">Ir para o conteúdo</a>
@@ -105,6 +105,7 @@
 <section class="catalogue-section" id="catalogo" aria-labelledby="catalogo-title">
       <div class="shell">
         <div class="section-title catalogue-heading"><div><div class="section-label">02 / CATÁLOGO DE EQUIPAMENTOS</div><h2 id="catalogo-title">Consulte as opções disponíveis.</h2><p>Kits e peças disponíveis para solicitar cotação. O dimensionamento definitivo dependerá das condições da instalação.</p></div><div class="catalogue-counter"><strong id="client-available-count">—</strong><small>itens para consulta</small></div></div><div class="client-filter-tabs" role="group" aria-label="Tipo de produto" style="margin-bottom:14px"><button type="button" data-kind="kit" class="active" aria-pressed="true">Kits solares</button><button type="button" data-kind="piece" aria-pressed="false">Peças avulsas</button></div>
+<div class="solar-location-control" id="solar-location-control"><label for="solar-city">Município para estimativa de geração</label><select id="solar-city"><option value="">Selecione o município</option><option value="Canindé">Canindé/CE</option><option value="Caridade">Caridade/CE</option><option value="Paramoti">Paramoti/CE</option></select><small id="solar-city-hint">A estimativa atual é uma referência comercial até selecionar um município.</small></div>
 <div class="client-category-tabs" id="client-category-tabs" role="group" aria-label="Categorias de peças" hidden></div>
 <div class="filterbar"><label class="search-wrap"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m16 16 5 5"/></svg><span class="sr-only">Pesquisar equipamentos</span><input type="search" id="client-search" placeholder="Pesquisar por fabricante, potência ou equipamento..." autocomplete="off"></label><span class="reset-filters" id="client-filter-label">CD Fortaleza • Cotação a confirmar</span></div>
 <div class="result-count" id="client-result-count" aria-live="polite">Carregando catálogo...</div>
@@ -149,6 +150,8 @@
 <script src="./cliente-dev-config.js?v=20261114-password-setup-v2" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0/dist/umd/supabase.min.js" defer></script>
 <script src="./cliente-core.js?v=20261114-password-setup-v2" defer></script>
-<script src="./cliente-dev.js?v=20261114-media-mensal-v1" defer></script>
+<script src="./solarimetria-data.js?v=20261114-solar-mensal-v1" defer></script>
+<script src="./solarimetria-core.js?v=20261114-solar-mensal-v1" defer></script>
+<script src="./cliente-dev.js?v=20261114-solar-mensal-v1" defer></script>
 <script src="./cliente-pwa.js?v=20261114-password-setup-v2" defer></script>
 </body></html>
