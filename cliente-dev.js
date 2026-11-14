@@ -304,7 +304,8 @@
   }
   // Cálculo exclusivamente de apresentação; seleção comercial, preços e checkout permanecem intactos.
   // Cálculo consultivo exclusivo do card; não modifica seleção, preços ou cotações.
-  const solarDemoEnabled = /^(?!ww-solar\\.pages\\.dev$)[a-z0-9-]+\\.ww-solar\\.pages\\.dev$/.test(window.location.hostname)
+  const solarDemoEnabled = /^([a-z0-9-]+)\.ww-solar\.pages\.dev$/.test(window.location.hostname)
+    && window.location.hostname !== 'ww-solar.pages.dev'
     && window.WWSolarSolarDemo?.synthetic === true;
   function solarEstimate(p,city){
     if(!city||!Solar||!SolarData)return null;
