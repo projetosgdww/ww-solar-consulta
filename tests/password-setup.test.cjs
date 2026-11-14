@@ -26,3 +26,13 @@ test('a interface oferece senha própria e recuperação',()=>{
   assert.match(html,new RegExp('id="'+id+'"'));
  assert.match(client,/resetPasswordForEmail/);
 });
+
+test('após salvar nova senha, inicia sessão nova em vez de atualizar token revogado',()=>{
+ const start=client.indexOf('async function savePersonalPassword(');
+ const end=client.indexOf('async function cancelPasswordSetup(',start);
+ const flow=client.slice(start,end);
+ assert.doesNotMatch(flow,/auth\.refreshSession\(/);
+ assert.match(flow,/auth\.signInWithPassword\(/);
+ assert.match(flow,/email,password:first/);
+ assert.match(flow,/Sua senha foi atualizada\. Entre novamente/);
+});
