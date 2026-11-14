@@ -1,11 +1,11 @@
 /* WW Solar — temas da área de clientes, administração e documentos (somente DEV).
    Temas escuros priorizam contraste; identidade da marca permanece nos cabeçalhos. */
-.ww-theme-switch{display:flex;align-items:center;margin-left:auto;flex:0 0 auto;position:relative;z-index:95}
-.ww-theme-label{display:flex;align-items:center;gap:5px;font-size:0}
-.ww-theme-select{font:600 11px/1.2 system-ui,-apple-system,"Segoe UI",sans-serif;min-height:32px;padding:5px 22px 5px 9px;border-radius:9px;background:#203639;color:#f2f7f4;border:1px solid #6d8380;max-width:105px;cursor:pointer;color-scheme:dark}
-.ww-theme-select:focus-visible{outline:2px solid #ffcf54;outline-offset:3px}
-.ww-theme-select option{background:#203639;color:#fff}
-@media(max-width:560px){.ww-theme-switch{margin-left:2px}.ww-theme-select{font-size:10px;padding:5px 4px;max-width:78px;min-height:30px}}
+.ww-theme-switch{display:flex;align-items:center;flex:0 0 auto;position:relative;z-index:95;margin-left:8px}
+.ww-theme-button{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-width:75px;min-height:36px;padding:6px 10px;border:1px solid #637d79;border-radius:10px;background:#203639;color:#eef7f2;font:700 11px/1.2 system-ui,-apple-system,"Segoe UI",sans-serif;white-space:nowrap;cursor:pointer}
+.ww-theme-button:hover{background:#2d4e4b;border-color:#94b4ac}
+.ww-theme-button:focus-visible{outline:2px solid #ffcf54;outline-offset:3px}
+.ww-theme-icon{font-size:15px;line-height:1}
+@media(max-width:560px){.ww-theme-switch{margin-left:2px}.ww-theme-button{min-width:42px;min-height:38px;padding:5px 7px;font-size:10px;gap:4px}}
 /* O tema padrão existente é preservado. */
 html[data-theme=dark]{--ink:#eaf1ed;--paper:#111e22;--line:#334b4a;--white:#1b2b2e;--muted:#afc2bd;--shadow:0 18px 45px rgba(0,0,0,.24);color-scheme:dark}
 html[data-theme=dark] body{background:#101b1f;color:#eaf1ed}
@@ -54,13 +54,31 @@ html[data-theme=dark] .document .eyebrow{color:#eccc70}
  .ww-theme-switch{display:none!important}
 }
 
-/* Alinha o seletor com as ações da conta no cabeçalho compacto. */
-@media(max-width:930px){
- .header .ww-theme-switch{order:2;margin-left:2px}
-}
-@media(max-width:390px){
- .header .ww-theme-select{max-width:72px;font-size:9px;padding:4px 2px}
-}
-@media(max-width:600px){
- .site-header .ww-theme-switch{margin:6px 0 2px}
-}
+
+/* Header: carrinho termina à direita, depois do botão de aparência. */
+.header .header-inner{gap:clamp(10px,1.7vw,25px)}
+.header .header-inner #client-nav{margin-left:auto;gap:clamp(10px,1.6vw,27px)}
+.header .header-inner .client-header-actions{flex:0 0 auto}
+.header .header-inner .ww-theme-switch{order:3;margin-left:auto}
+.header .header-inner #client-cart-top{order:4;margin-left:5px}
+.header .header-inner .brand{order:0;flex:0 0 auto}
+.header .header-inner #client-nav{order:1}
+.header .header-inner .client-header-actions{order:2}
+@media(max-width:930px){.header .header-inner{gap:10px}.header .header-inner #client-nav{gap:9px}}
+@media(max-width:700px){.header .header-inner .ww-theme-switch{margin-left:auto}.header .header-inner #client-cart-top{margin-left:0}}
+@media(max-width:430px){.header .header-inner{gap:5px}.header .ww-theme-current{display:none}.header .ww-theme-button{min-width:37px}.header .header-inner .ww-theme-switch{margin-left:auto}}
+@media(max-width:600px){.site-header .ww-theme-switch{margin:6px 0 2px}}
+/* Carrinho: não deixar cartão de projeto e legendas ilegíveis no escuro. */
+html[data-theme=dark] .client-project-option{background:#233e37;color:#e5f5e9;border:1px solid #4f806c}
+html[data-theme=dark] .client-project-option strong{color:#f0fff4}
+html[data-theme=dark] .client-project-option small{color:#c2dfcc!important}
+html[data-theme=dark] .client-linked-project-item{background:#263b39;color:#ecf3ef}
+html[data-theme=dark] .client-drawer-head p{color:#bfd2cc}
+html[data-theme=dark] .client-drawer-total{color:#c5d6d0}
+html[data-theme=dark] .client-drawer-bottom small{color:#c0d2cb!important}
+html[data-theme=dark] .client-drawer-items .client-cart-line .client-muted{color:#c3d3cd!important}
+html[data-theme=dark] .client-drawer-items .client-cart-line>strong{color:#eef7f2}
+html[data-theme=dark] .client-cart-preview #client-preview-lines{color:#eaf5ee}
+html[data-theme=dark] .client-cart-preview-bottom{color:#c1d4cd!important}
+html[data-theme=dark] .client-project-option input{accent-color:#50ce91}
+html[data-theme=dark] .client-cart-drawer .client-cart-clear{color:#ffae96}
