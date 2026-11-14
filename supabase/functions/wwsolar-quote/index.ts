@@ -50,6 +50,8 @@ Deno.serve(async req=>{
  const {data:identity,error:identityError}=await admin.auth.getUser(auth.slice(7).trim());
  if(identityError||!identity?.user)return result(401,{error:"invalid_session"},origin);
  const user=identity.user;
+ if(user.app_metadata?.wwsolar_password_change_required===true)
+   return result(403,{error:"password_change_required"},origin);
  const isAdmin=user.app_metadata?.wwsolar_role==="admin";
  let payload:Record<string,unknown>;
  try{
