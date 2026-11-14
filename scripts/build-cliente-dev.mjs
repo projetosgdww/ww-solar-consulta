@@ -3,13 +3,13 @@ import { resolve, join } from 'node:path';
 import { execFileSync } from 'node:child_process';
 
 // A geração por kWp e o filtro de kits devem passar nos testes antes do deploy.
-execFileSync(process.execPath,['--test','tests/cliente-core.test.cjs','tests/kit-line-commercial-v2.test.cjs','tests/kit-line-eight-review.test.cjs','tests/password-setup.test.cjs','tests/fotus-kits-presentation.test.cjs','tests/theme.test.cjs'],{stdio:'inherit'});
+execFileSync(process.execPath,['--test','tests/cliente-core.test.cjs','tests/kit-line-commercial-v2.test.cjs','tests/kit-line-eight-review.test.cjs','tests/password-setup.test.cjs','tests/fotus-kits-presentation.test.cjs'],{stdio:'inherit'});
 
 const root=process.cwd();
 const out=resolve(root,'dist-cliente-dev');
 const allowed=[
   'cliente-dev.html','cliente-dev.js','cliente-dev.css','cliente-dev-config.js','cliente-pwa.js',
-  'cliente-core.js','theme.js','theme.css','kit-line-commercial-v2.js','kit-line-eight-review.js','manifest.webmanifest','sw.js','privacidade.html','termos.html','legal.css','admin-dev.html','admin-dev.js','admin-dev.css','styles.css','favicon.svg'
+  'cliente-core.js','kit-line-commercial-v2.js','kit-line-eight-review.js','manifest.webmanifest','sw.js','privacidade.html','termos.html','legal.css','admin-dev.html','admin-dev.js','admin-dev.css','styles.css','favicon.svg'
 ];
 await rm(out,{recursive:true,force:true});
 await mkdir(out,{recursive:true});
