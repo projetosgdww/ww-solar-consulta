@@ -84,8 +84,11 @@
       status('Ambiente DEV ainda não configurado. Não informe senha nesta etapa.','client-login-status');
       return;
     }
+    // Um marcador explícito acompanha o link de recuperação mesmo depois
+    // de o Supabase retirar os tokens de acesso da URL.
     const hashParams=new URLSearchParams(window.location.hash.replace(/^#/,''));
-    S.recoveryMode=hashParams.get('type')==='recovery';
+    const queryParams=new URLSearchParams(window.location.search);
+    S.recoveryMode=hashParams.get('type')==='recovery'||queryParams.get('wwsolar_recovery')==='1';
     S.db=window.supabase.createClient(cfg.supabaseUrl,cfg.publishableKey,
       {auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
     S.db.auth.onAuthStateChange((event)=>{
@@ -124,8 +127,12 @@
     $('client-forgot-password').disabled=true;
     try{
       // A URL precisa constar da lista permitida em Authentication > URL Configuration.
+      const recoveryUrl=new URL('./cliente.html',window.location.href);
+      recoveryUrl.search='';
+      recoveryUrl.searchParams.set('wwsolar_recovery','1');
+      recoveryUrl.hash='';
       const {error}=await S.db.auth.resetPasswordForEmail(email,{
-        redirectTo:new URL('./cliente.html',window.location.href).href
+        redirectTo:recoveryUrl.href
       });
       if(error)console.warn('WW Solar: recuperação não enviada. Confira a configuração de e-mail.');
       status('Se este e-mail estiver habilitado, você receberá instruções para criar outra senha.','client-login-status');
@@ -160,6 +167,13 @@
       const email=S.user.email;
       $('client-new-password').value='';$('client-confirm-password').value='';
       S.recoveryMode=false;
+      // Evita que um refresh da página repita a tela de recuperação.
+      if(new URLSearchParams(window.location.search).has('wwsolar_recovery')){
+        const clean=new URL(window.location.href);
+        clean.searchParams.delete('wwsolar_recovery');
+        clean.hash='';
+        window.history.replaceState(window.history.state,'',clean.pathname+clean.search);
+      }
       const {data:session,error:signInError}=await S.db.auth.signInWithPassword({
         email,password:first
       });
@@ -181,6 +195,12 @@
   async function cancelPasswordSetup(){
     if(S.db)await S.db.auth.signOut();
     S.user=null;S.recoveryMode=false;
+    if(new URLSearchParams(window.location.search).has('wwsolar_recovery')){
+      const clean=new URL(window.location.href);
+      clean.searchParams.delete('wwsolar_recovery');
+      clean.hash='';
+      window.history.replaceState(window.history.state,'',clean.pathname+clean.search);
+    }
     showLogin();
     $('client-password').value='';
   }
