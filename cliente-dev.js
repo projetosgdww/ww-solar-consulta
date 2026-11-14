@@ -223,8 +223,16 @@
     renderRecommendation();
     if(S.kind==='kit')renderProducts();
   }
+  function matchingSolarKits(){
+    if(!S.solarCity)return C.matchingKits(available(),S.target);
+    return available().filter(p=>p.kind==='kit').map(p=>({p,estimate:solarEstimate(p)}))
+      .filter(x=>x.estimate&&x.estimate.averageMonthlyKwh>=S.target)
+      .sort((a,b)=>a.estimate.averageMonthlyKwh-b.estimate.averageMonthlyKwh||a.p.price-b.p.price)
+      .map(x=>x.p);
+  }
+  function recommendedSolarKit(){return matchingSolarKits()[0]||null;}
   function renderRecommendation(){
-    const kit=C.recommendedKit(available(),S.target);
+    const kit=recommendedSolarKit();
     const hasKits=available().some(p=>p.kind==='kit');
     $('client-result-button').disabled=!kit;
 
@@ -247,7 +255,8 @@
       return;
     }
     const x=kit.payload||{};
-    const target=C.estimatedGeneration(kit)||0;
+    const localEstimate=solarEstimate(kit);
+    const target=localEstimate?localEstimate.averageMonthlyKwh:(C.estimatedGeneration(kit)||0);
     $('result-status').textContent=target>=S.target?'ATENDE À REFERÊNCIA':'ABAIXO DO SOLICITADO';
     $('result-title').textContent=kit.title;
     $('result-description').textContent='Geração média mensal estimada · '+number(x.moduloWp)+' W por módulo · confirmar instalação';
@@ -344,7 +353,7 @@
   }
   function renderProducts(){
     const q=S.query.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
-    const products=(S.kind==='kit'?C.matchingKits(available(),S.target):available().filter(p=>p.kind==='piece'&&p.payload?.categoria!=='projetos'))
+    const products=(S.kind==='kit'?matchingSolarKits():available().filter(p=>p.kind==='piece'&&p.payload?.categoria!=='projetos'))
       .filter(p=>S.kind==='kit'||S.category==='all'||String(p.payload?.categoria||'').toLowerCase()===S.category)
       .filter(p=>!q||[p.id,p.title,p.payload?.inversor,p.payload?.categoria]
         .some(v=>String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().includes(q)))
@@ -726,7 +735,7 @@
   $('client-target').addEventListener('keydown',ev=>{if(ev.key==='Enter'){ev.preventDefault();setTarget(ev.target.value);}});
   $('client-target-apply').addEventListener('click',()=>{
     setTarget($('client-target').value);
-    if(C.recommendedKit(available(),S.target)){
+    if(recommendedSolarKit()){
       setKind('kit');
       document.getElementById('catalogo')?.scrollIntoView({behavior:'smooth',block:'start'});
     }else{
@@ -748,7 +757,7 @@
   $('client-kits-link').addEventListener('click',()=>setKind('kit'));
   $('client-pieces-link').addEventListener('click',()=>setKind('piece'));
   $('client-result-button').addEventListener('click',()=>{
-    const kit=C.recommendedKit(available(),S.target);
+    const kit=recommendedSolarKit();
     if(kit)add(kit.id);
   });
   $('client-checkout').addEventListener('click',checkout);
