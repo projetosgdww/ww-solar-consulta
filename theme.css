@@ -1,0 +1,55 @@
+/* WW Solar — temas da área de clientes, administração e documentos (somente DEV).
+   Temas escuros priorizam contraste; identidade da marca permanece nos cabeçalhos. */
+.ww-theme-switch{display:flex;align-items:center;margin-left:auto;flex:0 0 auto;position:relative;z-index:95}
+.ww-theme-label{display:flex;align-items:center;gap:5px;font-size:0}
+.ww-theme-select{font:600 11px/1.2 system-ui,-apple-system,"Segoe UI",sans-serif;min-height:32px;padding:5px 22px 5px 9px;border-radius:9px;background:#203639;color:#f2f7f4;border:1px solid #6d8380;max-width:105px;cursor:pointer;color-scheme:dark}
+.ww-theme-select:focus-visible{outline:2px solid #ffcf54;outline-offset:3px}
+.ww-theme-select option{background:#203639;color:#fff}
+@media(max-width:560px){.ww-theme-switch{margin-left:2px}.ww-theme-select{font-size:10px;padding:5px 4px;max-width:78px;min-height:30px}}
+/* O tema padrão existente é preservado. */
+html[data-theme=dark]{--ink:#eaf1ed;--paper:#111e22;--line:#334b4a;--white:#1b2b2e;--muted:#afc2bd;--shadow:0 18px 45px rgba(0,0,0,.24);color-scheme:dark}
+html[data-theme=dark] body{background:#101b1f;color:#eaf1ed}
+html[data-theme=dark] .hero-edge{background:#101b1f}
+html[data-theme=dark] :is(.catalogue-section,.main-section,.bottom-section,.client-main){background:#101b1f;color:#eaf1ed}
+html[data-theme=dark] :is(.client-login,.client-simulator,.client-catalog,.client-cart,#client-app .client-cart,.client-projects-card,.client-product,.simulator-controls,.result-card,.result-stats>div,.filterbar,.kit-card,.empty-state,.client-cart-preview,.client-cart-drawer,.admin-orders-panel,.admin-tabs button,.admin-order-card,.client-custom-kit-cta){background:#1b2b2e;color:#eaf1ed;border-color:#3a5551}
+html[data-theme=dark] :is(.segmented,.sim-info,.client-recommendation,.client-drawer-bottom,.client-order-audit,.admin-order-audit,.admin-order-actions,.admin-order-detail,.admin-client-row,.client-linked-project-item){background:#213438;color:#dceae3;border-color:#3a5551}
+html[data-theme=dark] :is(.client-filter-tabs button,.client-category-tabs button,.details-button,.client-qty button,.client-cart-close,.client-drawer-action,.button-outline,.admin-order-toolbar select,.admin-order-actions select){background:#263c3d;color:#ebf4ec;border-color:#50706a}
+html[data-theme=dark] :is(.client-filter-tabs button.active,.client-category-tabs button[aria-pressed=true]){background:#e6bc4b;color:#182523;border-color:#e6bc4b}
+html[data-theme=dark] :is(.client-form input,.client-controls input[type=number],.client-target-input-row input,#client-search,.search-wrap input,.select-wrap select,.admin-form input,.admin-order-toolbar select,.admin-order-actions select,.target-input-wrap input,.client-form select,textarea){background:#132428;color:#f0f7f3;border-color:#526d67}
+html[data-theme=dark] input::placeholder{color:#a3bab4}
+html[data-theme=dark] :is(.client-muted,.client-helper,.client-main section>p,.client-greeting+p,.section-title p,.kit-generation,.kit-facts span,.client-product .client-meta,.client-quote-note,.client-target-entry>label,.client-cart-preview-bottom,.client-projects-head small,.client-project-option small,.client-drawer-bottom small,.result-sub,.result-generation small,.result-count,.catalogue-counter small,.reset-filters,.admin-main-intro,.admin-order-detail summary,.admin-tabs button small){color:#b8cbc4!important}
+html[data-theme=dark] :is(.kit-generation strong,.kit-card h3,.client-product strong,.client-recommendation strong,.client-cart-bottom>strong,#client-app .client-cart-bottom>strong,.client-drawer-total strong,.client-projects-head strong,.client-projects-grid strong,.client-project-option strong,.client-quote-note strong,.admin-order-money,.client-cart-preview-bottom strong){color:#ecf5ee}
+html[data-theme=dark] :is(.kit-facts,.client-cart-lines,.client-cart-line,.client-order-row,.client-quote-footer,.client-projects-grid>div,.client-projects-head,.admin-client-directory,.admin-order-detail,.admin-order-item,.result-footer){border-color:#3d5553}
+html[data-theme=dark] :is(.client-drawer-head,.client-drawer-bottom,.client-cart-drawer,.admin-orders-panel){border-color:#3d5553}
+html[data-theme=dark] :is(.client-filter-tabs button:hover,.client-category-tabs button:hover,.details-button:hover){background:#38514d;color:#fff}
+html[data-theme=dark] .client-custom-kit-cta p{color:#c0d2c8}
+html[data-theme=dark] .client-projects-important{background:#392f1d;color:#fbe8ba;border-color:#745b29}
+html[data-theme=dark] .client-projects-head>span,.kit-status,.result-status,.admin-pill{background:#544020;color:#ffe0a2}
+html[data-theme=dark] .admin-pill-green{background:#174b3a;color:#c3f7d9}
+html[data-theme=dark] .client-toast{background:#173a31;color:#e6fff0}
+html[data-theme=dark] .client-password-link{color:#88e7bb}
+html[data-theme=dark] .client-password-link:hover{color:#baf8dc}
+html[data-theme=dark] .client-status{color:#ffb5a2}
+html[data-theme=dark] .button-accent{color:#142623}
+html[data-theme=dark] .button-dark{background:#304b4b;color:#fff}
+html[data-theme=dark] .button-dark:hover{background:#426564}
+html[data-theme=dark] .floating-note{background:#23373a;color:#f0f8f4}
+html[data-theme=dark] .floating-note small{color:#bfd0cb}
+html[data-theme=dark] .client-drawer-clock{background:#102527}
+html[data-theme=dark] .client-drawer-action-danger,.client-remove{color:#ffa99c}
+html[data-theme=dark] .client-drawer-action-danger:hover{background:#4e302f;color:#ffe0d7}
+html[data-theme=dark] .header,html[data-theme=dark] .footer{background:#0d191d}
+/* Documentos institucionais */
+html[data-theme=dark] .document{background:#1b2b2e;color:#ebf4ee;border-color:#3a5551;box-shadow:0 15px 40px rgba(0,0,0,.22)}
+html[data-theme=dark] .site-header,html[data-theme=dark] .site-footer{background:#0d191d}
+html[data-theme=dark] :is(.document .lead,.document .meta,.document .summary,.document td,.document th){color:#d2e2d9}
+html[data-theme=dark] .document .summary{background:#22383a;border-color:#42615c}
+html[data-theme=dark] .document .notice{background:#3c3322;color:#f9e5af;border-color:#d9aa49}
+html[data-theme=dark] .document a{color:#97eac7}
+html[data-theme=dark] .document :is(td,th){border-color:#47605a}
+html[data-theme=dark] .document h2,html[data-theme=dark] .document h3{color:#f2f7f4}
+html[data-theme=dark] .document .eyebrow{color:#eccc70}
+@media print{
+ html[data-theme=dark] body,html[data-theme=dark] .document{background:#fff!important;color:#111!important;box-shadow:none!important}
+ .ww-theme-switch{display:none!important}
+}
