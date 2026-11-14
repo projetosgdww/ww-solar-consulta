@@ -155,20 +155,27 @@
         const {error}=await S.db.auth.updateUser({password:first});
         if(error)throw error;
       }
-      // A senha é transmitida sob HTTPS ao Supabase e não é registrada no catálogo.
+      // O Supabase pode revogar o refresh token ao alterar a senha.
+      // Criar uma sessão NOVA com a senha pessoal, sem usar refreshSession().
+      const email=S.user.email;
       $('client-new-password').value='';$('client-confirm-password').value='';
       S.recoveryMode=false;
-      const {error:sessionError}=await S.db.auth.refreshSession();
-      if(sessionError)throw sessionError;
-      const {data:identity,error:identityError}=await S.db.auth.getUser();
-      if(identityError||!identity?.user)throw Error('Entre novamente com sua nova senha.');
-      S.user=identity.user;
-      if(S.user.app_metadata?.wwsolar_password_change_required===true)
-        throw Error('A senha foi alterada, mas a liberação ainda não foi confirmada. Contate o atendimento.');
+      const {data:session,error:signInError}=await S.db.auth.signInWithPassword({
+        email,password:first
+      });
+      if(signInError||!session?.user){
+        S.user=null;
+        showLogin();
+        status('Sua senha foi atualizada. Entre novamente usando o seu e-mail e a nova senha.','client-login-status');
+        return;
+      }
+      if(session.user.app_metadata?.wwsolar_password_change_required===true)
+        throw Error('A liberação do acesso ainda está pendente. Entre em contato com o atendimento.');
+      S.user=session.user;
       show('client-password-setup',false);show('client-login',true);
-      await enter(S.user);
+      await enter(session.user);
     }catch(e){
-      status(e?.message||'Falha ao definir a senha. Entre em contato com o suporte.','client-password-setup-status');
+      status(e?.message||'Não foi possível concluir a troca de senha. Tente novamente ou fale conosco.','client-password-setup-status');
     }finally{submit.disabled=false;}
   }
   async function cancelPasswordSetup(){
