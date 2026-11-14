@@ -331,3 +331,12 @@ body .header{position:sticky;top:0;z-index:80}
  .solar-monthly-item{flex-basis:33px}
  .solar-monthly-body{padding:9px 7px}
 }
+
+
+/* Seletor por kit: aparece apenas dentro de "Ver geração estimada mês a mês". */
+.solar-monthly-city-label{display:block;font-size:11px;font-weight:750;color:#315e4b;margin-bottom:6px}
+.solar-monthly-city{width:100%;max-width:285px;min-height:38px;display:block;padding:7px 10px;border:1px solid #bdd4c5;border-radius:8px;background:#fff;color:#173d30;font:inherit;font-size:13px}
+.solar-monthly-city:focus-visible{outline:2px solid #d29d26;outline-offset:2px}
+.solar-monthly-result{margin-top:10px}
+.solar-monthly-result>.client-muted{margin:0;font-size:12px;line-height:1.5}
+@media(max-width:480px){.solar-monthly-city{max-width:100%}}
