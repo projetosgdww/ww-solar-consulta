@@ -26,7 +26,7 @@ execFileSync(process.execPath,['scripts/generate-wwsolar-icons.mjs'],{stdio:'inh
 // URLs comerciais limpas sem mudar IDs internos, scripts ou estilos já homologados.
 const customer=(await readFile(join(out,'cliente-dev.html'),'utf8'))
   .replaceAll('./admin-dev.html','./admin.html')
-  .replace(/<script src="\.\/solarimetria-demo\.js[^>]*><\/script>\s*/g,isSolarPreview?'': '');
+  .replace(/<script src="\.\/solarimetria-demo\.js[^>]*><\/script>\s*/g,match=>isSolarPreview?match:'');
 const admin=(await readFile(join(out,'admin-dev.html'),'utf8'))
   .replaceAll('./cliente-dev.html','./cliente.html')
   .replace('Acesso restrito · DEV','Acesso restrito');
