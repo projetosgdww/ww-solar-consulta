@@ -289,3 +289,14 @@ body .header{position:sticky;top:0;z-index:80}
  #client-app .client-welcome{padding:13px 0 15px}
  #client-app .client-greeting{font-size:24px}
 }
+
+/* Primeira senha e recuperação — ações separadas do catálogo autenticado. */
+.client-password-link{display:inline-flex;align-items:center;justify-content:center;border:0;background:transparent;padding:7px 0;color:#17614c;font:inherit;font-size:13px;font-weight:750;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+.client-password-link:hover{color:#0b3f32}
+.client-password-link:focus-visible{outline:2px solid #d7a32c;outline-offset:3px}
+.client-password-link:disabled{opacity:.6;cursor:wait}
+.client-password-setup[hidden],#client-login[hidden]{display:none!important}
+.client-password-setup h1{font-size:clamp(25px,4vw,35px);margin:5px 0 12px}
+.client-password-setup>p{font-size:13px;color:#456358;line-height:1.55}
+.client-password-setup .client-form{gap:10px}
+.client-password-setup .client-form input{width:100%}
