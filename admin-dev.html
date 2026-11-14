@@ -10,7 +10,7 @@
   <button id="admin-tab-kits" type="button" aria-pressed="false" data-admin-panel="kits"><span>☀️</span><strong>Kits em revisão</strong><small>30 composições em revisão</small></button>
 </div>
 <section class="client-login admin-clients-panel" id="admin-clients-panel">
-<h1>Liberação de <em>clientes.</em></h1><p>Informe apenas o e-mail do cliente. Para novos acessos, o sistema gera uma senha individual no formato <strong>GDWW-xxxxxx-xxxxxx</strong> com caracteres aleatórios, mostrada uma vez para copiar.</p><p>Perdeu a senha de um cliente? Use <strong>Reemitir senha</strong> para substituir a anterior, sem excluir sua conta ou carrinho.</p>
+<h1>Liberação de <em>clientes.</em></h1><p>Informe apenas o e-mail do cliente. Para novos acessos, o sistema gera uma <strong>senha temporária</strong>, mostrada uma única vez. No primeiro login, o cliente deverá substituí-la por uma senha pessoal de no mínimo 12 caracteres.</p><p>Perdeu a senha de um cliente? O cliente pode usar <strong>Esqueci minha senha</strong> para receber um link de recuperação por e-mail. A opção <strong>Reemitir senha</strong> permanece como procedimento administrativo de contingência, sem excluir a conta ou o carrinho.</p>
 <p id="admin-dev-status" role="status" class="client-status">Verificando seu perfil de acesso...</p>
 <form id="admin-dev-form" class="client-form" hidden><label for="admin-dev-email">E-mail do cliente</label><input id="admin-dev-email" type="email" required maxlength="254" placeholder="cliente@exemplo.com" autocomplete="off">
 <button class="button button-accent" type="submit" id="admin-dev-submit">Criar acesso <span>↗</span></button>
@@ -22,7 +22,7 @@
 <button type="button" id="admin-dev-copy" class="button button-outline">Copiar acesso</button>
 <button type="button" id="admin-dev-clear" class="button button-outline">Limpar da tela</button>
 </div>
-<p class="client-muted">Sem convite, cadastro público ou recuperação de senha pelo cliente. A nova senha só aparece uma vez; copiar em local seguro. A reemissão invalida a senha anterior.</p>
+<p class="client-muted">Cadastro restrito aos administradores; não há cadastro público. As credenciais iniciais são temporárias e o cliente deve criar sua própria senha. Evite encaminhar a senha por canais compartilhados. O envio de links de recuperação depende da configuração de e-mails do Supabase.</p>
 <div id="admin-client-directory" class="admin-client-directory" hidden>
 <div class="admin-section-row"><div><h2>Acessos cadastrados</h2><p class="client-muted">Consulte e bloqueie acessos sem apagar o histórico.</p></div><button type="button" id="admin-refresh-clients" class="button button-outline">Atualizar</button></div>
 <div id="admin-client-list" class="admin-client-list"></div>
@@ -52,5 +52,5 @@
 </section>
 </main>
 <footer class="footer"><div class="shell footer-inner"><span><strong>WW</strong>SOLAR</span><span>Administração restrita</span><nav class="legal-footer-links" aria-label="Documentos legais"><a href="./privacidade.html">Política de Privacidade</a><a href="./termos.html">Termos de Uso</a></nav></div></footer>
-<script defer src="./cliente-dev-config.js"></script><script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0/dist/umd/supabase.min.js"></script><script defer src="./kit-line-eight-review.js?v=20261113-geracao-media-v1"></script><script defer src="./admin-dev.js?v=20261113-geracao-media-v1"></script>
+<script defer src="./cliente-dev-config.js"></script><script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0/dist/umd/supabase.min.js"></script><script defer src="./kit-line-eight-review.js?v=20261113-geracao-media-v1"></script><script defer src="./admin-dev.js?v=20261114-auth-v1"></script>
 </body></html>
