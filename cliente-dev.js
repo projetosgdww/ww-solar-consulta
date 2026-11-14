@@ -304,11 +304,17 @@
   }
   // Cálculo exclusivamente de apresentação; seleção comercial, preços e checkout permanecem intactos.
   // Cálculo consultivo exclusivo do card; não modifica seleção, preços ou cotações.
+  const solarDemoEnabled = /^(?!ww-solar\\.pages\\.dev$)[a-z0-9-]+\\.ww-solar\\.pages\\.dev$/.test(window.location.hostname)
+    && window.WWSolarSolarDemo?.synthetic === true;
   function solarEstimate(p,city){
     if(!city||!Solar||!SolarData)return null;
-    const location=SolarData.find('CE',city);
+    const authorizedData=SolarData.find('CE',city);
+    // Somente o host de preview poderá exibir fixtures sintéticas.
+    const location=authorizedData||(solarDemoEnabled?window.WWSolarSolarDemo.find('CE',city):null);
     const kwp=C.kitKwp(p);
-    return location&&kwp!==null?Solar.calculate(kwp,location,new Date().getFullYear()):null;
+    if(!location||kwp===null)return null;
+    const estimate=Solar.calculate(kwp,location,new Date().getFullYear());
+    return estimate?{...estimate,demo:location.demo===true}:null;
   }
   function solarDisclosure(p){
     const details=el('details',undefined,'solar-monthly');
@@ -333,6 +339,9 @@
         result.append(el('p','Estimativa mensal ainda não disponível para este município.','client-muted'));
         return;
       }
+      if(estimate.demo){
+        result.append(el('p','DEMONSTRAÇÃO • DADOS SINTÉTICOS • NÃO REPRESENTAM A IRRADIAÇÃO REAL DE '+estimate.city.toLocaleUpperCase('pt-BR')+'/CE','solar-demo-warning'));
+      }
       result.append(el('h4','Geração estimada mês a mês — '+estimate.city+'/CE'));
       const chart=el('div',undefined,'solar-monthly-chart');
       chart.setAttribute('role','img');
@@ -354,7 +363,9 @@
       totals.append(el('span','Média mensal: '+number(estimate.averageMonthlyKwh)+' kWh/mês'),
         el('span','Total anual: '+number(estimate.annualKwh)+' kWh/ano'));
       result.append(totals);
-      result.append(el('p','Estimativa com potência instalada, irradiação histórica local e fator de desempenho de 0,75 (perdas globais estimadas). A geração real varia conforme orientação, inclinação, sombreamento, temperatura, clima, equipamentos e condições da instalação. Ano civil de referência: '+estimate.year+'.','solar-monthly-disclaimer'));
+      result.append(el('p',estimate.demo
+        ?'SIMULAÇÃO VISUAL: os índices mensais são sintéticos e servem apenas para testar o gráfico. Não utilizar como previsão de geração, dado do INPE ou base de cotação. Fator de desempenho aplicado: 0,75. Ano de referência: '+estimate.year+'.'
+        :'Estimativa com potência instalada, irradiação histórica local e fator de desempenho de 0,75 (perdas globais estimadas). A geração real varia conforme orientação, inclinação, sombreamento, temperatura, clima, equipamentos e condições da instalação. Ano civil de referência: '+estimate.year+'.','solar-monthly-disclaimer'));
     };
     select.addEventListener('change',update);
     update();
