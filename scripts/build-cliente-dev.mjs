@@ -3,14 +3,17 @@ import { resolve, join } from 'node:path';
 import { execFileSync } from 'node:child_process';
 
 // A geração por kWp e o filtro de kits devem passar nos testes antes do deploy.
-execFileSync(process.execPath,['--test','tests/cliente-core.test.cjs','tests/kit-line-commercial-v2.test.cjs','tests/kit-line-eight-review.test.cjs','tests/password-setup.test.cjs','tests/fotus-kits-presentation.test.cjs'],{stdio:'inherit'});
+execFileSync(process.execPath,['--test','tests/cliente-core.test.cjs','tests/kit-line-commercial-v2.test.cjs','tests/kit-line-eight-review.test.cjs','tests/password-setup.test.cjs','tests/fotus-kits-presentation.test.cjs','tests/solarimetria.test.cjs'],{stdio:'inherit'});
 
 const root=process.cwd();
 const out=resolve(root,'dist-cliente-dev');
+const isSolarPreview=process.env.CF_PAGES_BRANCH==='feat/solarimetria-mensal-ce';
 const allowed=[
   'cliente-dev.html','cliente-dev.js','cliente-dev.css','cliente-dev-config.js','cliente-pwa.js',
-  'cliente-core.js','kit-line-commercial-v2.js','kit-line-eight-review.js','manifest.webmanifest','sw.js','privacidade.html','termos.html','legal.css','admin-dev.html','admin-dev.js','admin-dev.css','styles.css','favicon.svg'
+  'cliente-core.js','solarimetria-data.js','solarimetria-core.js','kit-line-commercial-v2.js','kit-line-eight-review.js','manifest.webmanifest','sw.js','privacidade.html','termos.html','legal.css','admin-dev.html','admin-dev.js','admin-dev.css','styles.css','favicon.svg'
 ];
+// O índice sintético nunca integra o pacote da branch de produção.
+if(isSolarPreview)allowed.push('solarimetria-demo.js');
 await rm(out,{recursive:true,force:true});
 await mkdir(out,{recursive:true});
 for(const file of allowed){
@@ -22,7 +25,8 @@ for(const file of allowed){
 execFileSync(process.execPath,['scripts/generate-wwsolar-icons.mjs'],{stdio:'inherit'});
 // URLs comerciais limpas sem mudar IDs internos, scripts ou estilos já homologados.
 const customer=(await readFile(join(out,'cliente-dev.html'),'utf8'))
-  .replaceAll('./admin-dev.html','./admin.html');
+  .replaceAll('./admin-dev.html','./admin.html')
+  .replace(/<script src="\.\/solarimetria-demo\.js[^>]*><\/script>\s*/g,isSolarPreview?'': '');
 const admin=(await readFile(join(out,'admin-dev.html'),'utf8'))
   .replaceAll('./cliente-dev.html','./cliente.html')
   .replace('Acesso restrito · DEV','Acesso restrito');
