@@ -53,3 +53,14 @@ html[data-theme=dark] .document .eyebrow{color:#eccc70}
  html[data-theme=dark] body,html[data-theme=dark] .document{background:#fff!important;color:#111!important;box-shadow:none!important}
  .ww-theme-switch{display:none!important}
 }
+
+/* Alinha o seletor com as ações da conta no cabeçalho compacto. */
+@media(max-width:930px){
+ .header .ww-theme-switch{order:2;margin-left:2px}
+}
+@media(max-width:390px){
+ .header .ww-theme-select{max-width:72px;font-size:9px;padding:4px 2px}
+}
+@media(max-width:600px){
+ .site-header .ww-theme-switch{margin:6px 0 2px}
+}
