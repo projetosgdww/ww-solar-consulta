@@ -9,7 +9,7 @@ const root=process.cwd();
 const out=resolve(root,'dist-cliente-dev');
 const allowed=[
   'cliente-dev.html','cliente-dev.js','cliente-dev.css','cliente-dev-config.js','cliente-pwa.js',
-  'cliente-core.js','kit-line-commercial-v2.js','kit-line-eight-review.js','manifest.webmanifest','sw.js','admin-dev.html','admin-dev.js','admin-dev.css','styles.css','favicon.svg'
+  'cliente-core.js','kit-line-commercial-v2.js','kit-line-eight-review.js','manifest.webmanifest','sw.js','privacidade.html','termos.html','legal.css','admin-dev.html','admin-dev.js','admin-dev.css','styles.css','favicon.svg'
 ];
 await rm(out,{recursive:true,force:true});
 await mkdir(out,{recursive:true});
