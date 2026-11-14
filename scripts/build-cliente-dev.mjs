@@ -7,13 +7,17 @@ execFileSync(process.execPath,['--test','tests/cliente-core.test.cjs','tests/kit
 
 const root=process.cwd();
 const out=resolve(root,'dist-cliente-dev');
-const isSolarPreview=process.env.CF_PAGES_BRANCH==='feat/solarimetria-mensal-ce';
+// Em deploy manual Cloudflare Pages, CF_PAGES_BRANCH pode não estar presente.
+// A fixture só existe na branch de laboratório; nunca copiar em branch de produção.
+const isSolarPreview=(await stat(resolve(root,'solarimetria-demo.js')).then(x=>x.isFile()).catch(()=>false))
+  && process.env.CF_PAGES_BRANCH!=='release/wwsolar-pecas-v1';
 const allowed=[
   'cliente-dev.html','cliente-dev.js','cliente-dev.css','cliente-dev-config.js','cliente-pwa.js',
   'cliente-core.js','solarimetria-data.js','solarimetria-core.js','kit-line-commercial-v2.js','kit-line-eight-review.js','manifest.webmanifest','sw.js','privacidade.html','termos.html','legal.css','admin-dev.html','admin-dev.js','admin-dev.css','styles.css','favicon.svg'
 ];
 // O índice sintético nunca integra o pacote da branch de produção.
 if(isSolarPreview)allowed.push('solarimetria-demo.js');
+console.log('Solar demo asset no pacote:',isSolarPreview?'SIM (preview isolado)':'NÃO');
 await rm(out,{recursive:true,force:true});
 await mkdir(out,{recursive:true});
 for(const file of allowed){
