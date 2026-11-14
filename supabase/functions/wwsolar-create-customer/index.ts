@@ -43,17 +43,40 @@ Deno.serve(async(req)=>{
   const admin=createClient(url,secret,{auth:{autoRefreshToken:false,persistSession:false}});
   // Consulta servidor a servidor: nunca aceitar role do corpo da requisição.
   const {data:identity,error:identityError}=await admin.auth.getUser(token);
-  if(identityError||identity?.user?.app_metadata?.wwsolar_role!=="admin")
+  if(identityError||!identity?.user)
+    return reply(403,{error:"not_authorized"},origin);
+  // Um cliente pode confirmar a troca da própria senha, sem acesso a operações admin.
+  // O catálogo continua dependendo de autenticação e acesso ativo.
+  let submitted:Record<string,unknown>;
+  try{submitted=await req.json();}catch{return reply(400,{error:"invalid_payload"},origin);}
+  if(submitted?.action==="complete_setup"){
+    const user=identity.user;
+    if(user.app_metadata?.wwsolar_role!=="client" ||
+       user.app_metadata?.wwsolar_password_change_required!==true)
+      return reply(403,{error:"not_allowed"},origin);
+    const {data:access,error:accessError}=await admin.from("wwsolar_client_access")
+      .select("active,email").eq("user_id",user.id).maybeSingle();
+    if(accessError||!access?.active||access.email!==user.email?.trim().toLowerCase())
+      return reply(403,{error:"access_inactive"},origin);
+    // Executar SOMENTE após updateUser({password}) no aplicativo.
+    // A flag é uma exigência do fluxo oficial de interface, não uma proteção
+    // contra clientes maliciosos que chamem diretamente esta API.
+    const {error:completeError}=await admin.auth.admin.updateUserById(user.id,{
+      app_metadata:{...user.app_metadata,wwsolar_password_change_required:false}
+    });
+    if(completeError)return reply(500,{error:"setup_completion_failed"},origin);
+    return reply(200,{action:"complete_setup",completed:true},origin);
+  }
+  if(identity.user.app_metadata?.wwsolar_role!=="admin")
     return reply(403,{error:"not_authorized"},origin);
 
   let email="";
   let action="create";
   let enabled:unknown=undefined;
   try{
-    const payload=await req.json();
-    email=String(payload?.email||"").trim().toLowerCase();
-    action=String(payload?.action||"create");
-    enabled=payload?.enabled;
+    email=String(submitted?.email||"").trim().toLowerCase();
+    action=String(submitted?.action||"create");
+    enabled=submitted?.enabled;
   }catch{ return reply(400,{error:"invalid_payload"},origin); }
   if(email.length>254||!emailRE.test(email))
     return reply(400,{error:"invalid_email"},origin);
@@ -96,14 +119,14 @@ Deno.serve(async(req)=>{
       ||target.user.app_metadata?.wwsolar_role!=="client")
       return reply(409,{error:"client_identity_not_valid"},origin);
     const {error:rotateError}=await admin.auth.admin.updateUserById(
-      target.user.id,{password}
+      target.user.id,{password,app_metadata:{...target.user.app_metadata,wwsolar_password_change_required:true}}
     );
     if(rotateError)return reply(500,{error:"password_rotation_failed"},origin);
     return reply(200,{email,password,action:"rotate"},origin);
   }
 
   const {data:created,error:createError}=await admin.auth.admin.createUser({
-    email,password,email_confirm:true,app_metadata:{wwsolar_role:"client"}
+    email,password,email_confirm:true,app_metadata:{wwsolar_role:"client",wwsolar_password_change_required:true}
   });
   if(createError||!created?.user)
     return reply(409,{error:"cannot_create_customer"},origin);
