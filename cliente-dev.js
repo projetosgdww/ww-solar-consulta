@@ -338,6 +338,9 @@
         }
         card.append(facts);
         card.append(el('small','Inclui módulos, inversor, fixação, perfis, cabos e conectores.','client-muted'));
+        if(x.origemKit==='fotus_pronto'){
+          card.append(el('small','Kit pronto do fornecedor · Frete incluso para Canindé/CE. Prazo previsto: até 15 dias úteis, podendo acrescentar até 5 dias úteis após confirmação do pedido e da disponibilidade. Para outras cidades, frete sob consulta.','client-muted'));
+        }
       }else{
         const facts=el('div',undefined,'kit-facts');
         const row=el('div');row.append(el('span','Categoria'),el('strong',String(p.payload?.categoria||'Equipamento')));
