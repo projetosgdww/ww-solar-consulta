@@ -143,17 +143,20 @@
     const submit=$('client-save-password');submit.disabled=true;
     status('Atualizando sua senha com segurança...','client-password-setup-status');
     try{
-      const {error}=await S.db.auth.updateUser({password:first});
-      if(error)throw error;
-      // A nova senha só é enviada ao serviço de autenticação, nunca ao administrador.
-      $('client-new-password').value='';$('client-confirm-password').value='';
       if(S.user.app_metadata?.wwsolar_password_change_required===true){
+        // O servidor atualiza senha + estado obrigatório atomicamente.
         const {data:result,error:completeError}=await S.db.functions.invoke('wwsolar-create-customer',{
-          body:{action:'complete_setup'}
+          body:{action:'complete_setup',new_password:first}
         });
         if(completeError||result?.completed!==true)
-          throw Error('Não foi possível concluir a confirmação do acesso. Tente novamente ou fale com o atendimento.');
+          throw Error('Não foi possível finalizar a troca de senha. Tente novamente ou fale com o atendimento.');
+      }else{
+        // Recuperação de uma conta que já usa senha pessoal.
+        const {error}=await S.db.auth.updateUser({password:first});
+        if(error)throw error;
       }
+      // A senha é transmitida sob HTTPS ao Supabase e não é registrada no catálogo.
+      $('client-new-password').value='';$('client-confirm-password').value='';
       S.recoveryMode=false;
       const {error:sessionError}=await S.db.auth.refreshSession();
       if(sessionError)throw sessionError;
