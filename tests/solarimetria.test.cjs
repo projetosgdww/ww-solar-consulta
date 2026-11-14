@@ -33,3 +33,20 @@ test('nomes e UF preparados para expansão da base',()=>{
  assert.deepEqual(data.cities.map(c=>c.name),['Canindé','Caridade','Paramoti']);
  assert.equal(data.months.length,12);
 });
+
+
+test('fixtures de demonstração são explicitamente sintéticas, três municípios e doze meses',()=>{
+ const demo=require('../solarimetria-demo.js');
+ assert.equal(demo.synthetic,true);
+ for(const city of ['Canindé','Caridade','Paramoti']){
+   const loc=demo.find('CE',city);
+   assert.equal(loc.demo,true);
+   assert.match(loc.source,/SINTÉTICOS/);
+   assert.equal(Object.keys(loc.hsp).length,12);
+   const estimate=solar.calculate(2.4,loc,2026);
+   assert.equal(estimate.monthly.length,12);
+   assert.equal(estimate.averageMonthlyKwh,estimate.annualKwh/12);
+ }
+ assert.equal(demo.find('CE','Fortaleza'),null);
+ assert.equal(demo.find('PI','Canindé'),null);
+});
