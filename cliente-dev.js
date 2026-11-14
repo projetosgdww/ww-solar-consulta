@@ -224,7 +224,10 @@
     if(S.kind==='kit')renderProducts();
   }
   function matchingSolarKits(){
-    if(!S.solarCity)return C.matchingKits(available(),S.target);
+    // Base solarimétrica ainda não liberada: manter 100% do filtro comercial original.
+    // Só aplicar filtragem por geração municipal quando houver dados completos.
+    if(!S.solarCity||!SolarData?.find('CE',S.solarCity))
+      return C.matchingKits(available(),S.target);
     return available().filter(p=>p.kind==='kit').map(p=>({p,estimate:solarEstimate(p)}))
       .filter(x=>x.estimate&&x.estimate.averageMonthlyKwh>=S.target)
       .sort((a,b)=>a.estimate.averageMonthlyKwh-b.estimate.averageMonthlyKwh||a.p.price-b.p.price)
@@ -747,7 +750,9 @@
   $('solar-city').addEventListener('change',ev=>{
     S.solarCity=String(ev.target.value||'');
     $('solar-city-hint').textContent=S.solarCity
-      ?'Estimativas para '+S.solarCity+'/CE, utilizando a base solarimétrica municipal.'
+      ?(SolarData?.find('CE',S.solarCity)
+        ?'Estimativas para '+S.solarCity+'/CE, utilizando a base solarimétrica municipal.'
+        :'Dados mensais ainda indisponíveis para '+S.solarCity+'/CE. Kits e referência comercial preservados.')
       :'A estimativa atual é uma referência comercial até selecionar um município.';
     renderProducts();
     renderRecommendation();
