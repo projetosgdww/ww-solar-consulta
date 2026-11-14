@@ -4,7 +4,7 @@
  const KEY='wwsolar:theme:v1';
  const options=['light','dark','auto'];
  const mq=window.matchMedia?window.matchMedia('(prefers-color-scheme: dark)'):null;
- function stored(){try{const v=localStorage.getItem(KEY);return options.includes(v)?v:'auto';}catch(_){return 'auto';}}
+ function stored(){try{const v=localStorage.getItem(KEY);return options.includes(v)?v:'light';}catch(_){return 'light';}}
  let preference=stored();
  function apply(){
    const resolved=preference==='auto'?(mq&&mq.matches?'dark':'light'):preference;
