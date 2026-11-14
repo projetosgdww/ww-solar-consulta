@@ -2,7 +2,8 @@
   'use strict';
   const $ = id => document.getElementById(id);
   const C=window.WWSolarClienteCore, cfg=window.WWSOLAR_CLIENTE_CONFIG||{};
-  const S={db:null,user:null,admin:false,catalog:[],lines:[],kind:'kit',category:'all',query:'',target:300,cartUpdatedAt:null,cartInvalid:false,saveQueue:Promise.resolve(),timer:null,toastTimer:null,drawerOpen:false,expiryNotified:false,checkoutPending:false,orderKey:null,recoveryMode:false};
+  const Solar=window.WWSolarSolarCore, SolarData=window.WWSolarSolarData;
+  const S={db:null,user:null,admin:false,catalog:[],lines:[],kind:'kit',category:'all',query:'',target:300,cartUpdatedAt:null,cartInvalid:false,saveQueue:Promise.resolve(),timer:null,toastTimer:null,drawerOpen:false,expiryNotified:false,checkoutPending:false,orderKey:null,recoveryMode:false,solarCity:''};
   const status=(m,id='client-action-status')=>{$(id).textContent=m;};
   const show=(id,visible)=>{$(id).hidden=!visible;};
   const euro = v => C.money(v);
@@ -298,6 +299,49 @@
       if(groups.has(category))wrap.append(mk(category,CATEGORY_LABELS[category],groups.get(category)));
     }
   }
+  // Cálculo exclusivamente de apresentação; seleção comercial, preços e checkout permanecem intactos.
+  function solarEstimate(p){
+    if(!S.solarCity||!Solar||!SolarData)return null;
+    const municipality=SolarData.find('CE',S.solarCity);
+    const kwp=Number(p?.payload?.potenciaKwp)||C.kitKwp(p);
+    return municipality&&Number.isFinite(kwp)&&kwp>0
+      ?Solar.calculate(kwp,municipality,new Date().getFullYear()):null;
+  }
+  function solarDisclosure(p,estimate){
+    const details=el('details',undefined,'solar-monthly');
+    const summary=el('summary','Ver geração estimada mês a mês ›','solar-monthly-trigger');
+    details.append(summary);
+    const body=el('div',undefined,'solar-monthly-body');
+    if(!S.solarCity){
+      body.append(el('p','Selecione Canindé, Caridade ou Paramoti no campo Município acima para consultar a geração mês a mês.','client-muted'));
+    }else if(!estimate){
+      body.append(el('p','Estimativa mensal ainda não disponível para este município.','client-muted'));
+    }else{
+      body.append(el('h4','Geração estimada mês a mês — '+estimate.city+'/CE'));
+      const chart=el('div',undefined,'solar-monthly-chart');
+      chart.setAttribute('role','img');
+      chart.setAttribute('aria-label',estimate.monthly.map(m=>m.label+': '+number(m.kwh)+' kWh').join('; '));
+      const peak=Math.max(...estimate.monthly.map(m=>m.kwh));
+      for(const m of estimate.monthly){
+        const item=el('div',undefined,'solar-monthly-item');
+        item.title=m.label+': '+number(m.kwh)+' kWh';
+        const value=el('span',number(m.kwh),'solar-monthly-value');
+        const barWrap=el('div',undefined,'solar-monthly-track');
+        const bar=el('div',undefined,'solar-monthly-bar');
+        bar.style.height=(100*m.kwh/peak).toFixed(2)+'%';
+        barWrap.append(bar);
+        item.append(value,barWrap,el('span',m.label.slice(0,3),'solar-monthly-label'));
+        chart.append(item);
+      }
+      body.append(chart);
+      const totals=el('div',undefined,'solar-monthly-totals');
+      const average=el('span','Média mensal: '+number(estimate.averageMonthlyKwh)+' kWh/mês');
+      const annual=el('span','Total anual: '+number(estimate.annualKwh)+' kWh/ano');
+      totals.append(average,annual);body.append(totals);
+      body.append(el('p','Estimativa com potência instalada, irradiação histórica local e fator de desempenho de 0,75 (perdas globais estimadas). A produção real varia com orientação, inclinação, sombreamento, temperatura, clima, equipamentos e condições da instalação. Ano civil de referência: '+estimate.year+'.','solar-monthly-disclaimer'));
+    }
+    details.append(body);return details;
+  }
   function renderProducts(){
     const q=S.query.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
     const products=(S.kind==='kit'?C.matchingKits(available(),S.target):available().filter(p=>p.kind==='piece'&&p.payload?.categoria!=='projetos'))
@@ -326,8 +370,11 @@
       if(p.kind==='kit'){
         const x=p.payload||{};
         const gen=el('p',undefined,'kit-generation');
-        gen.append(el('strong',number(C.estimatedGeneration(p))+' kWh/mês'),document.createTextNode(' de média mensal estimada*'));
+        const estimate=solarEstimate(p);
+        gen.append(el('strong',number(estimate?estimate.averageMonthlyKwh:C.estimatedGeneration(p))+' kWh/mês'),document.createTextNode(' de média mensal estimada*'));
         card.append(gen);
+        if(!estimate)card.append(el('small','Referência comercial de geração, não personalizada por município.','client-muted'));
+        card.append(solarDisclosure(p,estimate));
         const facts=el('div',undefined,'kit-facts');
         for(const [title,value] of [
           ['Módulos',number(x.placas)+' × '+number(x.moduloWp)+' Wp'],
@@ -688,6 +735,14 @@
   });
   $('client-target-slider').addEventListener('input',ev=>setTarget(ev.target.value));
   $('client-search').addEventListener('input',ev=>{S.query=ev.target.value;renderProducts();});
+  $('solar-city').addEventListener('change',ev=>{
+    S.solarCity=String(ev.target.value||'');
+    $('solar-city-hint').textContent=S.solarCity
+      ?'Estimativas para '+S.solarCity+'/CE, utilizando a base solarimétrica municipal.'
+      :'A estimativa atual é uma referência comercial até selecionar um município.';
+    renderProducts();
+    renderRecommendation();
+  });
   for(const tab of document.querySelectorAll('[data-kind]'))
     tab.addEventListener('click',()=>setKind(tab.dataset.kind));
   $('client-kits-link').addEventListener('click',()=>setKind('kit'));
