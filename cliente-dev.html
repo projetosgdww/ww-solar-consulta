@@ -39,6 +39,21 @@
 <p id="client-login-status" role="status" class="client-status"></p>
 </form>
 <p class="client-helper">O cadastro e o acesso são fornecidos diretamente pelo atendimento WW Solar. Não há cadastro público.</p>
+<button type="button" class="client-password-link" id="client-forgot-password">Esqueci minha senha</button>
+<p class="client-helper">Se o e-mail estiver cadastrado, você receberá orientações de recuperação.</p>
+</section>
+<section class="client-login client-password-setup" id="client-password-setup" hidden aria-labelledby="client-password-setup-title">
+<h1 id="client-password-setup-title">Crie sua senha pessoal</h1>
+<p id="client-password-setup-description">Para proteger o acesso, substitua a senha temporária por uma senha de sua escolha.</p>
+<form id="client-password-setup-form" class="client-form" autocomplete="on">
+<label for="client-new-password">Nova senha</label>
+<input id="client-new-password" type="password" autocomplete="new-password" minlength="12" maxlength="128" required placeholder="Mínimo de 12 caracteres">
+<label for="client-confirm-password">Confirmar senha</label>
+<input id="client-confirm-password" type="password" autocomplete="new-password" minlength="12" maxlength="128" required placeholder="Digite a senha novamente">
+<button id="client-save-password" class="button button-accent" type="submit">Salvar minha senha e continuar ↗</button>
+<p id="client-password-setup-status" class="client-status" role="status"></p>
+</form>
+<button id="client-password-cancel" class="client-password-link" type="button">Sair desta conta</button>
 </section></div>
 <section id="client-app" hidden>
 <div class="shell client-welcome" id="client-welcome"><div><h2 class="client-greeting">Olá, bem-vindo.</h2><p id="client-identity" class="client-muted"></p></div></div>
@@ -131,9 +146,9 @@
 <div id="client-toast" class="client-toast" role="status" aria-live="polite" hidden><span aria-hidden="true">✓</span><span id="client-toast-text">Produto adicionado ao carrinho</span></div>
 </main>
 <footer class="footer"><div class="shell footer-inner"><span><strong>WW</strong>SOLAR</span><span>Ambiente de clientes · Solicitação de cotação</span><span>Atendimento comercial (85) 99272-3637 · Canindé/CE</span><nav class="legal-footer-links" aria-label="Documentos legais"><a href="./privacidade.html">Política de Privacidade</a><a href="./termos.html">Termos de Uso</a></nav></div></footer>
-<script src="./cliente-dev-config.js?v=20261113-pwa-nobutton-v2" defer></script>
+<script src="./cliente-dev-config.js?v=20261114-password-setup-v1" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0/dist/umd/supabase.min.js" defer></script>
-<script src="./cliente-core.js?v=20261113-pwa-nobutton-v2" defer></script>
-<script src="./cliente-dev.js?v=20261113-pwa-nobutton-v2" defer></script>
-<script src="./cliente-pwa.js?v=20261113-pwa-nobutton-v2" defer></script>
+<script src="./cliente-core.js?v=20261114-password-setup-v1" defer></script>
+<script src="./cliente-dev.js?v=20261114-password-setup-v1" defer></script>
+<script src="./cliente-pwa.js?v=20261114-password-setup-v1" defer></script>
 </body></html>
