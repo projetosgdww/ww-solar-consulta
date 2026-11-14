@@ -340,3 +340,7 @@ body .header{position:sticky;top:0;z-index:80}
 .solar-monthly-result{margin-top:10px}
 .solar-monthly-result>.client-muted{margin:0;font-size:12px;line-height:1.5}
 @media(max-width:480px){.solar-monthly-city{max-width:100%}}
+
+
+/* Aviso incontornável de dados de demonstração; não confundir com valores reais. */
+.solar-demo-warning{padding:8px 9px;margin:0 0 10px;background:#fff3d8;border:1px solid #e6bf70;border-radius:7px;color:#704700;font-size:10px;line-height:1.45;font-weight:800;letter-spacing:.02em}
