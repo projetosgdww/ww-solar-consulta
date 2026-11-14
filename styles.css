@@ -23,3 +23,11 @@ button:disabled{opacity:.55;cursor:not-allowed;transform:none!important}
 /* Telefone discreto no botão já existente do cabeçalho */
 .header-contact-number{font-size:10px;font-weight:600;color:#bcd0c9;white-space:nowrap;margin-left:4px}
 @media(max-width:1120px) and (min-width:981px){.header-contact-number{display:none}}
+
+/* WW Solar: links legais disponíveis inclusive sem login. */
+.footer-inner{flex-wrap:wrap;padding-block:18px}
+.footer-inner .legal-footer-links{display:flex;align-items:center;justify-content:center;gap:12px 18px;flex-wrap:wrap}
+.footer-inner .legal-footer-links a{font-size:11px;color:#d8e5df;text-decoration:underline;text-underline-offset:3px}
+.footer-inner .legal-footer-links a:hover{color:var(--accent)}
+.footer-inner .legal-footer-links a:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+@media(max-width:650px){.footer-inner{min-height:0;gap:10px;padding-block:21px;flex-direction:column;text-align:center}.footer-inner .legal-footer-links{gap:8px 18px}}
