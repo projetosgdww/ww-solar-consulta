@@ -2,7 +2,6 @@
   'use strict';
   const $ = id => document.getElementById(id);
   const C=window.WWSolarClienteCore, cfg=window.WWSOLAR_CLIENTE_CONFIG||{};
-  const Solar=window.WWSolarSolarCore, SolarData=window.WWSolarSolarData;
   const S={db:null,user:null,admin:false,catalog:[],lines:[],kind:'kit',category:'all',query:'',target:300,cartUpdatedAt:null,cartInvalid:false,saveQueue:Promise.resolve(),timer:null,toastTimer:null,drawerOpen:false,expiryNotified:false,checkoutPending:false,orderKey:null,recoveryMode:false};
   const status=(m,id='client-action-status')=>{$(id).textContent=m;};
   const show=(id,visible)=>{$(id).hidden=!visible;};
@@ -223,11 +222,8 @@
     renderRecommendation();
     if(S.kind==='kit')renderProducts();
   }
-  // Recomendação comercial permanece independente da cidade consultada no card.
-  function matchingSolarKits(){return C.matchingKits(available(),S.target);}
-  function recommendedSolarKit(){return matchingSolarKits()[0]||null;}
   function renderRecommendation(){
-    const kit=recommendedSolarKit();
+    const kit=C.recommendedKit(available(),S.target);
     const hasKits=available().some(p=>p.kind==='kit');
     $('client-result-button').disabled=!kit;
 
@@ -302,81 +298,9 @@
       if(groups.has(category))wrap.append(mk(category,CATEGORY_LABELS[category],groups.get(category)));
     }
   }
-  // Cálculo exclusivamente de apresentação; seleção comercial, preços e checkout permanecem intactos.
-  // Cálculo consultivo exclusivo do card; não modifica seleção, preços ou cotações.
-  const solarDemoEnabled = /^([a-z0-9-]+)\.ww-solar\.pages\.dev$/.test(window.location.hostname)
-    && window.location.hostname !== 'ww-solar.pages.dev'
-    && window.WWSolarSolarDemo?.synthetic === true;
-  function solarEstimate(p,city){
-    if(!city||!Solar||!SolarData)return null;
-    const authorizedData=SolarData.find('CE',city);
-    // Somente o host de preview poderá exibir fixtures sintéticas.
-    const location=authorizedData||(solarDemoEnabled?window.WWSolarSolarDemo.find('CE',city):null);
-    const kwp=C.kitKwp(p);
-    if(!location||kwp===null)return null;
-    const estimate=Solar.calculate(kwp,location,new Date().getFullYear());
-    return estimate?{...estimate,demo:location.demo===true}:null;
-  }
-  function solarDisclosure(p){
-    const details=el('details',undefined,'solar-monthly');
-    const summary=el('summary','Ver geração estimada mês a mês ›','solar-monthly-trigger');
-    const body=el('div',undefined,'solar-monthly-body');
-    const label=el('label','Município para estimativa','solar-monthly-city-label');
-    const select=el('select',undefined,'solar-monthly-city');
-    select.setAttribute('aria-label','Município para estimativa de geração deste kit');
-    for(const [value,title] of [['','Selecione o município'],['Canindé','Canindé/CE'],['Caridade','Caridade/CE'],['Paramoti','Paramoti/CE']]){
-      const option=el('option',title);option.value=value;select.append(option);
-    }
-    const result=el('div',undefined,'solar-monthly-result');
-    const update=()=>{
-      result.replaceChildren();
-      const city=select.value;
-      if(!city){
-        result.append(el('p','Selecione um município para consultar a geração estimada mês a mês.','client-muted'));
-        return;
-      }
-      const estimate=solarEstimate(p,city);
-      if(!estimate){
-        result.append(el('p','Estimativa mensal ainda não disponível para este município.','client-muted'));
-        return;
-      }
-      if(estimate.demo){
-        result.append(el('p','DEMONSTRAÇÃO • DADOS SINTÉTICOS • NÃO REPRESENTAM A IRRADIAÇÃO REAL DE '+estimate.city.toLocaleUpperCase('pt-BR')+'/CE','solar-demo-warning'));
-      }
-      result.append(el('h4','Geração estimada mês a mês — '+estimate.city+'/CE'));
-      const chart=el('div',undefined,'solar-monthly-chart');
-      chart.setAttribute('role','img');
-      chart.setAttribute('aria-label',estimate.monthly.map(m=>m.label+': '+number(m.kwh)+' kWh').join('; '));
-      const peak=Math.max(...estimate.monthly.map(m=>m.kwh));
-      for(const m of estimate.monthly){
-        const item=el('div',undefined,'solar-monthly-item');
-        item.title=m.label+': '+number(m.kwh)+' kWh';
-        const value=el('span',number(m.kwh),'solar-monthly-value');
-        const track=el('div',undefined,'solar-monthly-track');
-        const bar=el('div',undefined,'solar-monthly-bar');
-        bar.style.height=(100*m.kwh/peak).toFixed(2)+'%';
-        track.append(bar);
-        item.append(value,track,el('span',m.label.slice(0,3),'solar-monthly-label'));
-        chart.append(item);
-      }
-      result.append(chart);
-      const totals=el('div',undefined,'solar-monthly-totals');
-      totals.append(el('span','Média mensal: '+number(estimate.averageMonthlyKwh)+' kWh/mês'),
-        el('span','Total anual: '+number(estimate.annualKwh)+' kWh/ano'));
-      result.append(totals);
-      result.append(el('p',estimate.demo
-        ?'SIMULAÇÃO VISUAL: os índices mensais são sintéticos e servem apenas para testar o gráfico. Não utilizar como previsão de geração, dado do INPE ou base de cotação. Fator de desempenho aplicado: 0,77. Ano de referência: '+estimate.year+'.'
-        :'Estimativa com potência instalada, irradiação histórica local e fator de desempenho de 0,77 (perdas globais estimadas). A geração real varia conforme orientação, inclinação, sombreamento, temperatura, clima, equipamentos e condições da instalação. Ano civil de referência: '+estimate.year+'.','solar-monthly-disclaimer'));
-    };
-    select.addEventListener('change',update);
-    update();
-    body.append(label,select,result);
-    details.append(summary,body);
-    return details;
-  }
   function renderProducts(){
     const q=S.query.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
-    const products=(S.kind==='kit'?matchingSolarKits():available().filter(p=>p.kind==='piece'&&p.payload?.categoria!=='projetos'))
+    const products=(S.kind==='kit'?C.matchingKits(available(),S.target):available().filter(p=>p.kind==='piece'&&p.payload?.categoria!=='projetos'))
       .filter(p=>S.kind==='kit'||S.category==='all'||String(p.payload?.categoria||'').toLowerCase()===S.category)
       .filter(p=>!q||[p.id,p.title,p.payload?.inversor,p.payload?.categoria]
         .some(v=>String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().includes(q)))
@@ -404,7 +328,6 @@
         const gen=el('p',undefined,'kit-generation');
         gen.append(el('strong',number(C.estimatedGeneration(p))+' kWh/mês'),document.createTextNode(' de média mensal estimada*'));
         card.append(gen);
-        card.append(solarDisclosure(p));
         const facts=el('div',undefined,'kit-facts');
         for(const [title,value] of [
           ['Módulos',number(x.placas)+' × '+number(x.moduloWp)+' Wp'],
@@ -756,7 +679,7 @@
   $('client-target').addEventListener('keydown',ev=>{if(ev.key==='Enter'){ev.preventDefault();setTarget(ev.target.value);}});
   $('client-target-apply').addEventListener('click',()=>{
     setTarget($('client-target').value);
-    if(recommendedSolarKit()){
+    if(C.recommendedKit(available(),S.target)){
       setKind('kit');
       document.getElementById('catalogo')?.scrollIntoView({behavior:'smooth',block:'start'});
     }else{
@@ -770,7 +693,7 @@
   $('client-kits-link').addEventListener('click',()=>setKind('kit'));
   $('client-pieces-link').addEventListener('click',()=>setKind('piece'));
   $('client-result-button').addEventListener('click',()=>{
-    const kit=recommendedSolarKit();
+    const kit=C.recommendedKit(available(),S.target);
     if(kit)add(kit.id);
   });
   $('client-checkout').addEventListener('click',checkout);
