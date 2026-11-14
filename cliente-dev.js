@@ -2,7 +2,7 @@
   'use strict';
   const $ = id => document.getElementById(id);
   const C=window.WWSolarClienteCore, cfg=window.WWSOLAR_CLIENTE_CONFIG||{};
-  const S={db:null,user:null,admin:false,catalog:[],lines:[],kind:'kit',category:'all',query:'',target:300,cartUpdatedAt:null,cartInvalid:false,saveQueue:Promise.resolve(),timer:null,toastTimer:null,drawerOpen:false,expiryNotified:false,checkoutPending:false,orderKey:null};
+  const S={db:null,user:null,admin:false,catalog:[],lines:[],kind:'kit',category:'all',query:'',target:300,cartUpdatedAt:null,cartInvalid:false,saveQueue:Promise.resolve(),timer:null,toastTimer:null,drawerOpen:false,expiryNotified:false,checkoutPending:false,orderKey:null,recoveryMode:false};
   const status=(m,id='client-action-status')=>{$(id).textContent=m;};
   const show=(id,visible)=>{$(id).hidden=!visible;};
   const euro = v => C.money(v);
@@ -25,10 +25,32 @@
       .select('active').eq('user_id',user.id).maybeSingle();
     return !error&&data?.active===true;
   }
+  function showPasswordSetup(mode){
+    show('client-entry',true);show('client-login',false);show('client-password-setup',true);
+    show('client-app',false);show('client-nav',false);show('client-cart-top',false);
+    show('client-logout',false);
+    S.recoveryMode=mode==='recovery';
+    $('client-password-setup-title').textContent=S.recoveryMode?'Defina uma nova senha':'Crie sua senha pessoal';
+    $('client-password-setup-description').textContent=S.recoveryMode
+      ?'Escolha uma senha pessoal para recuperar o acesso à sua conta.'
+      :'Antes de utilizar o catálogo, substitua a senha temporária por uma senha pessoal.';
+    $('client-new-password').value='';$('client-confirm-password').value='';
+    status('','client-password-setup-status');
+  }
+  function showLogin(){
+    show('client-entry',true);show('client-login',true);show('client-password-setup',false);
+    show('client-app',false);show('client-nav',false);show('client-cart-top',false);
+    show('client-logout',false);
+  }
   async function enter(user){
     if(!(await authorized(user))){
       await S.db.auth.signOut();
       status('Acesso não autorizado ou suspenso. Entre em contato com a WW Solar.','client-login-status');
+      return;
+    }
+    if(S.recoveryMode||user.app_metadata?.wwsolar_password_change_required===true){
+      S.user=user;
+      showPasswordSetup(S.recoveryMode?'recovery':'first');
       return;
     }
     try{
@@ -62,8 +84,16 @@
       status('Ambiente DEV ainda não configurado. Não informe senha nesta etapa.','client-login-status');
       return;
     }
+    const hashParams=new URLSearchParams(window.location.hash.replace(/^#/,''));
+    S.recoveryMode=hashParams.get('type')==='recovery';
     S.db=window.supabase.createClient(cfg.supabaseUrl,cfg.publishableKey,
-      {auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false}});
+      {auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+    S.db.auth.onAuthStateChange((event)=>{
+      if(event==='PASSWORD_RECOVERY'){
+        S.recoveryMode=true;
+        queueMicrotask(()=>{if(S.user)showPasswordSetup('recovery');});
+      }
+    });
     const {data,error}=await S.db.auth.getUser();
     if(!error&&data?.user)await enter(data.user);
   }
@@ -83,13 +113,69 @@
     }catch(e){status('E-mail ou senha não conferem, ou acesso não autorizado.','client-login-status');}
     finally{$('client-login-submit').disabled=false;}
   }
+  async function requestReset(){
+    const input=$('client-email');
+    const email=input.value.trim().toLowerCase();
+    if(!input.reportValidity())return;
+    if(!email){status('Informe seu e-mail para solicitar recuperação.','client-login-status');return;}
+    $('client-forgot-password').disabled=true;
+    try{
+      // A URL precisa constar da lista permitida em Authentication > URL Configuration.
+      const {error}=await S.db.auth.resetPasswordForEmail(email,{
+        redirectTo:new URL('./cliente.html',window.location.href).href
+      });
+      if(error)console.warn('WW Solar: recuperação não enviada. Confira a configuração de e-mail.');
+      status('Se este e-mail estiver habilitado, você receberá instruções para criar outra senha.','client-login-status');
+    }catch(e){
+      status('Não foi possível solicitar a recuperação. Entre em contato com a WW Solar.','client-login-status');
+    }finally{$('client-forgot-password').disabled=false;}
+  }
+  async function savePersonalPassword(event){
+    event.preventDefault();
+    if(!S.db||!S.user)return;
+    const first=$('client-new-password').value,second=$('client-confirm-password').value;
+    if(first.length<12||first.length>128){status('Use uma senha com 12 a 128 caracteres.','client-password-setup-status');return;}
+    if(first!==second){status('As duas senhas não coincidem.','client-password-setup-status');return;}
+    const submit=$('client-save-password');submit.disabled=true;
+    status('Atualizando sua senha com segurança...','client-password-setup-status');
+    try{
+      const {error}=await S.db.auth.updateUser({password:first});
+      if(error)throw error;
+      // A nova senha só é enviada ao serviço de autenticação, nunca ao administrador.
+      $('client-new-password').value='';$('client-confirm-password').value='';
+      if(S.user.app_metadata?.wwsolar_password_change_required===true){
+        const {data:result,error:completeError}=await S.db.functions.invoke('wwsolar-create-customer',{
+          body:{action:'complete_setup'}
+        });
+        if(completeError||result?.completed!==true)
+          throw Error('Não foi possível concluir a confirmação do acesso. Tente novamente ou fale com o atendimento.');
+      }
+      S.recoveryMode=false;
+      const {error:sessionError}=await S.db.auth.refreshSession();
+      if(sessionError)throw sessionError;
+      const {data:identity,error:identityError}=await S.db.auth.getUser();
+      if(identityError||!identity?.user)throw Error('Entre novamente com sua nova senha.');
+      S.user=identity.user;
+      if(S.user.app_metadata?.wwsolar_password_change_required===true)
+        throw Error('A senha foi alterada, mas a liberação ainda não foi confirmada. Contate o atendimento.');
+      show('client-password-setup',false);show('client-login',true);
+      await enter(S.user);
+    }catch(e){
+      status(e?.message||'Falha ao definir a senha. Entre em contato com o suporte.','client-password-setup-status');
+    }finally{submit.disabled=false;}
+  }
+  async function cancelPasswordSetup(){
+    if(S.db)await S.db.auth.signOut();
+    S.user=null;S.recoveryMode=false;
+    showLogin();
+    $('client-password').value='';
+  }
   async function logout(){
     if(S.db)await S.db.auth.signOut();
     S.user=null;S.catalog=[];S.lines=[];S.admin=false;S.cartUpdatedAt=null;S.orderKey=null;
     if(S.timer){clearInterval(S.timer);S.timer=null;}
     closeDrawer();
-    show('client-app',false);show('client-entry',true);show('client-nav',false);show('client-cart-top',false);
-    show('client-logout',false);
+    showLogin();
     $('client-password').value='';status('','client-login-status');
   }
   const number=n=>new Intl.NumberFormat('pt-BR',{maximumFractionDigits:0}).format(Number(n)||0);
@@ -547,6 +633,9 @@
     }finally{S.checkoutPending=false;updateClock();}
   }
   $('client-login-form').addEventListener('submit',login);
+  $('client-forgot-password').addEventListener('click',()=>void requestReset());
+  $('client-password-setup-form').addEventListener('submit',event=>void savePersonalPassword(event));
+  $('client-password-cancel').addEventListener('click',()=>void cancelPasswordSetup());
   $('client-logout').addEventListener('click',logout);
   // O campo numérico só aplica após confirmar; permite digitar 1200 sem ser forçado a 300 a cada tecla.
   $('client-target').addEventListener('change',ev=>setTarget(ev.target.value));
