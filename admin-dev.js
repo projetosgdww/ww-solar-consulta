@@ -86,14 +86,14 @@ async function sendAction(action){
       throw Error('O servidor não confirmou a criação da senha. Não envie credenciais.');
    oneTime='WW Solar — Área do cliente\n'
      +'Acesso: '+new URL('./cliente-dev.html',window.location.href).href+'\n'
-     +'E-mail: '+data.email+'\nSenha: '+data.password+'\n'
-     +'Guarde esta mensagem em local seguro.';
+     +'E-mail: '+data.email+'\nSenha temporária: '+data.password+'\n'
+     +'No primeiro acesso, crie sua senha pessoal. Não compartilhe a nova senha.';
    $('admin-dev-credentials').textContent=oneTime;
    $('admin-dev-created').hidden=false;
    input.value='';
    status(action==='rotate'
-     ?'Senha reemitida. A anterior não funciona mais. Copie e envie a nova ao cliente.'
-     :'Acesso criado. Copie as credenciais e encaminhe ao cliente.');
+     ?'Senha temporária reemitida. O cliente deverá trocá-la no acesso.'
+     :'Acesso criado. Encaminhe a senha temporária; a troca será obrigatória.');
    void loadClients();
  }catch(e){status(e?.message||'Não foi possível confirmar a operação.');}
  finally{$('admin-dev-submit').disabled=false;$('admin-dev-rotate').disabled=false;}
