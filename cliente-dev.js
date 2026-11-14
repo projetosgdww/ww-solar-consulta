@@ -91,7 +91,10 @@
     S.db.auth.onAuthStateChange((event)=>{
       if(event==='PASSWORD_RECOVERY'){
         S.recoveryMode=true;
-        queueMicrotask(()=>{if(S.user)showPasswordSetup('recovery');});
+        queueMicrotask(async()=>{
+          const {data,error}=await S.db.auth.getUser();
+          if(!error&&data?.user)await enter(data.user);
+        });
       }
     });
     const {data,error}=await S.db.auth.getUser();
@@ -135,6 +138,7 @@
     if(!S.db||!S.user)return;
     const first=$('client-new-password').value,second=$('client-confirm-password').value;
     if(first.length<12||first.length>128){status('Use uma senha com 12 a 128 caracteres.','client-password-setup-status');return;}
+    if(/^GDWW-/i.test(first)){status('Escolha uma senha pessoal diferente da senha temporária.','client-password-setup-status');return;}
     if(first!==second){status('As duas senhas não coincidem.','client-password-setup-status');return;}
     const submit=$('client-save-password');submit.disabled=true;
     status('Atualizando sua senha com segurança...','client-password-setup-status');
