@@ -1,43 +1,35 @@
 'use strict';
-const test=require('node:test');const assert=require('node:assert/strict');
-const data=require('../solarimetria-data.js');
-const solar=require('../solarimetria-core.js');
+const test=require('node:test'),assert=require('node:assert/strict');
+const solar=require('../solarimetria-core.js'),data=require('../solarimetria-data.js');
+const months=['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+// FIXTURES SINTÉTICAS EXCLUSIVAS PARA TESTES: NÃO SÃO DADOS SOLARIMÉTRICOS REAIS.
+function synthetic(name,base){return {name,uf:'CE',hsp:Object.fromEntries(months.map((m,i)=>[m,base+i*.02]))};}
 for(const city of ['Canindé','Caridade','Paramoti']){
- test(city+' usa os 12 valores da base de origem e média anual/12',()=>{
-   const loc=data.find('CE',city);assert.ok(loc);assert.equal(Object.keys(loc.hsp).length,12);
-   const result=solar.calculate(2.4,loc,2025);
+ test(city+' (fixture sintética): meses, anual e média anual/12',()=>{
+   const loc=synthetic(city,4.0);
+   const result=solar.calculate(2.4,loc,2026);
    assert.equal(result.monthly.length,12);
-   for(let i=0;i<12;i++){
-     const row=result.monthly[i];
-     assert.equal(row.kwh,2.4*row.hsp*row.days*0.75);
-   }
-   assert.ok(Math.abs(result.annualKwh-result.monthly.reduce((a,b)=>a+b.kwh,0))<1e-9);
-   assert.ok(Math.abs(result.averageMonthlyKwh-result.annualKwh/12)<1e-9);
+   for(let i=0;i<12;i++)assert.equal(result.monthly[i].kwh,2.4*loc.hsp[months[i]]*result.monthly[i].days*0.75);
+   assert.ok(Math.abs(result.annualKwh-result.monthly.reduce((s,v)=>s+v.kwh,0))<1e-9);
+   assert.equal(result.averageMonthlyKwh,result.annualKwh/12);
  });
 }
-test('valores oficiais Canindé Jan=5.140 HSP e Dez=5.398',()=>{
- const r=data.find('CE','Canindé');assert.equal(r.hsp.jan,5.14);assert.equal(r.hsp.dez,5.398);
+test('fevereiro: 28 e 29 dias, respeitando o calendário',()=>{
+ const loc=synthetic('Local teste',4.0);
+ const a=solar.calculate(2.4,loc,2026),b=solar.calculate(2.4,loc,2024);
+ assert.equal(a.monthly[1].days,28);assert.equal(b.monthly[1].days,29);
+ assert.equal(b.monthly[1].kwh-a.monthly[1].kwh,2.4*loc.hsp.fev*.75);
 });
-test('fevereiro 28/29 dias em anos comuns e bissextos',()=>{
- const l=data.find('CE','Paramoti'),common=solar.calculate(2.4,l,2025),leap=solar.calculate(2.4,l,2024);
- assert.equal(common.monthly[1].days,28);assert.equal(leap.monthly[1].days,29);
- assert.equal(leap.monthly[1].kwh-common.monthly[1].kwh,2.4*l.hsp.fev*0.75);
+test('sem dados reais ou município cadastrado: sem estimativa',()=>{
+ for(const city of ['Canindé','Caridade','Paramoti'])assert.equal(data.find('CE',city),null);
+ assert.equal(data.find('CE','Fortaleza'),null);assert.equal(data.find('PI','Canindé'),null);
+ assert.equal(solar.calculate(2.4,null,2026),null);
 });
-test('cidade inexistente ou UF diferente sem fallback',()=>{
- assert.equal(data.find('CE','Fortaleza'),null);
- assert.equal(data.find('PI','Canindé'),null);
- assert.equal(solar.calculate(2.4,null,2025),null);
+test('meses incompletos e potência inválida nunca geram valores fictícios',()=>{
+ assert.equal(solar.calculate(2.4,{hsp:{jan:5}},2026),null);
+ assert.equal(solar.calculate(0,synthetic('teste',4.0),2026),null);
 });
-test('dados ausentes retornam null, nunca inventa HSP',()=>{
- const bad={name:'X',uf:'CE',hsp:{jan:5.2}};
- assert.equal(solar.calculate(2.4,bad,2025),null);
- assert.equal(solar.calculate(0,data.find('CE','Canindé'),2025),null);
-});
-test('normalização de acentos no nome da cidade',()=>{
- assert.equal(data.find('ce','Caninde').name,'Canindé');
-});
-test('referência determinística de janeiro e média por ano civil',()=>{
- const loc=data.find('CE','Canindé'),r=solar.calculate(2.4,loc,2025);
- assert.ok(Math.abs(r.monthly[0].kwh-286.812)<1e-9);
- assert.ok(Math.abs(r.annualKwh-3703.0068)<1e-7);
+test('nomes e UF preparados para expansão da base',()=>{
+ assert.deepEqual(data.cities.map(c=>c.name),['Canindé','Caridade','Paramoti']);
+ assert.equal(data.months.length,12);
 });
