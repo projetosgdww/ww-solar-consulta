@@ -365,8 +365,8 @@
         el('span','Total anual: '+number(estimate.annualKwh)+' kWh/ano'));
       result.append(totals);
       result.append(el('p',estimate.demo
-        ?'SIMULAÇÃO VISUAL: os índices mensais são sintéticos e servem apenas para testar o gráfico. Não utilizar como previsão de geração, dado do INPE ou base de cotação. Fator de desempenho aplicado: 0,75. Ano de referência: '+estimate.year+'.'
-        :'Estimativa com potência instalada, irradiação histórica local e fator de desempenho de 0,75 (perdas globais estimadas). A geração real varia conforme orientação, inclinação, sombreamento, temperatura, clima, equipamentos e condições da instalação. Ano civil de referência: '+estimate.year+'.','solar-monthly-disclaimer'));
+        ?'SIMULAÇÃO VISUAL: os índices mensais são sintéticos e servem apenas para testar o gráfico. Não utilizar como previsão de geração, dado do INPE ou base de cotação. Fator de desempenho aplicado: 0,77. Ano de referência: '+estimate.year+'.'
+        :'Estimativa com potência instalada, irradiação histórica local e fator de desempenho de 0,77 (perdas globais estimadas). A geração real varia conforme orientação, inclinação, sombreamento, temperatura, clima, equipamentos e condições da instalação. Ano civil de referência: '+estimate.year+'.','solar-monthly-disclaimer'));
     };
     select.addEventListener('change',update);
     update();
