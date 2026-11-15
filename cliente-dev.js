@@ -557,7 +557,7 @@
     }
     if(!S.lines.length){
       area.append(el('p','Seu carrinho está vazio.','client-muted'));
-      drawer.append(el('p','Seu carrinho está vazio. Escolha peças ou kits para solicitar uma cotação.','client-muted'));
+      drawer.append(el('p','Seu carrinho está vazio. Escolha um projeto, peça ou kit para solicitar uma cotação.','client-muted'));
       preview.append(el('p','Nenhum item adicionado.','client-muted'));
     }else{
       for(const x of [...valid,...bad].slice(0,3)){
@@ -570,9 +570,25 @@
     if(S.cartInvalid)status('Há produtos indisponíveis no carrinho. Remova-os antes de finalizar.');
     updateClock();
   }
+  // Serviços PRJ-B são avulsos e independentes de qualquer kit (PRJ-WW).
+  // O preço exibido acompanha somente o catálogo ativo e aprovado.
+  function renderStandaloneProjects(){
+    for(const button of document.querySelectorAll('[data-project-id]')){
+      const project=available().find(p=>p.id===button.dataset.projectId &&
+        p.kind==='piece' && p.payload?.categoria==='projetos' && !p.payload?.kitCodigo);
+      const price=button.parentElement?.querySelector('strong');
+      if(price)price.textContent=project?euro(project.price):'Sob consulta';
+      button.disabled=!S.user||!project;
+      button.textContent=project?'Adicionar +':'Indisponível';
+    }
+    const hint=$('client-projects-hint');
+    if(hint)hint.textContent=S.user?
+      'Selecione a faixa correspondente à potência instalada. É possível solicitar apenas o projeto; TRT não inclusa.' :
+      'Entre na sua conta para adicionar somente o projeto ao carrinho.';
+  }
   function renderAll(){
     $('client-available-count').textContent=String(available().filter(p=>p.payload?.categoria!=='projetos').length);
-    renderRecommendation();renderCategories();renderProducts();renderCart();setTarget(S.target);
+    renderRecommendation();renderCategories();renderProducts();renderStandaloneProjects();renderCart();setTarget(S.target);
   }
   async function refreshQuote(){
     if(!S.user)return;
@@ -696,6 +712,18 @@
     const kit=C.recommendedKit(available(),S.target);
     if(kit)add(kit.id);
   });
+  for(const button of document.querySelectorAll('[data-project-id]')){
+    button.addEventListener('click',()=>{
+      if(button.disabled)return;
+      const id=button.dataset.projectId;
+      const project=available().find(p=>p.id===id && p.kind==='piece' &&
+        p.payload?.categoria==='projetos' && !p.payload?.kitCodigo);
+      if(!project||!S.user){status('Faça login para solicitar o projeto.');return;}
+      add(id);
+      status('Projeto elétrico adicionado. Você pode cotar apenas esse serviço; TRT não inclusa.');
+      openDrawer();
+    });
+  }
   $('client-checkout').addEventListener('click',checkout);
   $('client-drawer-checkout').addEventListener('click',checkout);
   $('client-cart-refresh').addEventListener('click',refreshQuote);
