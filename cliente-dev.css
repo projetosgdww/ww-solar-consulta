@@ -318,3 +318,9 @@ body .header{position:sticky;top:0;z-index:80}
 #carrinho[hidden]{display:none!important}
 .client-drawer-status{margin:2px 0 0;font-size:11px;line-height:1.4;overflow-wrap:anywhere}
 .client-drawer-status:empty{display:none}
+
+/* Carrinho no extremo direito do cabeçalho desktop, sem deslocar a marca no mobile. */
+@media(min-width:931px){
+ .header .header-inner.shell{width:100%;max-width:none;padding-left:max(24px,calc((100vw - 1190px)/2));padding-right:20px}
+ .header #client-cart-top{margin-left:auto;flex:0 0 auto}
+}
