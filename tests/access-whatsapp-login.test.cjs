@@ -8,11 +8,13 @@ test('login oferece WhatsApp WW Solar com mensagem pronta sem cadastro público'
  const url='https://wa.me/5585992723637?text=';
  assert.ok(html.includes(url));
  assert.ok(html.includes('Ol%C3%A1!%20Gostaria%20de%20solicitar%20acesso%20ao%20cat%C3%A1logo%20WW%20Solar.'));
- assert.ok(html.includes('Solicitar acesso pelo WhatsApp'));
- assert.ok(html.includes('(85) 99272-3637'));
+ assert.ok(html.includes('Clique aqui e fale com a WW Solar'));
+ assert.ok(html.includes('Ainda não tem acesso? O cadastro é realizado diretamente pelo atendimento WW Solar.'));
+ assert.ok(html.includes('O cadastro e o acesso são fornecidos diretamente pelo atendimento WW Solar. Não há cadastro público.'));
  assert.ok(html.includes('Não há cadastro público.'));
  assert.match(html,/rel="noopener noreferrer"/);
  assert.match(html,/id="client-login-form"/);
  assert.match(html,/id="client-forgot-password"/);
- assert.match(css,/\.client-access-whatsapp/);
+ assert.match(html,/class="client-password-link client-access-link"/);
+ assert.match(css,/\.client-access-link/);
 });
