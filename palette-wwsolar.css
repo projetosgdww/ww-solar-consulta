@@ -36,3 +36,37 @@ input[type=range]{accent-color:#FA4100}
 .client-drawer-bottom .button-accent{background:#FA4100;color:#161616}
 .client-drawer-bottom .button-accent:hover{background:#e83b00}
 .footer{background:#172123}
+
+/* Painel administrativo — extensão aprovada da Paleta 01.
+   Apenas apresentação; Clientes, Pedidos e Kits em revisão mantêm a mesma lógica. */
+.admin-main-title em,
+.admin-clients-panel>h1 em{color:#da3900}
+.admin-main-intro{color:#536962}
+.admin-tabs button{background:#fff;border-color:#dbe6da;color:#172123}
+.admin-tabs button:not(.active):hover{border-color:#FA4100;box-shadow:0 4px 16px rgba(250,65,0,.08)}
+.admin-tabs button:not(.active):focus-visible{outline:3px solid #FA4100;outline-offset:3px}
+.admin-tabs button.active{background:#172123;color:#fff;border-color:#FA4100;box-shadow:0 8px 22px rgba(23,33,35,.13);border-bottom:3px solid #FA4100}
+.admin-tabs button.active small{color:#d3e5d5}
+.admin-tabs button.active:focus-visible{outline:3px solid #81F002;outline-offset:3px}
+.admin-tabs button:not(.active) small{color:#526a61}
+.admin-clients-panel,.admin-orders-panel{border-color:#dbe6da}
+.admin-client-directory,.admin-client-row{border-color:#dfe9dc}
+.admin-pill{background:#fff1e9;color:#a42d00}
+.admin-pill-green{background:#effbdc;color:#365d0c}
+.admin-order-card{border-color:#dbe8dc}
+.admin-order-card:hover{border-color:#f9a487}
+.admin-order-header{background:#fff}
+.admin-order-money{color:#172123}
+.admin-order-detail,.admin-order-item{border-color:#e0e9df}
+.admin-order-detail summary{color:#2c5543}
+.admin-order-detail summary:hover{color:#c43700}
+.admin-order-audit{background:#f4faee;color:#426044}
+.admin-order-actions{background:#f6faef;border-color:#e0ead9}
+.admin-order-toolbar select,.admin-order-actions select{background:#fff;border-color:#b9d5c0;color:#172123}
+.admin-order-toolbar select:focus-visible,.admin-order-actions select:focus-visible{outline:3px solid #FA4100;outline-offset:2px}
+.admin-order-toolbar>span{color:#3c5c46}
+.admin-client-row button:focus-visible,#admin-refresh-kits:focus-visible{outline:3px solid #81F002;outline-offset:3px}
+#admin-dev-credentials{background:#f6faee!important;border-color:#d6e9c6!important;color:#172123}
+#admin-orders-panel .admin-section-row h2,
+#admin-kits-panel .admin-section-row h2,
+#admin-client-directory .admin-section-row h2{color:#172123}
