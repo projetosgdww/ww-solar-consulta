@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="WW Solar">
-<link rel="stylesheet" href="./styles.css?v=20261114-legal-v1"><link rel="stylesheet" href="./cliente-dev.css?v=20261114-password-setup-v2"><link rel="stylesheet" href="./palette-wwsolar.css?v=20261115-paleta01-admin-v2">
+<link rel="stylesheet" href="./styles.css?v=20261114-legal-v1"><link rel="stylesheet" href="./cliente-dev.css?v=20261115-projeto-avulso-v1"><link rel="stylesheet" href="./palette-wwsolar.css?v=20261115-paleta01-admin-v2">
 </head>
 <body>
 <a class="skip-link" href="#client-main">Ir para o conteúdo</a>
@@ -114,31 +114,32 @@
 <section class="main-section shell client-projects" id="projetos" aria-labelledby="client-projects-title">
  <div class="section-title"><div><div class="section-label">03 / PROJETO ELÉTRICO FOTOVOLTAICO</div>
  <h2 id="client-projects-title">Precisa também do projeto?</h2>
- <p>Você pode incluir o projeto elétrico fotovoltaico na solicitação do seu kit. O valor é calculado conforme a potência instalada.</p></div></div>
+ <p>Você pode solicitar somente o projeto elétrico fotovoltaico, sem comprar um kit, ou incluí-lo na cotação dos equipamentos. Escolha a faixa de potência instalada.</p></div></div>
  <div class="client-projects-card">
   <div class="client-projects-head"><div><strong>Valores de projetos · Grupo B</strong><small>Até 60 kW de potência fotovoltaica instalada</small></div><span>Serviço opcional</span></div>
-  <div class="client-projects-grid">
-   <div><span>Até 3 kW</span><strong>R$ 300,00</strong></div>
-   <div><span>Acima de 3 e abaixo de 10 kW</span><strong>R$ 400,00</strong></div>
-   <div><span>De 10 a menos de 20 kW</span><strong>R$ 500,00</strong></div>
-   <div><span>De 20 a menos de 30 kW</span><strong>R$ 600,00</strong></div>
-   <div><span>De 30 a menos de 40 kW</span><strong>R$ 700,00</strong></div>
-   <div><span>De 40 a menos de 50 kW</span><strong>R$ 800,00</strong></div>
-   <div><span>De 50 a 60 kW</span><strong>R$ 900,00</strong></div>
+  <div class="client-projects-grid" id="client-projects-grid">
+   <div class="client-projects-tier"><span>Até 3 kW</span><strong>R$ 300,00</strong><button type="button" class="client-project-add" data-project-id="PRJ-B-003" disabled aria-label="Adicionar projeto de Até 3 kW ao carrinho">Adicionar +</button></div>
+   <div class="client-projects-tier"><span>Acima de 3 e abaixo de 10 kW</span><strong>R$ 400,00</strong><button type="button" class="client-project-add" data-project-id="PRJ-B-010" disabled aria-label="Adicionar projeto de Acima de 3 e abaixo de 10 kW ao carrinho">Adicionar +</button></div>
+   <div class="client-projects-tier"><span>De 10 a menos de 20 kW</span><strong>R$ 500,00</strong><button type="button" class="client-project-add" data-project-id="PRJ-B-020" disabled aria-label="Adicionar projeto de De 10 a menos de 20 kW ao carrinho">Adicionar +</button></div>
+   <div class="client-projects-tier"><span>De 20 a menos de 30 kW</span><strong>R$ 600,00</strong><button type="button" class="client-project-add" data-project-id="PRJ-B-030" disabled aria-label="Adicionar projeto de De 20 a menos de 30 kW ao carrinho">Adicionar +</button></div>
+   <div class="client-projects-tier"><span>De 30 a menos de 40 kW</span><strong>R$ 700,00</strong><button type="button" class="client-project-add" data-project-id="PRJ-B-040" disabled aria-label="Adicionar projeto de De 30 a menos de 40 kW ao carrinho">Adicionar +</button></div>
+   <div class="client-projects-tier"><span>De 40 a menos de 50 kW</span><strong>R$ 800,00</strong><button type="button" class="client-project-add" data-project-id="PRJ-B-050" disabled aria-label="Adicionar projeto de De 40 a menos de 50 kW ao carrinho">Adicionar +</button></div>
+   <div class="client-projects-tier"><span>De 50 a 60 kW</span><strong>R$ 900,00</strong><button type="button" class="client-project-add" data-project-id="PRJ-B-060" disabled aria-label="Adicionar projeto de De 50 a 60 kW ao carrinho">Adicionar +</button></div>
   </div>
+  <p class="client-muted client-projects-hint" id="client-projects-hint">Entre na sua conta para incluir somente o projeto no carrinho, ou escolha um kit com projeto opcional.</p>
   <p class="client-projects-important"><strong>Importante:</strong> a Taxa de Responsabilidade Técnica (TRT) <strong>não está inclusa</strong> e deverá ser paga pelo contratante.</p>
   <p class="client-muted">Para instalações enquadradas no Grupo A ou acima de 60 kW, solicite um orçamento específico. O enquadramento é confirmado na análise da unidade consumidora.</p>
   <a href="https://wa.me/5585991170375?text=Ol%C3%A1%21%20Gostaria%20de%20uma%20cota%C3%A7%C3%A3o%20de%20projeto%20el%C3%A9trico%20fotovoltaico." target="_blank" rel="noopener noreferrer" class="button button-outline">Falar sobre projetos · (85) 99117-0375 ↗</a>
  </div>
 </section>
-<section class="main-section shell" id="carrinho" aria-labelledby="client-cart-title"><div class="section-title"><div><div class="section-label">04 / SOLICITAÇÃO</div><h2 id="client-cart-title">Seu carrinho <span id="client-cart-count">0</span></h2><p>Monte sua solicitação de equipamentos. Ao finalizar, o WhatsApp abrirá a mensagem para sua negociação.</p></div></div>
+<section class="main-section shell" id="carrinho" aria-labelledby="client-cart-title"><div class="section-title"><div><div class="section-label">04 / SOLICITAÇÃO</div><h2 id="client-cart-title">Seu carrinho <span id="client-cart-count">0</span></h2><p>Monte sua solicitação de equipamentos, de projetos ou apenas do projeto elétrico. Ao finalizar, o WhatsApp abrirá a mensagem para sua negociação.</p></div></div>
 <div class="client-cart"><div id="client-cart-lines" class="client-cart-lines"></div><div class="client-cart-bottom"><strong id="client-cart-total">R$ 0,00</strong><button type="button" id="client-checkout" class="button button-accent" disabled>Enviar cotação pelo WhatsApp <span>↗</span></button></div><p class="client-muted">Sem pagamento automático. Preços, estoque, frete e condições sujeitos à confirmação.</p><div class="client-quote-footer"><span class="client-quote-note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg> Cotação válida por <strong id="client-cart-timer">25:00</strong> desde a última atualização; não reserva estoque.</span><button id="client-cart-refresh" class="button button-outline" type="button">Atualizar preços</button></div>
 <p id="client-action-status" class="client-status" role="status"></p></div></section>
 <section class="bottom-section shell" id="informacoes"><div class="explain-block"><div class="section-label">03 / INFORMAÇÕES IMPORTANTES</div><h2>Simples na consulta.<br><em>Claro nas condições.</em></h2><p>A seleção é uma referência para iniciar uma cotação comercial. O kit indicado deve ser confirmado quanto à disponibilidade, compatibilidade e valores atualizados.</p><div class="notes"><div><span>01</span><p><b>Somente equipamentos</b>Não inclui instalação, projeto, homologação ou mão de obra.</p></div><div><span>02</span><p><b>Frete à parte</b>O custo de envio deve ser confirmado no atendimento.</p></div><div><span>03</span><p><b>Geração média estimada</b>Os valores reproduzem a base técnica e não representam garantia de produção.</p></div></div></div><div class="contact-block"><div class="contact-mark">☀</div><h3>Encontrou um kit interessante?</h3><p>Abra os detalhes, confira a configuração e prepare sua solicitação de cotação.</p><a class="button button-accent" href="#catalogo">Explorar opções <span>↗</span></a></div></section>
 </section>
 <div id="client-cart-shade" class="client-cart-shade" hidden></div>
 <aside id="client-cart-drawer" class="client-cart-drawer" role="dialog" aria-modal="true" aria-labelledby="client-drawer-title" aria-hidden="true" hidden>
-  <div class="client-drawer-head"><div><span class="section-label">WW SOLAR / RESUMO</span><h2 id="client-drawer-title">Meu carrinho</h2><p>O projeto é opcional e não está incluído no valor do kit.</p></div><button type="button" id="client-cart-close" class="client-cart-close" aria-label="Fechar carrinho">×</button></div>
+  <div class="client-drawer-head"><div><span class="section-label">WW SOLAR / RESUMO</span><h2 id="client-drawer-title">Meu carrinho</h2><p>Projetos elétricos podem ser solicitados separadamente. TRT não inclusa.</p></div><button type="button" id="client-cart-close" class="client-cart-close" aria-label="Fechar carrinho">×</button></div>
   <div class="client-drawer-clock"><span>Cotação válida por</span><strong id="client-drawer-timer">25:00</strong></div>
   <div class="client-drawer-items" id="client-drawer-lines"></div>
   <div class="client-drawer-bottom"><div class="client-drawer-total"><span>Total estimado</span><strong id="client-drawer-total">R$ 0,00</strong></div><button type="button" id="client-drawer-checkout" class="button button-accent" disabled>Enviar pelo WhatsApp ↗</button><div class="client-drawer-secondary-actions"><button type="button" id="client-drawer-refresh" class="client-drawer-action" title="Reconsultar os preços dos itens">↻ Atualizar valores</button><button type="button" id="client-drawer-clear" class="client-drawer-action client-drawer-action-danger" title="Remover todos os itens do carrinho" disabled>⌫ Limpar carrinho</button></div><small>Preço e estoque são confirmados no atendimento. Projetos não incluem TRT, paga pelo contratante. Não há pagamento automático.</small></div>
@@ -149,6 +150,6 @@
 <script src="./cliente-dev-config.js?v=20261114-password-setup-v2" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0/dist/umd/supabase.min.js" defer></script>
 <script src="./cliente-core.js?v=20261114-password-setup-v2" defer></script>
-<script src="./cliente-dev.js?v=20261114-media-mensal-v1" defer></script>
+<script src="./cliente-dev.js?v=20261115-projeto-avulso-v1" defer></script>
 <script src="./cliente-pwa.js?v=20261114-password-setup-v2" defer></script>
 </body></html>
