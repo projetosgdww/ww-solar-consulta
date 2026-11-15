@@ -324,3 +324,13 @@ body .header{position:sticky;top:0;z-index:80}
  .header .header-inner.shell{width:100%;max-width:none;padding-left:max(24px,calc((100vw - 1190px)/2));padding-right:20px}
  .header #client-cart-top{margin-left:auto;flex:0 0 auto}
 }
+
+/* Desktop: navegação e Sair agrupados ao lado do carrinho, que já está na borda direita. */
+@media(min-width:931px){
+ .header #client-nav:not([hidden]){margin-left:auto;gap:clamp(14px,1.65vw,25px)}
+ .header .client-header-actions{gap:clamp(5px,.65vw,10px)}
+ .header #client-cart-top{margin-left:clamp(14px,2.2vw,34px)}
+ /* Painel Admin: 'Voltar ao catálogo' fica alinhado à direita no mesmo cabeçalho. */
+ .header .header-inner>.nav:not(#client-nav){margin-left:auto}
+}
+/* Celular e tablet conservam o cabeçalho responsivo já homologado. */
