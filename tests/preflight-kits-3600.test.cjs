@@ -1,22 +1,32 @@
 'use strict';
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs');
 const data=JSON.parse(fs.readFileSync('catalog/preflight-kits-3600-20261115.json','utf8'));
-test('14 kits 3.60 kWp são inéditos e todos aguardam aprovação',()=>{
- const entries=data.records;
- assert.equal(entries.length,14);
- assert.equal(new Set(entries.map(x=>x.id)).size,14);
- for(const r of entries){
-  assert.equal(r.active,false);assert.equal(r.approved,false);
-  assert.equal(r.payload.placas,6);assert.equal(r.payload.moduloWp,600);
-  assert.equal(r.payload.potenciaKwp,3.6);
-  assert.equal(r.payload.geracaoMensalKwh,460.8);
-  assert.equal(r.payload.faixaGeracaoKwh,450);
-  assert.equal(Math.round(r.cost_brl*125)/100,r.price);
+test('12 kits candidatos de 3,60 kWp, margem 25%, sem publicação',()=>{
+ const items=data.records;
+ assert.equal(items.length,12);
+ assert.equal(new Set(items.map(x=>x.id)).size,12);
+ for(const p of items){
+  assert.equal(p.active,false);assert.equal(p.approved,false);
+  assert.equal(p.payload.placas,6);
+  assert.equal(p.payload.moduloWp,600);
+  assert.equal(p.payload.potenciaKwp,3.6);
+  assert.equal(p.payload.geracaoMensalKwh,460.8);
+  assert.equal(p.payload.faixaGeracaoKwh,450);
+  assert.equal(p.price,Math.round(p.cost_brl*125)/100);
+  assert.equal(p.payload.freteInclusoParaCaninde,true);
+  assert.equal(p.payload.destinoFreteIncluso,'Canindé/CE');
+  assert.equal(p.payload.prazoEntregaDiasUteis,15);
+  assert.equal(p.payload.prazoAdicionalDiasUteis,5);
+  assert.equal(p.payload.origemKit,'fotus_pronto');
+  assert.equal(p.internal_review.publishable,false);
+  assert.ok(p.payload.observacaoComercial.includes('Para outras cidades, frete sob consulta.'));
  }
 });
-test('microinversor 2.5 kW unitário fica bloqueado pelo mínimo de 2.772 kW',()=>{
- const x=data.records.find(x=>x.id==='FOTUS-3600-TSUN-2P5');
- assert.equal(x.internal_review.status,'bloqueado_potencia_insuficiente');
- assert.equal(x.internal_review.nominal_kw,2.5);
- assert.equal(x.internal_review.publishable,false);
+test('configurações TSUNESS de um único microinversor excluídas',()=>{
+ const excluded=['FOTUS-3600-TSUN-2P5','FOTUS-3600-TSUN-3'];
+ for(const id of excluded){
+  assert.equal(data.records.some(x=>x.id===id),false,id);
+  assert.equal(data.excluded_configurations.some(x=>x.id===id),true,id);
+ }
+ assert.equal(data.records.filter(x=>x.payload.tipoInversor==='micro').length,3);
 });
