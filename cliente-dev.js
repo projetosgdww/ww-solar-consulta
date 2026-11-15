@@ -457,19 +457,28 @@
   // Cada kit tem uma referência própria de projeto; isso evita misturar
   // seleções quando dois kits utilizam a mesma faixa de preço.
   function projectForKit(kit){
-    if(!kit||kit.kind!=='kit'||!/^WW-(300|500|800|1000|1200|1500|1800|2000)$/.test(kit.id))return null;
-    return available().find(p=>p.id==='PRJ-'+kit.id &&
-      p.payload?.categoria==='projetos' && p.payload?.kitCodigo===kit.id)||null;
+    if(!kit||kit.kind!=='kit')return null;
+    // Preservar os projetos próprios dos oito kits WW.
+    const dedicated=available().find(p=>p.id==='PRJ-'+kit.id &&
+      p.payload?.categoria==='projetos' && p.payload?.kitCodigo===kit.id);
+    if(dedicated)return dedicated;
+    // Kits de fornecedores: localizar serviço avulso Grupo B pela potência real.
+    const tier=C.projectForKwp(C.kitKwp(kit));
+    return tier?available().find(p=>p.id===tier.id && p.kind==='piece' &&
+      p.payload?.categoria==='projetos' && !p.payload?.kitCodigo)||null:null;
   }
   function setKitProject(kitId,include){
     const kit=available().find(p=>p.kind==='kit'&&p.id===kitId);
     const line=S.lines.find(x=>x.id===kitId);
     const project=projectForKit(kit);
     if(!line||!project){status('Confira o kit e tente novamente.');return;}
+    // Serviço de kit WW acompanha a quantidade do kit; projeto Grupo B é avulso.
+    const dedicated=project.id==='PRJ-'+kitId;
+    const existing=S.lines.find(x=>x.id===project.id);
     let next=S.lines.map(x=>({...x})).filter(x=>x.id!==project.id);
     if(include){
       if(next.length>=25){status('Limite de 25 produtos por cotação.');return;}
-      next.push({id:project.id,qty:line.qty});
+      next.push({id:project.id,qty:dedicated?line.qty:(existing?.qty||1)});
     }
     save(next,include?
       'Projeto incluído. TRT não inclusa; paga pelo contratante.':
@@ -507,7 +516,7 @@
     const isLinkedService=x.id.startsWith('PRJ-WW-');
     const itemName=isLinkedService?'Projeto elétrico do kit ('+x.id.slice(7)+')':x.title;
     label.append(el('strong',itemName),el('p',missing?'Indisponível — remova este item':euro(x.unit/100)+' por unidade','client-muted'));
-    if(inDrawer&&!missing&&x.id.startsWith('WW-')){
+    if(inDrawer&&!missing&&available().some(p=>p.id===x.id&&p.kind==='kit')){
       const kit=available().find(p=>p.id===x.id),project=projectForKit(kit);
       if(project){
         const option=el('label',undefined,'client-project-option');
@@ -517,7 +526,9 @@
         checkbox.addEventListener('change',()=>setKitProject(x.id,checkbox.checked));
         const caption=el('span');
         caption.append(el('strong','Incluir projeto elétrico · '+euro(project.price)),
-          el('small','Não incluído no kit · TRT paga pelo contratante'));
+          el('small',project.id==='PRJ-'+x.id
+            ?'Projeto opcional vinculado ao kit · TRT paga pelo contratante'
+            :'Projeto Grupo B avulso pela potência do kit · TRT paga pelo contratante'));
         option.append(checkbox,caption);label.append(option);
       }
     }
