@@ -555,14 +555,18 @@
       }catch(e){bad.push({id:line.id,title:'Produto '+line.id,qty:line.qty,unit:0,amount:0});}
     }
     S.cartInvalid=bad.length>0;
-    const count=S.lines.reduce((n,x)=>n+x.qty,0);
+    // Os projetos incorporados ao kit não ocupam outra linha visual.
+    // Os itens originais permanecem intactos para valor, persistência e cotação.
+    const visibleValid=C.cartDisplayRows(valid,products);
+    const visibleRows=[...visibleValid,...bad];
+    const count=visibleRows.reduce((n,x)=>n+x.qty,0);
     $('client-cart-count').textContent=String(count);
     $('client-top-count').textContent=String(count);
     $('client-drawer-clear').disabled=S.lines.length===0;
     const sumText=S.cartInvalid?'A revisar':euro(cents/100);
     for(const id of ['client-cart-total','client-top-total','client-preview-total','client-drawer-total'])
       $(id).textContent=sumText;
-    for(const x of [...valid,...bad]){
+    for(const x of visibleRows){
       const missing=bad.includes(x);
       area.append(makeCartRow(x,missing));drawer.append(makeCartRow(x,missing,true));
     }
@@ -571,12 +575,12 @@
       drawer.append(el('p','Seu carrinho está vazio. Escolha um projeto, peça ou kit para solicitar uma cotação.','client-muted'));
       preview.append(el('p','Nenhum item adicionado.','client-muted'));
     }else{
-      for(const x of [...valid,...bad].slice(0,3)){
+      for(const x of visibleRows.slice(0,3)){
         const line=el('div',undefined,'client-preview-row');
         line.append(el('span',x.qty+' × '+x.title),el('b',bad.includes(x)?'Indisponível':euro(x.amount/100)));
         preview.append(line);
       }
-      if(S.lines.length>3)preview.append(el('p','E mais '+(S.lines.length-3)+' produto(s)...','client-muted'));
+      if(visibleRows.length>3)preview.append(el('p','E mais '+(visibleRows.length-3)+' produto(s)...','client-muted'));
     }
     if(S.cartInvalid)status('Há produtos indisponíveis no carrinho. Remova-os antes de finalizar.');
     updateClock();
