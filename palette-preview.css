@@ -1,0 +1,38 @@
+/* WW Solar | Preview de identidade 02 | cores de referência #0047F7 #FFFFFF #FA4802.
+   APENAS ESTILO. Nenhuma regra de negócio ou preço é alterada. */
+:root{--deep:#0047F7;--night:#0632a1;--ink:#16243d;--accent:#FA4802;--paper:#f5f8ff;--line:#dce5fb}
+.header{background:#0047F7;border-bottom:3px solid #FA4802}
+.header .nav a{color:#f0f5ff}
+.header .nav a:hover{color:#fff;text-decoration:underline;text-underline-offset:5px}
+.brand-symbol,.brand-copy strong span,.brand-copy>strong span{color:#fff}
+.header .client-cart-trigger{background:#0839b7;border-color:#7599ff}
+.header .client-cart-trigger:hover{background:#002b91}
+.header .client-cart-top-name b{background:#FA4802;color:#151515}
+#client-top-clock{color:#fff6d8}
+.header .client-cart-top{margin-left:auto}
+.client-main{background:#f5f8ff}
+.client-main h1 em,.client-simulator h2 em,.client-catalog h2 em{color:#0047F7}
+.client-simulator,.client-catalog,.client-cart,#client-app .client-cart,.client-login,.client-product,.kit-card{border-color:#d9e3fb}
+.client-product:hover,.kit-card:hover{border-color:#0047F7}
+.section-label,.eyebrow{color:#0047F7}
+.client-recommendation,.sim-info{background:#eff4ff}
+.button-accent,.client-product .button-accent{background:#FA4802;color:#181818}
+.button-accent:hover{background:#e64100}
+.button-dark{background:#0047F7;color:#fff}
+.button-dark:hover{background:#0039c6}
+#client-app .client-filter-tabs button.active,.client-filter-tabs button.active,#client-app .client-category-tabs button[aria-pressed=true]{background:#0047F7;border-color:#0047F7;color:#fff}
+#client-app .client-category-tabs button:hover,.client-filter-tabs button:hover{border-color:#0047F7}
+.client-target-input-row input:focus,.client-form input:focus-visible,#client-search:focus-visible{outline-color:#0047F7}
+input[type=range]{accent-color:#0047F7}
+.result-generation strong,.result-count strong,.client-cart-bottom>strong{color:#0039c6}
+.client-quote-footer,.client-cart-bottom{border-color:#dce5fb}
+.client-cart-trigger:focus-visible,.button:focus-visible{outline:3px solid #ffac77;outline-offset:3px}
+.client-product .kit-status,.kit-status{background:#e8efff;color:#0038ac}
+.client-drawer-clock{background:#003bc9}
+.client-drawer-clock strong{color:#fff}
+.client-project-option{background:#f1f5ff;border-color:#d0dcf9}
+.client-project-option input{accent-color:#0047F7}
+.client-cart-preview-bottom strong{color:#0039c6}
+.client-drawer-bottom .button-accent{background:#FA4802;color:#171717}
+.client-drawer-bottom .button-accent:hover{background:#e64100}
+.footer{background:#0632a1}
