@@ -84,6 +84,29 @@
   function recommendedKit(products,target) {
     return matchingKits(products,target)[0]||null;
   }
+  // Somente visual: mantém o projeto na cotação e no valor, mas não o
+  // repete como linha quando ele já aparece selecionado junto de um kit.
+  // Pedidos com apenas projeto avulso continuam sendo exibidos normalmente.
+  function cartDisplayRows(selected,catalog) {
+    const items=Array.isArray(selected)?selected:[];
+    const byId=new Map((Array.isArray(catalog)?catalog:[]).map(p=>[p.id,p]));
+    const chosen=new Set(items.map(x=>x.id));
+    const grouped=new Set();
+    for(const item of items){
+      const kit=byId.get(item.id);
+      if(kit?.kind!=='kit')continue;
+      const dedicated='PRJ-'+kit.id;
+      const project=byId.get(dedicated);
+      if(chosen.has(dedicated)&&project?.payload?.kitCodigo===kit.id) {
+        grouped.add(dedicated);
+        continue;
+      }
+      const tier=projectForKwp(kitKwp(kit));
+      if(tier&&chosen.has(tier.id)&&byId.get(tier.id)?.payload?.categoria==='projetos')
+        grouped.add(tier.id);
+    }
+    return items.filter(x=>!grouped.has(x.id));
+  }
   function buildMessage(userEmail,selected,cents) {
     const email=String(userEmail||'').trim();
     if(!email.includes('@')||selected.length<1) throw Error('Pedido incompleto');
@@ -119,5 +142,5 @@
     const seconds=Math.max(0,Math.ceil(Number(remainingMs||0)/1000));
     return String(Math.floor(seconds/60)).padStart(2,'0')+':'+String(seconds%60).padStart(2,'0');
   }
-  return Object.freeze({quantity,money,sumCart,PROJECT_TIERS,projectForKwp,GENERATION_FACTOR,kitKwp,estimatedGeneration,matchingKits,recommendedKit,buildMessage,cleanLines,quoteRemainingMs,quoteClock,QUOTE_MINUTES});
+  return Object.freeze({quantity,money,sumCart,PROJECT_TIERS,projectForKwp,GENERATION_FACTOR,kitKwp,estimatedGeneration,matchingKits,recommendedKit,cartDisplayRows,buildMessage,cleanLines,quoteRemainingMs,quoteClock,QUOTE_MINUTES});
 });
