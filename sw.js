@@ -1,6 +1,6 @@
 /* WW Solar PWA v1: autenticação e catálogo precisam sempre de rede atual.
    Nenhuma resposta de HTML, Supabase, cotação ou dado pessoal é armazenada. */
-const VERSION='wwsolar-public-icons-v1';
+const VERSION='wwsolar-public-icons-v2';
 const PUBLIC_ICONS=['/icons/ww-solar-192.png','/icons/ww-solar-512.png','/icons/apple-touch-icon.png'];
 self.addEventListener('install',event=>{
   event.waitUntil((async()=>{
