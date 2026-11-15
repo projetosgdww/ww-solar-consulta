@@ -300,3 +300,16 @@ body .header{position:sticky;top:0;z-index:80}
 .client-password-setup>p{font-size:13px;color:#456358;line-height:1.55}
 .client-password-setup .client-form{gap:10px}
 .client-password-setup .client-form input{width:100%}
+
+/* Projeto Grupo B: largura alinhada à seção e opções uniformes com ação avulsa. */
+.client-projects-card{max-width:none;width:100%;margin:20px 0 30px}
+.client-projects-grid{column-gap:24px;row-gap:0}
+.client-projects-grid>.client-projects-tier{display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"label price" "button button";align-items:center;gap:9px 14px;min-width:0;padding:14px 0}
+.client-projects-tier>span{grid-area:label;min-width:0;overflow-wrap:break-word}
+.client-projects-tier>strong{grid-area:price;white-space:nowrap;font-variant-numeric:tabular-nums}
+.client-project-add{grid-area:button;justify-self:start;min-height:35px;border:1px solid #d9e4db;border-radius:8px;padding:7px 13px;background:#f6faf4;color:#172123;font:800 12px/1.2 inherit;cursor:pointer}
+.client-project-add:hover:not(:disabled){background:#FA4100;color:#191919;border-color:#FA4100}
+.client-project-add:focus-visible{outline:3px solid #FA4100;outline-offset:3px}
+.client-project-add:disabled{cursor:not-allowed;opacity:.58}
+.client-projects-hint{margin:4px 0 13px}
+@media(max-width:700px){.client-projects-grid{grid-template-columns:1fr}.client-projects-grid>.client-projects-tier{padding:12px 0}}
