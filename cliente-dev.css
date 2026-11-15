@@ -334,3 +334,8 @@ body .header{position:sticky;top:0;z-index:80}
  .header .header-inner>.nav:not(#client-nav){margin-left:auto}
 }
 /* Celular e tablet conservam o cabeçalho responsivo já homologado. */
+
+/* Link simples de solicitação de acesso: mesmo estilo de Esqueci minha senha. */
+.client-access-contact{margin:12px 0 8px}
+.client-access-contact .client-helper{margin:7px 0!important}
+.client-access-link{margin:0 0 5px;text-align:left}
