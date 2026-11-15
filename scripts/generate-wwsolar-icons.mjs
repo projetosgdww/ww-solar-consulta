@@ -1,5 +1,5 @@
 // Ícones PNG para Android/iOS gerados no build: sem dependências externas.
-// Identidade WW Solar: fundo azul-petróleo + sol amarelo com raio central.
+// Identidade WW Solar: fundo azul-petróleo + sol verde-limão com raio central.
 import { deflateSync } from 'node:zlib';
 import { mkdir,writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
@@ -45,7 +45,7 @@ function png(size){
           if(distSegment(xx,yy,ax,ay,bx,by)<.017){gold=true;break;}
         }
       }
-      let color=gold?[255,192,53,255]:[14,32,35,255];
+      let color=gold?[129,240,2,255]:[14,32,35,255];
       if(inPoly(xx,yy,bolt))color=[14,32,35,255];
       const p=start+1+x*4;
       scan[p]=color[0];scan[p+1]=color[1];scan[p+2]=color[2];scan[p+3]=color[3];
