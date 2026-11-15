@@ -1,0 +1,38 @@
+/* WW Solar | Preview de identidade 01 | cores de referência #FA4100 #FFFFFF #81F002.
+   APENAS ESTILO. Nenhuma regra de negócio ou preço é alterada. */
+:root{--deep:#172123;--night:#10191b;--ink:#192323;--accent:#FA4100;--paper:#f8faf7;--line:#e3e9e3}
+.header{background:#172123;border-bottom:3px solid #FA4100}
+.brand-symbol,.brand-copy strong span,.brand-copy>strong span{color:#81F002}
+.header .nav a:hover,.client-account-link:hover{color:#a6fb48}
+.header .client-cart-trigger{background:#24312d;border-color:#4d6e51}
+.header .client-cart-trigger:hover{background:#35513d}
+.header .client-cart-top-name b{background:#81F002;color:#172123}
+#client-top-clock{color:#b1fa6c}
+.header .client-cart-top{margin-left:auto}
+.client-main{background:#f8faf7}
+.client-main h1 em,.client-simulator h2 em,.client-catalog h2 em{color:#db3a00}
+.client-simulator,.client-catalog,.client-cart,#client-app .client-cart,.client-login,.client-product,.kit-card{border-color:#e0e8dc}
+.client-product:hover,.kit-card:hover{border-color:#FA4100}
+.section-label,.eyebrow{color:#c33700}
+.client-recommendation,.sim-info{background:#f2f9e8}
+.button-accent,.client-product .button-accent{background:#FA4100;color:#191919}
+.button-accent:hover{background:#ed3d00}
+.button-dark{background:#172123;color:#fff}
+.button-dark:hover{background:#283d35}
+#client-app .client-filter-tabs button.active,.client-filter-tabs button.active,#client-app .client-category-tabs button[aria-pressed=true]{background:#172123;border-color:#172123;color:#fff}
+#client-app .client-category-tabs button:hover,.client-filter-tabs button:hover{border-color:#FA4100}
+.client-target-input-row input:focus,.client-form input:focus-visible,#client-search:focus-visible{outline-color:#FA4100}
+input[type=range]{accent-color:#FA4100}
+.result-generation strong,.result-count strong,.client-cart-bottom>strong{color:#172123}
+.client-quote-footer,.client-cart-bottom{border-color:#dbe7d8}
+.client-cart-trigger:focus-visible,.button:focus-visible{outline:3px solid #81F002;outline-offset:3px}
+.client-product .kit-status,.kit-status{background:#efffdc;color:#315b00}
+.client-drawer-clock{background:#172123}
+.client-drawer-clock strong{color:#a8f757}
+.client-project-option{background:#f3fce8;border-color:#d3e7c3}
+.client-project-option input{accent-color:#416f0c}
+.client-cart-preview-bottom strong{color:#172123}
+/* CTA vibrante mantendo texto com contraste elevado. */
+.client-drawer-bottom .button-accent{background:#FA4100;color:#161616}
+.client-drawer-bottom .button-accent:hover{background:#e83b00}
+.footer{background:#172123}
