@@ -673,6 +673,10 @@
     const isLinkedService=x.id.startsWith('PRJ-WW-');
     const itemName=isLinkedService?'Projeto elétrico do kit ('+x.id.slice(7)+')':x.title;
     label.append(el('strong',itemName),el('p',missing?'Indisponível — remova este item':euro(x.unit/100)+' por unidade','client-muted'));
+    if(inDrawer&&!missing&&x.id.startsWith('PRJ-B-')&&
+       !S.lines.find(item=>item.id===x.id)?.linkedKits){
+      label.append(el('small','Projeto avulso sem kit definido. Para vincular a um kit, remova esta linha e marque a opção no kit desejado.','client-muted'));
+    }
     if(inDrawer&&!missing&&available().some(p=>p.id===x.id&&p.kind==='kit')){
       const kit=available().find(p=>p.id===x.id),project=projectForKit(kit);
       if(project){
@@ -847,7 +851,10 @@
         }
         return;
       }
-      const message=String(data.message);
+      const serverMessage=String(data.message);
+      const projectNote=C.linkedProjectNote(S.lines,available());
+      const message=projectNote&&!serverMessage.includes('Projetos elétricos associados a cada kit')
+        ?serverMessage+String.fromCharCode(10,10)+projectNote:serverMessage;
       if(message.length>4000)throw Error('message_length');
       const reference=String(data.order.id).slice(0,8).toUpperCase();
       status('Solicitação '+reference+' registrada no histórico. O envio da mensagem deve ser confirmado no WhatsApp.');
