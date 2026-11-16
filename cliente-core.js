@@ -143,6 +143,25 @@
       return [item];
     });
   }
+  // Complemento de WhatsApp: deixa inequívoco qual kit recebeu cada projeto.
+  // O valor permanece no item PRJ-B do carrinho, calculado pelo servidor.
+  function linkedProjectNote(input,catalog) {
+    const lines=cleanLines(input);
+    const byId=new Map((Array.isArray(catalog)?catalog:[]).map(p=>[p.id,p]));
+    const notes=[];
+    for(const line of lines){
+      if(!line.id.startsWith('PRJ-B-')||!line.linkedKits?.length)continue;
+      for(const kitId of line.linkedKits){
+        const kit=byId.get(kitId),project=byId.get(line.id);
+        if(kit?.kind!=='kit'||project?.payload?.categoria!=='projetos')
+          throw Error('Vínculo de projeto indisponível');
+        notes.push('• '+kit.title+' ['+kit.id+'] — '+line.id);
+      }
+    }
+    return notes.length
+      ?'Projetos elétricos associados a cada kit (TRT não inclusa):\\n'+notes.join('\\n')
+      :'';
+  }
   function buildMessage(userEmail,selected,cents) {
     const email=String(userEmail||'').trim();
     if(!email.includes('@')||selected.length<1) throw Error('Pedido incompleto');
@@ -198,5 +217,5 @@
     const seconds=Math.max(0,Math.ceil(Number(remainingMs||0)/1000));
     return String(Math.floor(seconds/60)).padStart(2,'0')+':'+String(seconds%60).padStart(2,'0');
   }
-  return Object.freeze({quantity,money,sumCart,PROJECT_TIERS,projectForKwp,GENERATION_FACTOR,kitKwp,estimatedGeneration,matchingKits,recommendedKit,cartDisplayRows,setProjectForKit,removeKitProjectLinks,buildMessage,cleanLines,quoteRemainingMs,quoteClock,QUOTE_MINUTES});
+  return Object.freeze({quantity,money,sumCart,PROJECT_TIERS,projectForKwp,GENERATION_FACTOR,kitKwp,estimatedGeneration,matchingKits,recommendedKit,cartDisplayRows,setProjectForKit,removeKitProjectLinks,linkedProjectNote,buildMessage,cleanLines,quoteRemainingMs,quoteClock,QUOTE_MINUTES});
 });
