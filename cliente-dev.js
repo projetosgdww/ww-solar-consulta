@@ -19,6 +19,13 @@
      && /^(sb_publishable_[A-Za-z0-9_-]+|eyJ[A-Za-z0-9._-]+)$/.test(cfg.publishableKey||'')
      && /^55\d{10,11}$/.test(cfg.whatsapp||'');
   function available(){return S.catalog.filter(p=>p.active===true&&p.approved===true&&Number(p.price)>0);}
+  // O mesmo título/geração pode corresponder a inversores de fabricantes ou potências diferentes.
+  // O SKU é a fonte da identidade comercial da composição selecionada.
+  function kitVariantLabel(kit){
+    if(!kit||kit.kind!=='kit')return '';
+    const inverter=typeof kit.payload?.inversor==='string'?kit.payload.inversor.trim():'';
+    return (inverter?'Inversor: '+inverter+' · ':'')+'SKU: '+kit.id;
+  }
   async function authorized(user){
     if(user?.app_metadata?.wwsolar_role==='admin')return true;
     const {data,error}=await S.db.from('wwsolar_client_access')
@@ -446,6 +453,7 @@
       card.append(top);
       const heading=el('h3',p.title);
       card.append(heading);
+      if(p.kind==='kit')card.append(el('small',kitVariantLabel(p),'client-muted'));
       if(p.kind==='kit'){
         const x=p.payload||{};
         const gen=el('p',undefined,'kit-generation');
@@ -680,7 +688,10 @@
     const row=el('div',undefined,'client-cart-line'),label=el('div'),tools=el('div',undefined,'client-qty');
     const isLinkedService=x.id.startsWith('PRJ-WW-');
     const itemName=isLinkedService?'Projeto elétrico do kit ('+x.id.slice(7)+')':x.title;
-    label.append(el('strong',itemName),el('p',missing?'Indisponível — remova este item':euro(x.unit/100)+' por unidade','client-muted'));
+    label.append(el('strong',itemName));
+    const selectedProduct=available().find(p=>p.id===x.id);
+    if(selectedProduct?.kind==='kit')label.append(el('small',kitVariantLabel(selectedProduct),'client-muted'));
+    label.append(el('p',missing?'Indisponível — remova este item':euro(x.unit/100)+' por unidade','client-muted'));
     if(inDrawer&&!missing&&x.id.startsWith('PRJ-B-')&&
        !S.lines.find(item=>item.id===x.id)?.linkedKits){
       label.append(el('small','Projeto avulso sem kit definido. Para vincular a um kit, remova esta linha e marque a opção no kit desejado.','client-muted'));
@@ -693,7 +704,7 @@
         const projectLine=S.lines.find(item=>item.id===project.id);
         checkbox.checked=project.id==='PRJ-'+x.id
           ?!!projectLine:!!projectLine?.linkedKits?.includes(x.id);
-        checkbox.setAttribute('aria-label','Incluir projeto elétrico para '+x.title);
+        checkbox.setAttribute('aria-label','Incluir projeto elétrico para '+x.title+' ('+kitVariantLabel(kit)+')');
         checkbox.addEventListener('change',()=>setKitProject(x.id,checkbox.checked));
         const caption=el('span');
         caption.append(el('strong','Incluir projeto elétrico · '+euro(project.price)),
@@ -748,7 +759,9 @@
     }else{
       for(const x of visibleRows.slice(0,3)){
         const line=el('div',undefined,'client-preview-row');
-        line.append(el('span',x.qty+' × '+x.title),el('b',bad.includes(x)?'Indisponível':euro(x.amount/100)));
+        const selectedProduct=products.find(p=>p.id===x.id);
+        const variant=selectedProduct?.kind==='kit'?' · '+kitVariantLabel(selectedProduct):'';
+        line.append(el('span',x.qty+' × '+x.title+variant),el('b',bad.includes(x)?'Indisponível':euro(x.amount/100)));
         preview.append(line);
       }
       if(visibleRows.length>3)preview.append(el('p','E mais '+(visibleRows.length-3)+' produto(s)...','client-muted'));
@@ -848,7 +861,8 @@
           body:{action:'capabilities'}
         });
         if(capabilityError||capabilities?.quote_version!==2||
-           capabilities?.project_link_snapshots!==true){
+           capabilities?.project_link_snapshots!==true||
+           capabilities?.idempotent_request_key!==true){
           status('O envio está temporariamente indisponível: aguardando a atualização segura do sistema de pedidos. Seu carrinho foi preservado.');
           showToast('Sistema de pedidos aguardando atualização.');
           return;
@@ -881,13 +895,14 @@
         }else if(code==='client_inactive'){
           status('Seu acesso foi suspenso. Entre em contato com a WW Solar.');
         }else{
-          status('Não foi possível registrar sua solicitação. Nenhum pedido confirmado; tente novamente.');
+          status('Não foi possível confirmar o registro. Confira o histórico antes de repetir a cotação; se necessário, fale com o atendimento.');
         }
         return;
       }
       // O WhatsApp usa somente o texto do servidor e os vínculos já registrados.
       // Nenhuma anotação do carrinho local pode completar um snapshot ausente.
       if(data.quote_version!==2||
+         Number(data.order.total_cents)!==current.cents||
          !C.quoteSnapshotMatches(S.lines,data.order.items)){
         status('O pedido foi registrado, mas o resumo recebido não corresponde ao carrinho. Não abriremos o WhatsApp automaticamente; entre em contato com a WW Solar com a referência do pedido.');
         showToast('Pedido registrado: confira o resumo antes de enviar.');
@@ -902,7 +917,7 @@
       const destination=hasProject&&/^55[0-9]{10,11}$/.test(cfg.projectWhatsapp||'')?cfg.projectWhatsapp:cfg.whatsapp;
       window.location.assign('https://wa.me/'+destination+'?text='+encodeURIComponent(message));
     }catch(e){
-      status('Não foi possível completar a operação. Confira a conexão ou consulte seu atendimento.');
+      status('A operação não pôde ser concluída ou confirmada. Consulte o histórico antes de tentar de novo.');
     }finally{S.checkoutPending=false;updateClock();}
   }
   $('client-login-form').addEventListener('submit',login);
