@@ -65,7 +65,7 @@ test('backend persiste associação validada em items JSONB, usa mesmos itens na
   'const association=projectLinks.get(l.id)',
   '...(association?association:{})',
   'projectAssociationNotes(order.items)',
-  'if(already)return result(200,{order:already,message:messageFor(already),existing:true},origin)',
+  'if(already)return result(200,{quote_version:2,order:already,message:messageFor(already),existing:true},origin)',
   'items,total_cents:total,status:"registrado"',
   'if(total!==expectedTotal)'
  ])assert.ok(server.includes(fragment),fragment);
@@ -73,7 +73,7 @@ test('backend persiste associação validada em items JSONB, usa mesmos itens na
 test('histórico exibe nomes dos kits vinculados sem presumir associação por faixa',()=>{
  assert.ok(admin.includes("Array.isArray(x.linked_kits)"));
  assert.ok(admin.includes('Projeto elétrico vinculado a:'));
- assert.ok(client.includes('C.linkedProjectNote(S.lines,available())'));
+ assert.ok(client.includes('C.quoteSnapshotMatches(S.lines,data.order.items)'));
 });
 
 test('Edge Function preview aceita apenas validação autenticada e não grava pedidos',()=>{
@@ -95,4 +95,28 @@ test('frontend DEV exige vínculo registrado na simulação e não abre WhatsApp
  assert.ok(client.includes("if(PREVIEW_HOST&&!error&&data?.validated===true"));
  assert.ok(client.includes('Simulação DEV aprovada.'));
  assert.ok(client.includes('Nenhum pedido foi registrado ou enviado ao WhatsApp.'));
+});
+
+test('backend exige capacidade v2 antes do submit e devolve versão em resposta',()=>{
+ assert.ok(server.includes('if(payload.action==="capabilities")'));
+ assert.ok(server.includes('project_link_snapshots:true'));
+ assert.ok(server.includes('quote_version:2,order:saved'));
+ assert.ok(server.includes('quote_version:2,order:already'));
+ assert.ok(client.includes("body:{action:'capabilities'}"));
+ assert.ok(client.includes('capabilities?.quote_version!==2'));
+ assert.ok(client.includes('capabilities?.project_link_snapshots!==true'));
+ const guard=client.indexOf("body:{action:'capabilities'}");
+ const submit=client.indexOf("action:PREVIEW_HOST?'validate':'submit'");
+ assert.ok(guard>0&&submit>guard);
+});
+test('backend antigo impede submit real sem registrar pedido incompleto',()=>{
+ assert.ok(client.includes('if(!PREVIEW_HOST){'));
+ assert.ok(client.includes('Sistema de pedidos aguardando atualização.'));
+ assert.ok(client.includes('!C.quoteSnapshotMatches(S.lines,data.order.items)'));
+ assert.ok(!client.includes('C.linkedProjectNote(S.lines,available())'));
+ assert.ok(client.includes('const message=String(data.message)'));
+});
+test('número WhatsApp de projetos aceita somente dígitos e mantém separação comercial',()=>{
+ assert.ok(client.includes('/^55[0-9]{10,11}$/.test(cfg.projectWhatsapp'));
+ assert.ok(!client.includes('^55'+String.fromCharCode(92,92)+'d'));
 });
