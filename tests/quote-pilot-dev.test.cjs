@@ -58,3 +58,25 @@ test('exibe inversor e SKU para diferenciar kits com mesmo nome, sem alterar pre
  assert.ok(client.includes("x.qty+' × '+x.title+variant"));
  assert.equal(describe({id:'FOTUS-4200-DEYE-3',title,kind:'kit',payload:{}}),'SKU: FOTUS-4200-DEYE-3');
 });
+
+test('reenvio idempotente DEV usa SOMENTE chave do pedido existente e verifica resposta sem WhatsApp',()=>{
+ const admin=fs.readFileSync('admin-dev.js','utf8');
+ assert.ok(admin.includes("get('teste-idempotencia')==='1'"));
+ assert.ok(admin.includes("const REPLAY_ID='0a2a9e26-2b49-4ecc-a960-37a8e9042ec2'"));
+ assert.match(admin,/PILOT_REPLAY&&item\.id===REPLAY_ID&&item\.user_id===adminUserId/);
+ assert.ok(admin.includes("if(!window.confirm('TESTE DEV: reenviar a chave"));
+ assert.ok(admin.includes(".eq('id',REPLAY_ID).eq('user_id',adminUserId).single()"));
+ assert.ok(admin.includes(".eq('user_id',adminUserId).eq('request_key',original.request_key)"));
+ assert.ok(admin.includes("before?.length!==1||before[0]?.id!==REPLAY_ID"));
+ assert.ok(admin.includes("after?.length!==1||after[0]?.id!==REPLAY_ID"));
+ assert.ok(admin.includes("db.functions.invoke('wwsolar-quote-pilot'"));
+ assert.ok(admin.includes("body:{action:'submit',request_key:original.request_key"));
+ assert.ok(admin.includes("reply?.existing!==true"));
+ assert.ok(admin.includes("reply?.order?.id!==REPLAY_ID"));
+ assert.doesNotMatch(admin,/crypto\.randomUUID/);
+ assert.doesNotMatch(admin,/window\.location\.assign\('https:\/\/wa\.me/);
+ const lookup=pilot.indexOf('if(already)return result(200');
+ const insert=pilot.indexOf('.insert({user_id:user.id,request_key:key');
+ assert.ok(lookup>0&&insert>lookup);
+ assert.ok(pilot.includes("if(saveError.code===\"23505\")"));
+});
