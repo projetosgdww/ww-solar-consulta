@@ -75,3 +75,22 @@ test('histórico exibe nomes dos kits vinculados sem presumir associação por f
  assert.ok(admin.includes('Projeto elétrico vinculado a:'));
  assert.ok(client.includes('C.linkedProjectNote(S.lines,available())'));
 });
+
+test('Edge Function preview aceita apenas validação autenticada e não grava pedidos',()=>{
+ const preview=fs.readFileSync('supabase/functions/wwsolar-quote-preview/index.ts','utf8');
+ assert.ok(preview.includes('if(payload.action!=="validate")'));
+ assert.ok(preview.includes('preview_only_validate'));
+ assert.ok(preview.includes('validated:true,preview_only:true'));
+ assert.ok(preview.includes('verifyProjectAssociations(lines,products)'));
+ assert.ok(preview.includes('projectAssociationNotes(order.items)'));
+ assert.ok(!/\\.insert\\(|\\.update\\(|\\.delete\\(/.test(preview));
+ assert.ok(!preview.includes('https://catalogo.wwplatform.com.br'));
+ assert.ok(!preview.includes('https://ww-solar.pages.dev'));
+ assert.ok(preview.includes('previewOrigin.test(origin)'));
+});
+test('frontend DEV exige vínculo registrado na simulação e não abre WhatsApp',()=>{
+ assert.ok(client.includes("action:PREVIEW_HOST?'validate':'submit'"));
+ assert.ok(client.includes("if(PREVIEW_HOST&&!error&&data?.validated===true"));
+ assert.ok(client.includes('Simulação DEV aprovada.'));
+ assert.ok(client.includes('Nenhum pedido foi registrado ou enviado ao WhatsApp.'));
+});
