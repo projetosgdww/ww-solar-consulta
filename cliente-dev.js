@@ -50,7 +50,7 @@
     'freteInclusoParaCaninde','prazoEntregaDiasUteis','prazoAdicionalDiasUteis'];
   const PUBLIC_CATEGORIES=new Set(['modulos','microinversores','inversores',
     'estruturas','cabos','componentes','projetos']);
-  const PREVIEW_HOST=/(^localhost$|^127\.0\.0\.1$|(?:^|\.)ww-solar\.pages\.dev$)/.test(window.location.hostname);
+  const PREVIEW_HOST=/(^localhost$|^127\.0\.0\.1$|^[a-z0-9-]+\.ww-solar\.pages\.dev$)/.test(window.location.hostname);
   function validatePublicItems(rows){
     if(!Array.isArray(rows)||rows.length===0||rows.length>200)
       throw Error('Resposta pública inválida');
@@ -109,8 +109,8 @@
     show('client-entry',false);show('client-app',true);show('client-nav',true);
     show('client-cart-top',false);show('client-admin-link',false);
     show('client-logout',false);show('client-login-open',true);
-    show('client-preview-disclaimer',true);
-    $('client-preview-disclaimer').textContent=source==='snapshot'
+    show('client-preview-disclaimer',PREVIEW_HOST);
+    if(PREVIEW_HOST)$('client-preview-disclaimer').textContent=source==='snapshot'
       ?'Prévia DEV · preços de '+snapshotDate+' (não atualizados em tempo real). Confirme os valores antes de solicitar cotação.'
       :'Prévia DEV · preços públicos consultados no Supabase. Cotação sujeita à confirmação.';
     $('client-identity').textContent='Consulte preços livremente. Para detalhes completos e cotação, entre na sua conta.';
