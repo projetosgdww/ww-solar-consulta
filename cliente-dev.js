@@ -51,6 +51,8 @@
   const PUBLIC_CATEGORIES=new Set(['modulos','microinversores','inversores',
     'estruturas','cabos','componentes','projetos']);
   const PREVIEW_HOST=/(^localhost$|^127\.0\.0\.1$|^[a-z0-9]{8}\.ww-solar\.pages\.dev$)/.test(window.location.hostname);
+  // Piloto exclusivo do administrador: somente URLs hash de preview, opt-in por query string.
+  const PILOT_HOST=PREVIEW_HOST && new URLSearchParams(window.location.search).get('piloto-pedido')==='1';
   function validatePublicItems(rows){
     if(!Array.isArray(rows)||rows.length===0||rows.length>200)
       throw Error('Resposta pública inválida');
@@ -841,21 +843,30 @@
         return;
       }
       if(!S.orderKey)S.orderKey=crypto.randomUUID();
-      const quoteFunction=PREVIEW_HOST?'wwsolar-quote-preview':'wwsolar-quote';
-      if(!PREVIEW_HOST){
+      if(PILOT_HOST){
+        if(!S.admin){status('Piloto de pedidos DEV exclusivo do administrador.');return;}
+        if(!window.confirm('ATENÇÃO: registrar pedido TESTE no banco DEV? O WhatsApp NÃO será aberto.')) {
+          status('Piloto DEV cancelado. Nenhum pedido foi registrado nesta tentativa.');
+          return;
+        }
+      }
+      const quoteFunction=PILOT_HOST?'wwsolar-quote-pilot':PREVIEW_HOST?'wwsolar-quote-preview':'wwsolar-quote';
+      if(!PREVIEW_HOST||PILOT_HOST){
         // Bloqueia a gravação até o backend oficial confirmar suporte ao vínculo por kit.
         const {data:capabilities,error:capabilityError}=await S.db.functions.invoke(quoteFunction,{
           body:{action:'capabilities'}
         });
         if(capabilityError||capabilities?.quote_version!==2||
-           capabilities?.project_link_snapshots!==true){
+           capabilities?.project_link_snapshots!==true||
+           (PILOT_HOST&&capabilities?.pilot_dev!==true)){
           status('O envio está temporariamente indisponível: aguardando a atualização segura do sistema de pedidos. Seu carrinho foi preservado.');
           showToast('Sistema de pedidos aguardando atualização.');
           return;
         }
       }
       const {data,error}=await S.db.functions.invoke(quoteFunction,{
-        body:{action:PREVIEW_HOST?'validate':'submit',request_key:S.orderKey,expected_total_cents:current.cents}
+        body:{action:PILOT_HOST?'submit':PREVIEW_HOST?'validate':'submit',request_key:S.orderKey,expected_total_cents:current.cents,
+          ...(PILOT_HOST?{pilot_confirmation:'REGISTRAR_TESTE_DEV'}:{})}
       });
       if(PREVIEW_HOST&&!error&&data?.validated===true&&Array.isArray(data.items)){
         if(!C.quoteSnapshotMatches(S.lines,data.items)||
@@ -896,6 +907,15 @@
       const message=String(data.message);
       if(message.length>4000)throw Error('message_length');
       const reference=String(data.order.id).slice(0,8).toUpperCase();
+      if(PILOT_HOST){
+        if(data.pilot_dev!==true){status('Resposta não corresponde ao piloto DEV. WhatsApp bloqueado.');return;}
+        const details=$('client-quote-preview');
+        details.hidden=false;
+        $('client-quote-preview-text').textContent='PEDIDO TESTE DEV '+reference+' — registrado no histórico DEV, sem envio ao WhatsApp.\n\n'+message;
+        status('Pedido TESTE '+reference+' registrado no histórico DEV. WhatsApp NÃO aberto.');
+        showToast('Pedido TESTE salvo no DEV. Confira o histórico.');
+        return;
+      }
       status('Solicitação '+reference+' registrada no histórico. O envio da mensagem deve ser confirmado no WhatsApp.');
       showToast('Solicitação registrada! Abrindo WhatsApp...');
       const hasProject=S.lines.some(line=>available().some(p=>p.id===line.id&&p.payload?.categoria==='projetos'));
@@ -952,6 +972,10 @@
       status('Projeto elétrico adicionado. Você pode cotar apenas esse serviço; TRT não inclusa.');
       openDrawer();
     });
+  }
+  if(PILOT_HOST){
+    $('client-checkout').textContent='Registrar pedido TESTE DEV';
+    $('client-drawer-checkout').textContent='Registrar pedido TESTE DEV';
   }
   $('client-checkout').addEventListener('click',checkout);
   $('client-drawer-checkout').addEventListener('click',checkout);

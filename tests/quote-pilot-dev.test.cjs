@@ -1,0 +1,31 @@
+'use strict';
+const test=require('node:test');
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const pilot=fs.readFileSync('supabase/functions/wwsolar-quote-pilot/index.ts','utf8');
+const client=fs.readFileSync('cliente-dev.js','utf8');
+test('piloto só aceita preview hash, JWT e administrador',()=>{
+ assert.ok(pilot.includes('previewOrigin.test(origin)'));
+ assert.match(pilot,/\[a-z0-9\]\{8\}/);
+ assert.ok(pilot.includes('if(!isAdmin)return result(403,{error:"pilot_admin_only"}'));
+ assert.doesNotMatch(pilot,/https:\/\/catalogo\.wwplatform\.com\.br/);
+ assert.doesNotMatch(pilot,/origins\.add\(/);
+ assert.ok(pilot.includes('pilot_confirmation_required'));
+ assert.ok(pilot.includes('verifyProjectAssociations(lines,products)'));
+ assert.ok(pilot.includes('quote_version:2,pilot_dev:true,order:saved'));
+ assert.ok(!pilot.includes('if(payload.action==="status")'));
+});
+test('piloto exige ação explícita do administrador e mantém checkout oficial separado',()=>{
+ assert.ok(client.includes("new URLSearchParams(window.location.search).get('piloto-pedido')==='1'"));
+ assert.ok(client.includes("if(!S.admin){status('Piloto de pedidos DEV exclusivo"));
+ assert.ok(client.includes('if(!window.confirm('));
+ assert.ok(client.includes("'wwsolar-quote-pilot'"));
+ assert.ok(client.includes('pilot_confirmation:\'REGISTRAR_TESTE_DEV\''));
+ assert.ok(client.includes('capabilities?.pilot_dev!==true'));
+ const safeReturn=client.indexOf("if(PILOT_HOST){\n        if(data.pilot_dev!==true)");
+ const wa=client.indexOf("window.location.assign('https://wa.me/'");
+ assert.ok(safeReturn>0&&wa>safeReturn);
+ assert.ok(client.slice(safeReturn,wa).includes('return;'));
+ assert.ok(client.includes("PEDIDO TESTE DEV "));
+ assert.ok(client.includes("Registr"));
+});
