@@ -57,7 +57,7 @@ test('tabelas privadas com políticas de admin e sem grants para anon',()=>{
  assert.match(sql,/force row level security/g);
  assert.match(sql,/revoke all on public\.wwsolar_builder_costs from public, anon, authenticated/);
  assert.match(sql,/revoke all on public\.wwsolar_builder_drafts from public, anon, authenticated/);
- assert.equal((sql.match(/wwsolar_role'\) = 'admin'/g)||[]).length,6);
+ assert.equal((sql.match(/wwsolar_role'\) = 'admin'/g)||[]).length,8);
  assert.ok(!/grant\s+(?:all|select|insert|update)\s+on\s+public\.wwsolar_builder_\w+\s+to\s+anon/i.test(sql));
  assert.ok(!/delete\s+from\s+public\.wwsolar_catalog/i.test(sql));
 });
