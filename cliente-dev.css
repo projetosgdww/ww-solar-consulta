@@ -347,3 +347,6 @@ body .header{position:sticky;top:0;z-index:80}
 #client-login-open:hover{border-color:#81f002;background:#e9f9df}
 #client-login-open:focus-visible{outline:3px solid #FA4100;outline-offset:3px}
 @media(max-width:640px){#client-login-open{padding:7px 11px;font-size:12px}.client-public-preview-banner{font-size:11px}}
+
+/* Destaque discreto do produto selecionado antes do login. */
+.client-returned-item{outline:3px solid #81F002;outline-offset:3px}
