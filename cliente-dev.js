@@ -345,8 +345,14 @@
       $('client-custom-kit-whatsapp').href='https://wa.me/'+phone+'?text='+encodeURIComponent(message);
     }
     if(!kit){
+      // Explica a faixa atendida pelo catálogo REAL, sem prometer kits inativos.
+      const generations=available().filter(p=>p.kind==='kit')
+        .map(p=>C.estimatedGeneration(p)).filter(n=>Number.isFinite(n)&&n>0);
+      const maxGeneration=generations.length?Math.max(...generations):null;
       $('result-title').textContent=hasKits?'Nenhum kit atende à geração informada':'Kits em preparação';
-      $('result-description').textContent=hasKits?'Não temos um kit nessa faixa no momento, mas podemos preparar uma proposta personalizada.':'Podemos preparar um kit personalizado para sua necessidade.';
+      $('result-description').textContent=hasKits&&maxGeneration!==null
+        ?'Os kits disponíveis atualmente geram até cerca de '+number(maxGeneration)+' kWh/mês. Para '+number(S.target)+' kWh/mês, consulte uma cotação personalizada.'
+        :'Podemos preparar um kit personalizado para sua necessidade.';
       $('result-status').textContent=hasKits?'SEM KIT NA FAIXA':'AGUARDANDO HOMOLOGAÇÃO';
       $('result-generation').textContent='—';
       $('result-power').textContent='—';
