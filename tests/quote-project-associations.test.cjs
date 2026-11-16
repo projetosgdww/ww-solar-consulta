@@ -91,7 +91,9 @@ test('Edge Function preview aceita apenas validação autenticada e não grava p
  assert.ok(preview.includes('previewOrigin.test(origin)'));
 });
 test('frontend DEV exige vínculo registrado na simulação e não abre WhatsApp',()=>{
- assert.ok(client.includes("action:PREVIEW_HOST?'validate':'submit'"));
+ assert.ok(client.includes("action:PILOT_HOST?'submit':PREVIEW_HOST?'validate':'submit'"));
+ assert.ok(client.includes("if(PREVIEW_HOST&&!error&&data?.validated===true"));
+ assert.ok(client.includes("if(PILOT_HOST){\n        if(data.pilot_dev!==true)"));
  assert.ok(client.includes("if(PREVIEW_HOST&&!error&&data?.validated===true"));
  assert.ok(client.includes('Simulação DEV aprovada.'));
  assert.ok(client.includes('Nenhum pedido foi registrado ou enviado ao WhatsApp.'));
@@ -106,11 +108,12 @@ test('backend exige capacidade v2 antes do submit e devolve versão em resposta'
  assert.ok(client.includes('capabilities?.quote_version!==2'));
  assert.ok(client.includes('capabilities?.project_link_snapshots!==true'));
  const guard=client.indexOf("body:{action:'capabilities'}");
- const submit=client.indexOf("action:PREVIEW_HOST?'validate':'submit'");
+ const submit=client.indexOf("action:PILOT_HOST?'submit':PREVIEW_HOST?'validate':'submit'");
  assert.ok(guard>0&&submit>guard);
 });
 test('backend antigo impede submit real sem registrar pedido incompleto',()=>{
- assert.ok(client.includes('if(!PREVIEW_HOST){'));
+ assert.ok(client.includes('if(!PREVIEW_HOST||PILOT_HOST){'));
+ assert.ok(client.includes('capabilities?.pilot_dev!==true'));
  assert.ok(client.includes('Sistema de pedidos aguardando atualização.'));
  assert.ok(client.includes('!C.quoteSnapshotMatches(S.lines,data.order.items)'));
  assert.ok(!client.includes('C.linkedProjectNote(S.lines,available())'));

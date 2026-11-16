@@ -1,0 +1,82 @@
+'use strict';
+const test=require('node:test');
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const pilot=fs.readFileSync('supabase/functions/wwsolar-quote-pilot/index.ts','utf8');
+const client=fs.readFileSync('cliente-dev.js','utf8');
+test('piloto só aceita preview hash, JWT e administrador',()=>{
+ assert.ok(pilot.includes('previewOrigin.test(origin)'));
+ assert.match(pilot,/\[a-z0-9\]\{8\}/);
+ assert.ok(pilot.includes('if(!isAdmin)return result(403,{error:"pilot_admin_only"}'));
+ assert.doesNotMatch(pilot,/https:\/\/catalogo\.wwplatform\.com\.br/);
+ assert.doesNotMatch(pilot,/origins\.add\(/);
+ assert.ok(pilot.includes('pilot_confirmation_required'));
+ assert.ok(pilot.includes('verifyProjectAssociations(lines,products)'));
+ assert.ok(pilot.includes('quote_version:2,pilot_dev:true,order:saved'));
+ assert.ok(!pilot.includes('if(payload.action==="status")'));
+});
+test('texto do checkout piloto permanece durante o relogio e nao vira simulação',()=>{
+ const clock=client.slice(client.indexOf('function updateClock(){'),client.indexOf('function openDrawer(){'));
+ assert.ok(clock.includes("PILOT_HOST?'Registrar pedido TESTE DEV':PREVIEW_HOST?'Simular cotação (sem registrar)'"));
+ assert.ok(clock.includes("PILOT_HOST?'Registrar pedido TESTE DEV':PREVIEW_HOST?'Simular cotação'"));
+ assert.ok(clock.includes("$('client-drawer-checkout').disabled=!ok;"));
+ assert.ok(clock.includes("$('client-checkout').disabled=!ok;"));
+});
+test('piloto exige ação explícita do administrador e mantém checkout oficial separado',()=>{
+ assert.ok(client.includes("new URLSearchParams(window.location.search).get('piloto-pedido')==='1'"));
+ assert.ok(client.includes("if(!S.admin){status('Piloto de pedidos DEV exclusivo"));
+ assert.ok(client.includes('if(!window.confirm('));
+ assert.ok(client.includes("'wwsolar-quote-pilot'"));
+ assert.ok(client.includes('pilot_confirmation:\'REGISTRAR_TESTE_DEV\''));
+ assert.ok(client.includes('capabilities?.pilot_dev!==true'));
+ const safeReturn=client.indexOf("if(PILOT_HOST){\n        if(data.pilot_dev!==true)");
+ const wa=client.indexOf("window.location.assign('https://wa.me/'");
+ assert.ok(safeReturn>0&&wa>safeReturn);
+ assert.ok(client.slice(safeReturn,wa).includes('return;'));
+ assert.ok(client.includes("PEDIDO TESTE DEV "));
+ assert.ok(client.includes("Registr"));
+});
+
+test('exibe inversor e SKU para diferenciar kits com mesmo nome, sem alterar preco',()=>{
+ const vm=require('node:vm');
+ const match=client.match(/function kitVariantLabel\(kit\)\{[\s\S]*?\n  \}/);
+ assert.ok(match,'Helper de variante ausente');
+ const describe=vm.runInNewContext('('+match[0]+')');
+ const title='Kit solar 500 kWh/mês · 4,20 kWp';
+ const kit3={id:'FOTUS-4200-DEYE-3',title,kind:'kit',payload:{inversor:'Deye 3 kW (G05P1-EU-CM1)'},price:9036.08};
+ const kit5={id:'FOTUS-4200-DEYE-5',title,kind:'kit',payload:{inversor:'Deye 5 kW (G05P1-EU-CM2)'},price:9354.50};
+ assert.match(describe(kit3),/Deye 3 kW/);
+ assert.match(describe(kit5),/Deye 5 kW/);
+ assert.match(describe(kit3),/SKU: FOTUS-4200-DEYE-3/);
+ assert.match(describe(kit5),/SKU: FOTUS-4200-DEYE-5/);
+ assert.notEqual(describe(kit3),describe(kit5));
+ assert.equal(kit3.price,9036.08);
+ assert.equal(kit5.price,9354.50);
+ assert.ok(client.includes("card.append(el('small',kitVariantLabel(p),'client-muted'))"));
+ assert.ok(client.includes("label.append(el('small',kitVariantLabel(selectedProduct),'client-muted'))"));
+ assert.ok(client.includes("Incluir projeto elétrico para '+x.title+' ('+kitVariantLabel(kit)+')"));
+ assert.ok(client.includes("x.qty+' × '+x.title+variant"));
+ assert.equal(describe({id:'FOTUS-4200-DEYE-3',title,kind:'kit',payload:{}}),'SKU: FOTUS-4200-DEYE-3');
+});
+
+test('reenvio idempotente DEV usa SOMENTE chave do pedido existente e verifica resposta sem WhatsApp',()=>{
+ const admin=fs.readFileSync('admin-dev.js','utf8');
+ assert.ok(admin.includes("get('teste-idempotencia')==='1'"));
+ assert.ok(admin.includes("const REPLAY_ID='0a2a9e26-2b49-4ecc-a960-37a8e9042ec2'"));
+ assert.match(admin,/PILOT_REPLAY&&item\.id===REPLAY_ID&&item\.user_id===adminUserId/);
+ assert.ok(admin.includes("if(!window.confirm('TESTE DEV: reenviar a chave"));
+ assert.ok(admin.includes(".eq('id',REPLAY_ID).eq('user_id',adminUserId).single()"));
+ assert.ok(admin.includes(".eq('user_id',adminUserId).eq('request_key',original.request_key)"));
+ assert.ok(admin.includes("before?.length!==1||before[0]?.id!==REPLAY_ID"));
+ assert.ok(admin.includes("after?.length!==1||after[0]?.id!==REPLAY_ID"));
+ assert.ok(admin.includes("db.functions.invoke('wwsolar-quote-pilot'"));
+ assert.ok(admin.includes("body:{action:'submit',request_key:original.request_key"));
+ assert.ok(admin.includes("reply?.existing!==true"));
+ assert.ok(admin.includes("reply?.order?.id!==REPLAY_ID"));
+ assert.doesNotMatch(admin,/crypto\.randomUUID/);
+ assert.doesNotMatch(admin,/window\.location\.assign\('https:\/\/wa\.me/);
+ const lookup=pilot.indexOf('if(already)return result(200');
+ const insert=pilot.indexOf('.insert({user_id:user.id,request_key:key');
+ assert.ok(lookup>0&&insert>lookup);
+ assert.ok(pilot.includes("if(saveError.code===\"23505\")"));
+});

@@ -19,6 +19,13 @@
      && /^(sb_publishable_[A-Za-z0-9_-]+|eyJ[A-Za-z0-9._-]+)$/.test(cfg.publishableKey||'')
      && /^55\d{10,11}$/.test(cfg.whatsapp||'');
   function available(){return S.catalog.filter(p=>p.active===true&&p.approved===true&&Number(p.price)>0);}
+  // Titulos de kits podem se repetir entre fabricantes/potencias de inversor.
+  // Usar dados do SKU selecionado, nunca adivinhar a variante a partir do titulo.
+  function kitVariantLabel(kit){
+    if(!kit||kit.kind!=='kit')return '';
+    const inverter=typeof kit.payload?.inversor==='string'?kit.payload.inversor.trim():'';
+    return (inverter?'Inversor: '+inverter+' · ':'')+'SKU: '+kit.id;
+  }
   async function authorized(user){
     if(user?.app_metadata?.wwsolar_role==='admin')return true;
     const {data,error}=await S.db.from('wwsolar_client_access')
@@ -51,6 +58,8 @@
   const PUBLIC_CATEGORIES=new Set(['modulos','microinversores','inversores',
     'estruturas','cabos','componentes','projetos']);
   const PREVIEW_HOST=/(^localhost$|^127\.0\.0\.1$|^[a-z0-9]{8}\.ww-solar\.pages\.dev$)/.test(window.location.hostname);
+  // Piloto exclusivo do administrador: somente URLs hash de preview, opt-in por query string.
+  const PILOT_HOST=PREVIEW_HOST && new URLSearchParams(window.location.search).get('piloto-pedido')==='1';
   function validatePublicItems(rows){
     if(!Array.isArray(rows)||rows.length===0||rows.length>200)
       throw Error('Resposta pública inválida');
@@ -446,6 +455,7 @@
       card.append(top);
       const heading=el('h3',p.title);
       card.append(heading);
+      if(p.kind==='kit')card.append(el('small',kitVariantLabel(p),'client-muted'));
       if(p.kind==='kit'){
         const x=p.payload||{};
         const gen=el('p',undefined,'kit-generation');
@@ -503,8 +513,8 @@
     const ok=S.lines.length>0&&!S.cartInvalid&&!expired()&&!S.checkoutPending;
     $('client-checkout').disabled=!ok;
     $('client-drawer-checkout').disabled=!ok;
-    $('client-drawer-checkout').textContent=PREVIEW_HOST?'Simular cotação (sem registrar)':'Enviar pelo WhatsApp ↗';
-    $('client-checkout').textContent=PREVIEW_HOST?'Simular cotação':'Solicitar cotação';
+    $('client-drawer-checkout').textContent=PILOT_HOST?'Registrar pedido TESTE DEV':PREVIEW_HOST?'Simular cotação (sem registrar)':'Enviar pelo WhatsApp ↗';
+    $('client-checkout').textContent=PILOT_HOST?'Registrar pedido TESTE DEV':PREVIEW_HOST?'Simular cotação':'Solicitar cotação';
     // Sincroniza o botão em todo tick, inclusive após trocas de sessão/cache.
     $('client-drawer-clear').disabled=!S.user||S.lines.length===0;
     $('client-cart-refresh').textContent=expired()?'Renovar cotação':'Atualizar preços';
@@ -680,7 +690,10 @@
     const row=el('div',undefined,'client-cart-line'),label=el('div'),tools=el('div',undefined,'client-qty');
     const isLinkedService=x.id.startsWith('PRJ-WW-');
     const itemName=isLinkedService?'Projeto elétrico do kit ('+x.id.slice(7)+')':x.title;
-    label.append(el('strong',itemName),el('p',missing?'Indisponível — remova este item':euro(x.unit/100)+' por unidade','client-muted'));
+    label.append(el('strong',itemName));
+    const selectedProduct=available().find(p=>p.id===x.id);
+    if(selectedProduct?.kind==='kit')label.append(el('small',kitVariantLabel(selectedProduct),'client-muted'));
+    label.append(el('p',missing?'Indisponível — remova este item':euro(x.unit/100)+' por unidade','client-muted'));
     if(inDrawer&&!missing&&x.id.startsWith('PRJ-B-')&&
        !S.lines.find(item=>item.id===x.id)?.linkedKits){
       label.append(el('small','Projeto avulso sem kit definido. Para vincular a um kit, remova esta linha e marque a opção no kit desejado.','client-muted'));
@@ -693,7 +706,7 @@
         const projectLine=S.lines.find(item=>item.id===project.id);
         checkbox.checked=project.id==='PRJ-'+x.id
           ?!!projectLine:!!projectLine?.linkedKits?.includes(x.id);
-        checkbox.setAttribute('aria-label','Incluir projeto elétrico para '+x.title);
+        checkbox.setAttribute('aria-label','Incluir projeto elétrico para '+x.title+' ('+kitVariantLabel(kit)+')');
         checkbox.addEventListener('change',()=>setKitProject(x.id,checkbox.checked));
         const caption=el('span');
         caption.append(el('strong','Incluir projeto elétrico · '+euro(project.price)),
@@ -748,7 +761,9 @@
     }else{
       for(const x of visibleRows.slice(0,3)){
         const line=el('div',undefined,'client-preview-row');
-        line.append(el('span',x.qty+' × '+x.title),el('b',bad.includes(x)?'Indisponível':euro(x.amount/100)));
+        const selectedProduct=products.find(p=>p.id===x.id);
+        const variant=selectedProduct?.kind==='kit'?' · '+kitVariantLabel(selectedProduct):'';
+        line.append(el('span',x.qty+' × '+x.title+variant),el('b',bad.includes(x)?'Indisponível':euro(x.amount/100)));
         preview.append(line);
       }
       if(visibleRows.length>3)preview.append(el('p','E mais '+(visibleRows.length-3)+' produto(s)...','client-muted'));
@@ -841,21 +856,30 @@
         return;
       }
       if(!S.orderKey)S.orderKey=crypto.randomUUID();
-      const quoteFunction=PREVIEW_HOST?'wwsolar-quote-preview':'wwsolar-quote';
-      if(!PREVIEW_HOST){
+      if(PILOT_HOST){
+        if(!S.admin){status('Piloto de pedidos DEV exclusivo do administrador.');return;}
+        if(!window.confirm('ATENÇÃO: registrar pedido TESTE no banco DEV? O WhatsApp NÃO será aberto.')) {
+          status('Piloto DEV cancelado. Nenhum pedido foi registrado nesta tentativa.');
+          return;
+        }
+      }
+      const quoteFunction=PILOT_HOST?'wwsolar-quote-pilot':PREVIEW_HOST?'wwsolar-quote-preview':'wwsolar-quote';
+      if(!PREVIEW_HOST||PILOT_HOST){
         // Bloqueia a gravação até o backend oficial confirmar suporte ao vínculo por kit.
         const {data:capabilities,error:capabilityError}=await S.db.functions.invoke(quoteFunction,{
           body:{action:'capabilities'}
         });
         if(capabilityError||capabilities?.quote_version!==2||
-           capabilities?.project_link_snapshots!==true){
+           capabilities?.project_link_snapshots!==true||
+           (PILOT_HOST&&capabilities?.pilot_dev!==true)){
           status('O envio está temporariamente indisponível: aguardando a atualização segura do sistema de pedidos. Seu carrinho foi preservado.');
           showToast('Sistema de pedidos aguardando atualização.');
           return;
         }
       }
       const {data,error}=await S.db.functions.invoke(quoteFunction,{
-        body:{action:PREVIEW_HOST?'validate':'submit',request_key:S.orderKey,expected_total_cents:current.cents}
+        body:{action:PILOT_HOST?'submit':PREVIEW_HOST?'validate':'submit',request_key:S.orderKey,expected_total_cents:current.cents,
+          ...(PILOT_HOST?{pilot_confirmation:'REGISTRAR_TESTE_DEV'}:{})}
       });
       if(PREVIEW_HOST&&!error&&data?.validated===true&&Array.isArray(data.items)){
         if(!C.quoteSnapshotMatches(S.lines,data.items)||
@@ -896,6 +920,15 @@
       const message=String(data.message);
       if(message.length>4000)throw Error('message_length');
       const reference=String(data.order.id).slice(0,8).toUpperCase();
+      if(PILOT_HOST){
+        if(data.pilot_dev!==true){status('Resposta não corresponde ao piloto DEV. WhatsApp bloqueado.');return;}
+        const details=$('client-quote-preview');
+        details.hidden=false;
+        $('client-quote-preview-text').textContent='PEDIDO TESTE DEV '+reference+' — registrado no histórico DEV, sem envio ao WhatsApp.\n\n'+message;
+        status('Pedido TESTE '+reference+' registrado no histórico DEV. WhatsApp NÃO aberto.');
+        showToast('Pedido TESTE salvo no DEV. Confira o histórico.');
+        return;
+      }
       status('Solicitação '+reference+' registrada no histórico. O envio da mensagem deve ser confirmado no WhatsApp.');
       showToast('Solicitação registrada! Abrindo WhatsApp...');
       const hasProject=S.lines.some(line=>available().some(p=>p.id===line.id&&p.payload?.categoria==='projetos'));
@@ -952,6 +985,10 @@
       status('Projeto elétrico adicionado. Você pode cotar apenas esse serviço; TRT não inclusa.');
       openDrawer();
     });
+  }
+  if(PILOT_HOST){
+    $('client-checkout').textContent='Registrar pedido TESTE DEV';
+    $('client-drawer-checkout').textContent='Registrar pedido TESTE DEV';
   }
   $('client-checkout').addEventListener('click',checkout);
   $('client-drawer-checkout').addEventListener('click',checkout);

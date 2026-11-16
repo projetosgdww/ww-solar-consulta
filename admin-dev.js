@@ -1,7 +1,12 @@
 (()=>{
 'use strict';
 const $=id=>document.getElementById(id),cfg=window.WWSOLAR_CLIENTE_CONFIG||{};
-let db=null,oneTime='',ready=false,orders=[],orderEvents=[];
+let db=null,oneTime='',ready=false,orders=[],orderEvents=[],adminUserId=null;
+// Isolado: o teste não é mostrado na produção e exige ativação explícita na URL.
+const PILOT_REPLAY= /^[a-z0-9]{8}\.ww-solar\.pages\.dev$/.test(window.location.hostname)
+  && new URLSearchParams(window.location.search).get('teste-idempotencia')==='1';
+const REPLAY_ID='0a2a9e26-2b49-4ecc-a960-37a8e9042ec2';
+const REPLAY_TOTAL_CENTS=1769706;
 const statuses={registrado:'Registrada',em_atendimento:'Em atendimento',fechado:'Fechada',cancelado:'Cancelada'};
 const status=m=>{$('admin-dev-status').textContent=m;};
 const orderStatus=m=>{$('admin-order-status').textContent=m;};
@@ -46,6 +51,7 @@ async function init(){
    status('Acesso restrito ao administrador. Faça login na área do cliente com sua conta administrativa.');
    return;
  }
+ adminUserId=data.user.id;
  ready=true;
  $('admin-tabs').hidden=false;
  $('admin-dev-form').hidden=false;
@@ -218,9 +224,53 @@ function renderOrders(){
    choose.value=item.status;
    const save=button('Salvar situação',()=>void changeOrder(item,choose,save));
    actions.append(label,choose,save);
+   // Um único pedido já existente, criado pelo administrador, pode ser repetido
+   // pela MESMA request_key. Não há botão para gerar nova chave.
+   if(PILOT_REPLAY&&item.id===REPLAY_ID&&item.user_id===adminUserId&&
+      item.status==='registrado'&&Number(item.total_cents)===REPLAY_TOTAL_CENTS){
+     const retry=button('Testar antduplicação DEV',()=>void verifyReplay(item,retry));
+     actions.append(retry);
+   }
    card.append(actions);
    list.append(card);
  }
+}
+async function verifyReplay(item,actionButton){
+ if(!ready||!PILOT_REPLAY||item.id!==REPLAY_ID||item.user_id!==adminUserId||
+    item.status!=='registrado'||Number(item.total_cents)!==REPLAY_TOTAL_CENTS)return;
+ if(!window.confirm('TESTE DEV: reenviar a chave do pedido PED-0A2A9E26 para conferir a prevenção de duplicidade? Nenhum WhatsApp será aberto.'))return;
+ actionButton.disabled=true;
+ orderStatus('Validando a chave do pedido já existente no DEV...');
+ try{
+   // Lê a chave direto do pedido salvo, sem gerar nova chave e sem alterar o carrinho.
+   const {data:original,error:readError}=await db.from('wwsolar_quote_requests')
+     .select('id,user_id,request_key,status,total_cents')
+     .eq('id',REPLAY_ID).eq('user_id',adminUserId).single();
+   if(readError||!original||original.status!=='registrado'||
+      Number(original.total_cents)!==REPLAY_TOTAL_CENTS||
+      !/^[0-9a-f]{8}-[0-9a-f-]{27,}$/i.test(String(original.request_key||'')))
+      throw Error('Pedido original não corresponde ao teste. Nenhuma solicitação foi enviada.');
+   const {data:before,error:beforeError}=await db.from('wwsolar_quote_requests')
+     .select('id').eq('user_id',adminUserId).eq('request_key',original.request_key);
+   if(beforeError||before?.length!==1||before[0]?.id!==REPLAY_ID)
+     throw Error('A chave não está vinculada exclusivamente ao pedido original. Reenvio cancelado.');
+   // Exercita o MESMO endpoint/action=submit; a função encontra a chave ANTES
+   // da validação do carrinho e responde existing=true, sem executar INSERT.
+   const {data:reply,error:invokeError}=await db.functions.invoke('wwsolar-quote-pilot',{
+     body:{action:'submit',request_key:original.request_key,
+       expected_total_cents:REPLAY_TOTAL_CENTS,pilot_confirmation:'REGISTRAR_TESTE_DEV'}
+   });
+   if(invokeError||reply?.pilot_dev!==true||reply?.existing!==true||
+      reply?.order?.id!==REPLAY_ID||Number(reply.order.total_cents)!==REPLAY_TOTAL_CENTS)
+     throw Error('O servidor não confirmou o retorno idempotente. Não considerar o teste aprovado.');
+   const {data:after,error:afterError}=await db.from('wwsolar_quote_requests')
+     .select('id').eq('user_id',adminUserId).eq('request_key',original.request_key);
+   if(afterError||after?.length!==1||after[0]?.id!==REPLAY_ID)
+     throw Error('Não foi possível confirmar a unicidade após o reenvio.');
+   orderStatus('TESTE DEV APROVADO: mesmo pedido PED-0A2A9E26 retornado (existing=true); uma única solicitação com essa chave, sem WhatsApp.');
+ }catch(e){
+   orderStatus(e?.message||'Teste inconclusivo. Não foi confirmado nenhum novo pedido.');
+ }finally{actionButton.disabled=false;}
 }
 async function changeOrder(item,select,buttonElement){
  const value=select.value;
