@@ -21,7 +21,9 @@ for(const file of allowed){
   await cp(source,join(out,file));
 }
 // Snapshot estático de homologação: nunca publicar em produção sem feed seguro dinâmico.
-if(process.env.CF_PAGES_BRANCH!=='release/wwsolar-pecas-v1'){
+// Apenas a branch de homologação recebe o snapshot estático.
+// Falha fechada quando CF_PAGES_BRANCH estiver ausente, em release ou em outra branch.
+if(process.env.CF_PAGES_BRANCH==='feat/vitrine-publica-controlada-v1'){
   await mkdir(join(out,'dados'),{recursive:true});
   await cp(resolve(root,'dados/vitrine-preview.json'),join(out,'dados/vitrine-preview.json'));
 }
