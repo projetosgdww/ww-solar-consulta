@@ -15,6 +15,13 @@ test('piloto só aceita preview hash, JWT e administrador',()=>{
  assert.ok(pilot.includes('quote_version:2,pilot_dev:true,order:saved'));
  assert.ok(!pilot.includes('if(payload.action==="status")'));
 });
+test('texto do checkout piloto permanece durante o relogio e nao vira simulação',()=>{
+ const clock=client.slice(client.indexOf('function updateClock(){'),client.indexOf('function openDrawer(){'));
+ assert.ok(clock.includes("PILOT_HOST?'Registrar pedido TESTE DEV':PREVIEW_HOST?'Simular cotação (sem registrar)'"));
+ assert.ok(clock.includes("PILOT_HOST?'Registrar pedido TESTE DEV':PREVIEW_HOST?'Simular cotação'"));
+ assert.ok(clock.includes("$('client-drawer-checkout').disabled=!ok;"));
+ assert.ok(clock.includes("$('client-checkout').disabled=!ok;"));
+});
 test('piloto exige ação explícita do administrador e mantém checkout oficial separado',()=>{
  assert.ok(client.includes("new URLSearchParams(window.location.search).get('piloto-pedido')==='1'"));
  assert.ok(client.includes("if(!S.admin){status('Piloto de pedidos DEV exclusivo"));
