@@ -60,7 +60,6 @@ function renderParts(){
    if(itemCategory(p)==='stringbox')info.append(el('small','Opcional · valor do PDF · sem acréscimo'));
    const actions=el('div',undefined,'builder-part-actions');
    const costButton=makeButton(cost?'Editar custo':'Cadastrar custo',()=>openCost(p));
-   actions.append(costButton);
    const qtyRow=el('div',undefined,'builder-pick-row');
    const qtyLabel=el('span','Quantidade','builder-pick-caption');
    const qtyControls=el('div',undefined,'builder-pick-controls');
@@ -104,7 +103,7 @@ function renderParts(){
    };
    qty.addEventListener('change',()=>setQuantity(Number(qty.value)));
    qty.addEventListener('keydown',ev=>{if(ev.key==='Enter'){ev.preventDefault();qty.blur();}});
-   actions.append(qtyRow,add);
+   actions.append(qtyRow,costButton,add);
    syncPartControls();
    card.append(info,actions);list.append(card);
  }
