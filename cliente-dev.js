@@ -893,7 +893,7 @@
       status('Solicitação '+reference+' registrada no histórico. O envio da mensagem deve ser confirmado no WhatsApp.');
       showToast('Solicitação registrada! Abrindo WhatsApp...');
       const hasProject=S.lines.some(line=>available().some(p=>p.id===line.id&&p.payload?.categoria==='projetos'));
-      const destination=hasProject&&/^55\\d{10,11}$/.test(cfg.projectWhatsapp||'')?cfg.projectWhatsapp:cfg.whatsapp;
+      const destination=hasProject&&/^55[0-9]{10,11}$/.test(cfg.projectWhatsapp||'')?cfg.projectWhatsapp:cfg.whatsapp;
       window.location.assign('https://wa.me/'+destination+'?text='+encodeURIComponent(message));
     }catch(e){
       status('Não foi possível completar a operação. Confira a conexão ou consulte seu atendimento.');
