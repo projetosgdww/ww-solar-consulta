@@ -84,28 +84,64 @@
   function recommendedKit(products,target) {
     return matchingKits(products,target)[0]||null;
   }
-  // Somente visual: mantém o projeto na cotação e no valor, mas não o
-  // repete como linha quando ele já aparece selecionado junto de um kit.
-  // Pedidos com apenas projeto avulso continuam sendo exibidos normalmente.
-  function cartDisplayRows(selected,catalog) {
+  // Cada projeto de faixa pode pertencer a kits diferentes no mesmo carrinho.
+  // linkedKits é a associação explícita; standaloneQty guarda projetos avulsos.
+  // O SKU continua sendo o produto do catálogo, e a quantidade continua compatível
+  // com a validação de preços no servidor.
+  function setProjectForKit(input,kitId,projectId,include) {
+    const lines=cleanLines(input);
+    if(!lines.some(x=>x.id===kitId))throw Error('Kit não está no carrinho');
+    if(!/^PRJ-B-\\d{3}$/.test(projectId))throw Error('Projeto de faixa inválido');
+    const project=lines.find(x=>x.id===projectId);
+    const standalone=project?(project.standaloneQty??project.qty):0;
+    const linked=project?.linkedKits||[];
+    const nextLinks=include
+      ?(linked.includes(kitId)?linked:[...linked,kitId])
+      :linked.filter(id=>id!==kitId);
+    const qty=standalone+nextLinks.length;
+    if(qty>99)throw Error('Limite de 99 projetos por faixa');
+    const next=lines.filter(x=>x.id!==projectId);
+    if(qty>0){
+      if(!project&&next.length>=25)throw Error('Limite de 25 tipos de produto');
+      next.push({id:projectId,qty,standaloneQty:standalone,linkedKits:nextLinks});
+    }
+    return cleanLines(next);
+  }
+  function removeKitProjectLinks(input,kitId) {
+    const lines=cleanLines(input);
+    const next=[];
+    for(const x of lines){
+      if(!/^PRJ-B-\\d{3}$/.test(x.id)||!x.linkedKits?.includes(kitId)){
+        if(x.id!==kitId&&x.id!=='PRJ-'+kitId)next.push(x);
+        continue;
+      }
+      const linkedKits=x.linkedKits.filter(id=>id!==kitId);
+      const qty=x.standaloneQty+linkedKits.length;
+      if(qty>0)next.push({...x,qty,linkedKits});
+    }
+    return cleanLines(next);
+  }
+  // Projetos explicitamente vinculados são ocultados como linha separada.
+  // Se houver projeto avulso no mesmo SKU, mostrar só a quantidade avulsa.
+  // Um PRJ-B legado sem linkedKits continua avulso, sem associação presumida.
+  function cartDisplayRows(selected,catalog,rawLines=[]) {
     const items=Array.isArray(selected)?selected:[];
     const byId=new Map((Array.isArray(catalog)?catalog:[]).map(p=>[p.id,p]));
     const chosen=new Set(items.map(x=>x.id));
-    const grouped=new Set();
-    for(const item of items){
-      const kit=byId.get(item.id);
-      if(kit?.kind!=='kit')continue;
-      const dedicated='PRJ-'+kit.id;
-      const project=byId.get(dedicated);
-      if(chosen.has(dedicated)&&project?.payload?.kitCodigo===kit.id) {
-        grouped.add(dedicated);
-        continue;
+    const raw=new Map((Array.isArray(rawLines)?rawLines:[]).map(x=>[x.id,x]));
+    return items.flatMap(item=>{
+      if(item.id.startsWith('PRJ-WW-')){
+        const project=byId.get(item.id),kitId=project?.payload?.kitCodigo;
+        if(kitId&&chosen.has(kitId))return [];
       }
-      const tier=projectForKwp(kitKwp(kit));
-      if(tier&&chosen.has(tier.id)&&byId.get(tier.id)?.payload?.categoria==='projetos')
-        grouped.add(tier.id);
-    }
-    return items.filter(x=>!grouped.has(x.id));
+      const source=raw.get(item.id);
+      if(item.id.startsWith('PRJ-B-')&&Array.isArray(source?.linkedKits)){
+        const standalone=Number(source.standaloneQty)||0;
+        if(standalone===0)return [];
+        return [{...item,qty:standalone,amount:item.unit*standalone}];
+      }
+      return [item];
+    });
   }
   function buildMessage(userEmail,selected,cents) {
     const email=String(userEmail||'').trim();
@@ -127,7 +163,27 @@
       const id=String(item.id||'');
       if(!/^[A-Za-z0-9-]{3,64}$/.test(id)) throw Error('Produto inválido');
       if(byId.has(id)) throw Error('Produto duplicado');
-      byId.set(id,{id,qty:quantity(item.qty)});
+      const qty=quantity(item.qty);
+      const line={id,qty};
+      if(id.startsWith('PRJ-B-')&&
+        (Object.prototype.hasOwnProperty.call(item,'linkedKits')||
+         Object.prototype.hasOwnProperty.call(item,'standaloneQty'))){
+        if(!Array.isArray(item.linkedKits)||item.linkedKits.length>25)
+          throw Error('Vínculos de projeto inválidos');
+        const linkedKits=[];
+        for(const kitId of item.linkedKits){
+          if(typeof kitId!=='string'||!/^[A-Za-z0-9-]{3,64}$/.test(kitId)||
+             linkedKits.includes(kitId))throw Error('Vínculo de kit inválido');
+          linkedKits.push(kitId);
+        }
+        const standalone=Number(item.standaloneQty);
+        if(!Number.isInteger(standalone)||standalone<0||standalone>99||
+           standalone+linkedKits.length!==qty)
+          throw Error('Quantidade de projetos inconsistente');
+        line.standaloneQty=standalone;
+        line.linkedKits=linkedKits;
+      }
+      byId.set(id,line);
     }
     return [...byId.values()];
   }
@@ -142,5 +198,5 @@
     const seconds=Math.max(0,Math.ceil(Number(remainingMs||0)/1000));
     return String(Math.floor(seconds/60)).padStart(2,'0')+':'+String(seconds%60).padStart(2,'0');
   }
-  return Object.freeze({quantity,money,sumCart,PROJECT_TIERS,projectForKwp,GENERATION_FACTOR,kitKwp,estimatedGeneration,matchingKits,recommendedKit,cartDisplayRows,buildMessage,cleanLines,quoteRemainingMs,quoteClock,QUOTE_MINUTES});
+  return Object.freeze({quantity,money,sumCart,PROJECT_TIERS,projectForKwp,GENERATION_FACTOR,kitKwp,estimatedGeneration,matchingKits,recommendedKit,cartDisplayRows,setProjectForKit,removeKitProjectLinks,buildMessage,cleanLines,quoteRemainingMs,quoteClock,QUOTE_MINUTES});
 });
