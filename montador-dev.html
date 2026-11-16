@@ -7,7 +7,7 @@
 <link rel="icon" href="./favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="./styles.css">
 <link rel="stylesheet" href="./admin-dev.css">
-<link rel="stylesheet" href="./montador-dev.css?v=20261116-montador-v1">
+<link rel="stylesheet" href="./montador-dev.css?v=20261116-montador-v2">
 <link rel="stylesheet" href="./palette-wwsolar.css">
 </head>
 <body>
@@ -24,7 +24,7 @@
 <div id="builder-app" hidden>
 <div class="builder-banner" role="note">🔒 Somente administração · Custos internos · Rascunhos não publicados · Compatibilidade elétrica sujeita à análise técnica.</div>
 <div class="builder-topbar">
-<label>Fornecedor <input id="builder-supplier" maxlength="64" value="Sola" aria-label="Fornecedor"></label>
+<label>Fornecedor <input id="builder-supplier" maxlength="64" value="Soollar" aria-label="Fornecedor"></label>
 <button id="builder-new" class="button button-outline" type="button">+ Novo rascunho</button>
 <button id="builder-export" class="button button-outline" type="button">Exportar JSON</button>
 <button id="builder-print" class="button button-outline" type="button">Imprimir / salvar PDF</button>
@@ -32,7 +32,7 @@
 <div class="builder-grid">
 <section class="builder-card builder-parts" aria-label="Selecionar equipamentos">
 <div class="builder-section-head"><div><span class="section-label">01 / COMPONENTES</span><h2>Peças do fornecedor</h2></div><span id="builder-piece-count"></span></div>
-<p class="builder-help">O preço do catálogo é preço comercial, <strong>não é custo</strong>. Cadastre o custo de compra antes de adicionar uma peça.</p>
+<p class="builder-help">Equipamentos e custos privados do fornecedor <strong>Soollar Distribuidora · CD Fortaleza</strong>, cotação de 16/11/2026. Você pode alterar os custos manualmente; não usamos os preços comerciais como custo.</p>
 <label class="builder-search-label">Pesquisar<input type="search" id="builder-search" placeholder="Módulo 620W, Deye, cabo, cerâmica…" autocomplete="off"></label>
 <div id="builder-categories" class="builder-categories" role="group" aria-label="Categorias"></div>
 <div id="builder-parts-list" class="builder-parts-list"></div>
@@ -46,7 +46,7 @@
 </div>
 <div class="builder-actions"><button class="button button-accent" type="submit">Salvar custo</button><button type="button" id="builder-cancel-cost" class="button button-outline">Cancelar</button></div>
 </form>
-<p class="builder-help">Valores e potências devem ser conferidos na cotação e na ficha técnica do fabricante.</p>
+<p class="builder-help">Os custos podem ser alterados manualmente. String boxes são opcionais e entram pelo valor do PDF, sem acréscimo. Confirme disponibilidade e especificações técnicas.</p>
 </div>
 </section>
 <section class="builder-card builder-assembly" aria-label="Kit em montagem">
@@ -64,6 +64,7 @@
 <label>Frete e despesas (R$)<input id="builder-freight" type="number" min="0" max="1000000000" step="0.01" value="0.00" inputmode="decimal"></label>
 <label>Acréscimo sobre custo (%)<input id="builder-markup" type="number" min="0" max="300" step="0.01" value="25" inputmode="decimal"></label>
 <div><span>Custo + despesas</span><strong id="builder-base-total">R$ 0,00</strong></div>
+<div><span>String boxes opcionais (preço do PDF, sem margem)</span><strong id="builder-stringbox-pass">R$ 0,00</strong></div>
 <div><span>Acréscimo bruto estimado</span><strong id="builder-profit">R$ 0,00</strong></div>
 <div class="builder-grand-total"><span>Preço sugerido (não publicado)</span><strong id="builder-final-price">R$ 0,00</strong></div>
 </div>
@@ -82,6 +83,6 @@
 <footer class="footer"><div class="shell footer-inner"><span><strong>WW</strong>SOLAR</span><span>Ferramenta administrativa DEV · Não publicada</span></div></footer>
 <script defer src="./cliente-dev-config.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0/dist/umd/supabase.min.js"></script>
-<script defer src="./montador-core.js?v=20261116-montador-v1"></script>
-<script defer src="./montador-dev.js?v=20261116-montador-v1"></script>
+<script defer src="./montador-core.js?v=20261116-montador-v2"></script>
+<script defer src="./montador-dev.js?v=20261116-montador-v2"></script>
 </body></html>
