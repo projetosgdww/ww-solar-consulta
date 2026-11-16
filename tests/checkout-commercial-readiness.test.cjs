@@ -114,3 +114,37 @@ test('origem pública é somente leitura e não permite uso de função piloto n
  assert.ok(client.includes("const quoteFunction=PREVIEW_HOST?'wwsolar-quote-preview':'wwsolar-quote';"));
  assert.doesNotMatch(client,/wwsolar-quote-pilot|REGISTRAR_TESTE_DEV/);
 });
+
+test('WhatsApp só abre após registro confirmado e usa texto do servidor e telefone configurado',()=>{
+ const cfg=fs.readFileSync('cliente-dev-config.js','utf8');
+ assert.match(cfg,/whatsapp:\s*"5585992723637"/);
+ assert.match(cfg,/projectWhatsapp:\s*"5585991170375"/);
+ const primary='5585992723637',project='5585991170375';
+ assert.match(primary,/^55[0-9]{10,11}$/);
+ assert.match(project,/^55[0-9]{10,11}$/);
+ const redirect=client.indexOf("window.location.assign('https://wa.me/'");
+ const snapshot=client.indexOf('!C.quoteSnapshotMatches(S.lines,data.order.items)',client.indexOf("async function checkout()"));
+ const confirmed=client.indexOf('Number(data.order.total_cents)!==current.cents',client.indexOf("async function checkout()"));
+ assert.ok(snapshot>0&&confirmed>0&&redirect>snapshot&&redirect>confirmed);
+ assert.ok(client.includes('const message=String(data.message)'));
+ assert.ok(client.includes('encodeURIComponent(message)'));
+ assert.ok(client.includes("const destination=hasProject&&/^55[0-9]{10,11}$/.test(cfg.projectWhatsapp||'')?cfg.projectWhatsapp:cfg.whatsapp;"));
+ assert.ok(client.includes("window.location.assign('https://wa.me/'+destination+'?text='+encodeURIComponent(message))"));
+ assert.doesNotMatch(client,/https:\/\/api\.whatsapp\.com\/send\?phone=|fetch\(['"]https:\/\/wa\.me/);
+});
+test('build comercial usa RPC ao vivo e não copia snapshot DEV para release',()=>{
+ const build=fs.readFileSync('scripts/build-cliente-dev.mjs','utf8');
+ assert.ok(build.includes("if(process.env.CF_PAGES_BRANCH==='feat/vitrine-publica-controlada-v1')"));
+ assert.ok(build.includes('dados/vitrine-preview.json'));
+ assert.ok(!build.includes("CF_PAGES_BRANCH==='release/wwsolar-pecas-v1'"));
+ assert.ok(client.includes('wwsolar_public_catalog'));
+ assert.ok(client.includes('const PREVIEW_HOST='));
+});
+test('backend V2 preserva atualização de status e histórico administrativo',()=>{
+ assert.ok(server.includes('if(payload.action==="status")'));
+ assert.ok(server.includes('if(!isAdmin)return result(403,{error:"admin_only"}'));
+ assert.ok(server.includes('status_updated_by:user.id'));
+ assert.ok(server.includes('if(!changed)return result(409,{error:"concurrent_update"}'));
+ assert.ok(server.includes('quote_version:2,order:already'));
+ assert.ok(server.includes('quote_version:2,order:saved'));
+});
