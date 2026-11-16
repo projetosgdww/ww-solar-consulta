@@ -31,7 +31,7 @@ as $$
    and c.approved is true
    and c.price > 0
    and (
-     (c.kind='kit' and c.id like 'FOTUS-%')
+     (c.kind='kit')
      or (c.kind='piece' and c.payload->>'categoria' in
         ('modulos','microinversores','inversores','estruturas','cabos','componentes'))
      or (c.kind='piece' and c.id like 'PRJ-B-%')
