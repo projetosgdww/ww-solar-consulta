@@ -24,6 +24,6 @@ test('cliente conserva links e botão Sair, sem alterar fluxo comercial',()=>{
  for(const id of ['client-nav-simulate','client-kits-link','client-pieces-link','client-projects-link','client-logout','client-cart-top']){
    assert.ok(html.includes('id="'+id+'"'),id);
  }
- assert.match(html,/cliente-dev\.css\?v=20261116-public-preview-v1/);
- assert.match(html,/cliente-dev\.js\?v=20261116-public-preview-v1/);
+ assert.match(html,/cliente-dev\.css\?v=20261116-public-rpc-v2/);
+ assert.match(html,/cliente-dev\.js\?v=20261116-public-rpc-v2/);
 });
