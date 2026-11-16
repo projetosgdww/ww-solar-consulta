@@ -339,3 +339,11 @@ body .header{position:sticky;top:0;z-index:80}
 .client-access-contact{margin:12px 0 8px}
 .client-access-contact .client-helper{margin:7px 0!important}
 .client-access-link{margin:0 0 5px;text-align:left}
+
+/* Vitrine pública de homologação DEV: o acesso de cliente e o carrinho permanecem controlados. */
+.client-public-preview-banner{margin:0;padding:12px clamp(18px,5vw,64px);text-align:center;background:#fff3d8;border-bottom:1px solid #e8bd62;color:#704108;font-weight:700;font-size:12px;line-height:1.5}
+#client-app .client-welcome{justify-content:flex-start}
+#client-login-open{min-width:72px;border:1px solid #d9e5df;border-radius:10px;padding:9px 13px;background:#f6faf4;color:#193b2f;font-weight:800;cursor:pointer}
+#client-login-open:hover{border-color:#81f002;background:#e9f9df}
+#client-login-open:focus-visible{outline:3px solid #FA4100;outline-offset:3px}
+@media(max-width:640px){#client-login-open{padding:7px 11px;font-size:12px}.client-public-preview-banner{font-size:11px}}
