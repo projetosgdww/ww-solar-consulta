@@ -159,7 +159,7 @@
       }
     }
     return notes.length
-      ?'Projetos elétricos associados a cada kit (TRT não inclusa):\\n'+notes.join('\\n')
+      ?'Projetos elétricos associados a cada kit (TRT não inclusa):\n'+notes.join('\n')
       :'';
   }
   function buildMessage(userEmail,selected,cents) {
