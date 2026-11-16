@@ -49,6 +49,7 @@
     'freteInclusoParaCaninde','prazoEntregaDiasUteis','prazoAdicionalDiasUteis'];
   const PUBLIC_CATEGORIES=new Set(['modulos','microinversores','inversores',
     'estruturas','cabos','componentes','projetos']);
+  const PREVIEW_HOST=/(^localhost$|^127\.0\.0\.1$|(?:^|\.)ww-solar\.pages\.dev$)/.test(window.location.hostname);
   function validatePublicItems(rows){
     if(!Array.isArray(rows)||rows.length===0||rows.length>200)
       throw Error('Resposta pública inválida');
@@ -96,7 +97,10 @@
   async function showPublicCatalog(){
     let publicItems,source='rpc',snapshotDate='';
     try{publicItems=await readPublicCatalog();}
-    catch(_){
+    catch(error){
+      // O snapshot só pode ser usado nas prévias e nos testes locais.
+      // No domínio oficial, falhar fechado é mais seguro do que anunciar valores antigos.
+      if(!PREVIEW_HOST)throw error;
       const snapshot=await readPreviewSnapshot();
       publicItems=snapshot.items;source='snapshot';snapshotDate=snapshot.date;
     }
@@ -149,8 +153,14 @@
         if(requested.startsWith('PRJ-B-')){
           document.getElementById('projetos')?.scrollIntoView({behavior:'smooth'});
         }else{
-          setKind(requested.startsWith('FOTUS-')?'kit':'piece');
-          document.getElementById('catalogo')?.scrollIntoView({behavior:'smooth'});
+          const product=available().find(p=>p.id===requested);
+          setKind(product?.kind==='kit'?'kit':'piece');
+          const returned=Array.from($('client-product-grid').children)
+            .find(node=>node.dataset.productId===requested);
+          if(returned){
+            returned.classList.add('client-returned-item');
+            returned.scrollIntoView({behavior:'smooth',block:'center'});
+          }else document.getElementById('catalogo')?.scrollIntoView({behavior:'smooth'});
         }
       }
       if(S.timer)clearInterval(S.timer);
@@ -417,6 +427,7 @@
     }
     for(const p of products){
       const card=el('article',undefined,'kit-card');
+      card.dataset.productId=p.id;
       const top=el('div',undefined,'kit-top');
       top.append(el('span',p.kind==='kit'?'Kit solar':'Peça avulsa','kit-id'),el('span','Cotação a confirmar','kit-status'));
       card.append(top);
