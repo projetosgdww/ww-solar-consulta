@@ -42,3 +42,21 @@ test('migração preparada não concede SELECT sobre wwsolar_catalog a anon',()=
  assert.doesNotMatch(draft,/grant select on public\.wwsolar_catalog to anon/i);
  assert.doesNotMatch(draft,/create policy/i);
 });
+
+test('RPC dinâmica substitui snapshot, com falha fechada fora do DEV',()=>{
+ assert.match(js,/S\\.db\\.rpc\\('wwsolar_public_catalog'\\)/);
+ assert.match(js,/if\\(!PREVIEW_HOST\\)throw error/);
+ assert.match(js,/source='snapshot'/);
+ assert.match(js,/client-returned-item/);
+ assert.match(js,/client-back-to-catalog/);
+ assert.match(html,/id="client-back-to-catalog"/);
+});
+test('consulta pública só inclui kits e peças ativos e aprovados, com payload por allowlist',()=>{
+ assert.match(draft,/c\\.active is true/);
+ assert.match(draft,/c\\.approved is true/);
+ assert.match(draft,/c\\.price > 0/);
+ assert.match(draft,/security definer/);
+ assert.match(draft,/set search_path = ''/);
+ assert.match(draft,/pg_catalog\\.jsonb_build_object/);
+ assert.match(draft,/\\(c\\.kind='kit'\\)/);
+});
