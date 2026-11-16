@@ -24,3 +24,6 @@ Exercitar o registro de um pedido TESTE em `drutoqwkjzdsirqthdux` sem alterar `w
 **Não publicar** este piloto nos domínios oficiais. Não mesclar no release. Sem aprovação final, não substituir a função `wwsolar-quote`. A função de simulação `wwsolar-quote-preview` permanece ativa e sem escrita.
 
 O comando do build testa `tests/quote-pilot-dev.test.cjs`. Os testes automatizados e o teste autenticado de ponta a ponta devem ser conferidos antes de considerar o piloto homologado.
+
+## Registro de configuração Cloudflare
+Em 16/11/2026 a Cloudflare Pages foi configurada com `production_deployments_enabled=false`, `preview_deployment_setting=custom` e allowlist exclusiva `feat/wwsolar-piloto-cotacao-real-dev`, preservando a branch de produção `release/wwsolar-pecas-v1`. Esta atualização documental aciona a compilação da prévia isolada; não representa homologação do checkout ou envio de mensagem.
