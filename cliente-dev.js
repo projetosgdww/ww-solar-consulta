@@ -505,8 +505,8 @@
     const ok=S.lines.length>0&&!S.cartInvalid&&!expired()&&!S.checkoutPending;
     $('client-checkout').disabled=!ok;
     $('client-drawer-checkout').disabled=!ok;
-    $('client-drawer-checkout').textContent=PREVIEW_HOST?'Simular cotação (sem registrar)':'Enviar pelo WhatsApp ↗';
-    $('client-checkout').textContent=PREVIEW_HOST?'Simular cotação':'Solicitar cotação';
+    $('client-drawer-checkout').textContent=PILOT_HOST?'Registrar pedido TESTE DEV':PREVIEW_HOST?'Simular cotação (sem registrar)':'Enviar pelo WhatsApp ↗';
+    $('client-checkout').textContent=PILOT_HOST?'Registrar pedido TESTE DEV':PREVIEW_HOST?'Simular cotação':'Solicitar cotação';
     // Sincroniza o botão em todo tick, inclusive após trocas de sessão/cache.
     $('client-drawer-clear').disabled=!S.user||S.lines.length===0;
     $('client-cart-refresh').textContent=expired()?'Renovar cotação':'Atualizar preços';
