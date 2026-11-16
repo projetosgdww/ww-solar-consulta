@@ -833,7 +833,9 @@
         return;
       }
       if(!S.orderKey)S.orderKey=crypto.randomUUID();
-      const {data,error}=await S.db.functions.invoke('wwsolar-quote',{
+      // PREVIEW usa função isolada: a versão oficial mantém o backend existente.
+      const quoteFunction=PREVIEW_HOST?'wwsolar-quote-preview':'wwsolar-quote';
+      const {data,error}=await S.db.functions.invoke(quoteFunction,{
         body:{action:'submit',request_key:S.orderKey,expected_total_cents:current.cents}
       });
       if(error||!data?.order?.id||!data?.message){
@@ -852,7 +854,29 @@
         return;
       }
       const serverMessage=String(data.message);
-      const projectNote=C.linkedProjectNote(S.lines,available());
+      // Não abrir WhatsApp com vínculo diferente do histórico salvo no servidor.
+      const chosenLinks=S.lines.filter(line=>Array.isArray(line.linkedKits)&&line.linkedKits.length);
+      const persistedItems=Array.isArray(data.order.items)?data.order.items:[];
+      const serverLinks=persistedItems.flatMap(item=>
+        Array.isArray(item.linked_kits)?item.linked_kits.map(kit=>({
+          project:String(item.sku),kit:String(kit.sku)
+        })):[]
+      );
+      const expectedLinks=chosenLinks.flatMap(line=>line.linkedKits.map(kit=>({
+        project:line.id,kit
+      })));
+      const linkKey=x=>x.project+'|'+x.kit;
+      if(PREVIEW_HOST &&(
+        serverLinks.length!==expectedLinks.length||
+        serverLinks.some(x=>!expectedLinks.some(y=>linkKey(y)===linkKey(x)))
+      )){
+        status('Pedido registrado, porém a associação do projeto não foi confirmada no histórico. Não enviaremos WhatsApp com dados divergentes; solicite atendimento.');
+        showToast('Confira a associação do projeto no histórico.');
+        return;
+      }
+      // Em produção antiga, até atualizar o backend, mantém-se o complemento
+      // legado; na nova função a mensagem é gerada do snapshot persistido.
+      const projectNote=serverLinks.length?'':C.linkedProjectNote(S.lines,available());
       const message=projectNote&&!serverMessage.includes('Projetos elétricos associados a cada kit')
         ?serverMessage+String.fromCharCode(10,10)+projectNote:serverMessage;
       if(message.length>4000)throw Error('message_length');
