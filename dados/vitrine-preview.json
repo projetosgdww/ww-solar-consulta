@@ -1,0 +1,1046 @@
+{
+  "version": 1,
+  "generatedOn": "2026-11-16",
+  "previewOnly": true,
+  "notice": "Instantâneo para homologação DEV; não usar como fonte dinâmica na produção.",
+  "items": [
+    {
+      "id": "FOTUS-3600-AUXSOL-3",
+      "kind": "kit",
+      "title": "Kit solar 450 kWh/mês · 3,60 kWp",
+      "price": "8358.18",
+      "payload": {
+        "potenciaKwp": 3.6,
+        "faixaGeracaoKwh": 450,
+        "geracaoMensalKwh": 460.8,
+        "prazoEntregaDiasUteis": 15,
+        "freteInclusoParaCaninde": true,
+        "prazoAdicionalDiasUteis": 5
+      },
+      "active": true,
+      "approved": true
+    },
+    {
+      "id": "FOTUS-3600-AUXSOL-5",
+      "kind": "kit",
+      "title": "Kit solar 450 kWh/mês · 3,60 kWp",
+      "price": "8709.95",
+      "payload": {
+        "potenciaKwp": 3.6,
+        "faixaGeracaoKwh": 450,
+        "geracaoMensalKwh": 460.8,
+        "prazoEntregaDiasUteis": 15,
+        "freteInclusoParaCaninde": true,
+        "prazoAdicionalDiasUteis": 5
+      },
+      "active": true,
+      "approved": true
+    },
+    {
+      "id": "FOTUS-3600-DEYE-2P25X2",
+      "kind": "kit",
+      "title": "Kit solar 450 kWh/mês · 3,60 kWp",
+      "price": "9018.78",
+      "payload": {
+        "potenciaKwp": 3.6,
+        "faixaGeracaoKwh": 450,
+        "geracaoMensalKwh": 460.8,
+        "prazoEntregaDiasUteis": 15,
+        "freteInclusoParaCaninde": true,
+        "prazoAdicionalDiasUteis": 5
+      },
+      "active": true,
+      "approved": true
+    },
+    {
+      "id": "FOTUS-3600-DEYE-3",
+      "kind": "kit",
+      "title": "Kit solar 450 kWh/mês · 3,60 kWp",
+      "price": "8260.98",
+      "payload": {
+        "potenciaKwp": 3.6,
+        "faixaGeracaoKwh": 450,
+        "geracaoMensalKwh": 460.8,
+        "prazoEntregaDiasUteis": 15,
+        "freteInclusoParaCaninde": true,
+        "prazoAdicionalDiasUteis": 5
+      },
+      "active": true,
+      "approved": true
+    },
+    {
+      "id": "FOTUS-3600-DEYE-5",
+      "kind": "kit",
+      "title": "Kit solar 450 kWh/mês · 3,60 kWp",
+      "price": "8579.39",
+      "payload": {
+        "potenciaKwp": 3.6,
+        "faixaGeracaoKwh": 450,
+        "geracaoMensalKwh": 460.8,
+        "prazoEntregaDiasUteis": 15,
+        "freteInclusoParaCaninde": true,
+        "prazoAdicionalDiasUteis": 5
+      },
+      "active": true,
+      "approved": true
+    },
+    {
+      "id": "FOTUS-3600-GOODWE-3P3",
+      "kind": "kit",
+      "title": "Kit solar 450 kWh/mês · 3,60 kWp",
+      "price": "9152.47",
+      "payload": {
+        "potenciaKwp": 3.6,
+        "faixaGeracaoKwh": 450,
+        "geracaoMensalKwh": 460.8,
+        "prazoEntregaDiasUteis": 15,
+        "freteInclusoParaCaninde": true,
+        "prazoAdicionalDiasUteis": 5
+      },
+      "active": true,
+      "approved": true
+    },
+    {
+      "id": "FOTUS-3600-GOODWE-5",
+      "kind": "kit",
+      "title": "Kit solar 450 kWh/mês · 3,60 kWp",
+      "price": "9364.12",
+      "payload": {
+        "potenciaKwp": 3.6,
+        "faixaGeracaoKwh": 450,
+        "geracaoMensalKwh": 460.8,
+        "prazoEntregaDiasUteis": 15,
+        "freteInclusoParaCaninde": true,
+        "prazoAdicionalDiasUteis": 5
+      },
+      "active": true,
+      "approved": true
+    },
+    {
+      "id": "FOTUS-3600-ROCKCORE-2P5X2",
+      "kind": "kit",
+      "title": "Kit solar 450 kWh/mês · 3,60 kWp",
+      "price": "8445.44",
+      "payload": {
+        "potenciaKwp": 3.6,
+        "faixaGeracaoKwh": 450,
+        "geracaoMensalKwh": 460.8,
+        "prazoEntregaDiasUteis": 15,
+        "freteInclusoParaCaninde": true,
+        "prazoAdicionalDiasUteis": 5
+      },
+      "active": true,
+      "approved": true
+    },
+    {
+      "id": "FOTUS-3600-SOLIS-3",
+      "kind": "kit",
+      "title": "Kit solar 450 kWh/mês · 3,60 kWp",
+      "price": "9338.50",
+      "payload": {
+        "potenciaKwp": 3.6,
+        "faixaGeracaoKwh": 450,
+        "geracaoMensalKwh": 460.8,
+        "prazoEntregaDiasUteis": 15,
+        "freteInclusoParaCaninde": true,
+        "prazoAdicionalDiasUteis": 5
+      },
+      "active": true,
+      "approved": true
+    },
+    {
+      "id": "FOTUS-3600-SOLIS-5",
+      "kind": "kit",
+      "title": "Kit solar 450 kWh/mês · 3,60 kWp",
+      "price": "9803.56",
+      "payload": {
+        "potenciaKwp": 3.6,
+        "faixaGeracaoKwh": 450,
+        "geracaoMensalKwh": 460.8,
+        "prazoEntregaDiasUteis": 15,
+        "freteInclusoParaCaninde": true,
+        "prazoAdicionalDiasUteis": 5
+      },
+      "active": true,
+      "approved": true
+    },
+    {
+      "id": "FOTUS-3600-SOLPLANET-5",
+      "kind": "kit",
+      "title": "Kit solar 450 kWh/mês · 3,60 kWp",
+      "price": "8871.12",
+      "payload": {
+        "potenciaKwp": 3.6,
+        "faixaGeracaoKwh": 450,
+        "geracaoMensalKwh": 460.8,
+        "prazoEntregaDiasUteis": 15,
+        "freteInclusoParaCaninde": true,
+        "prazoAdicionalDiasUteis": 5
+      },
+      "active": true,
+      "approved": true
+    },
+    {
+      "id": "FOTUS-3600-TSUN-2P25X2",
+      "kind": "kit",
+      "title": "Kit solar 450 kWh/mês · 3,60 kWp",
+      "price": "9645.44",
+      "payload": {
+        "potenciaKwp": 3.6,
+        "faixaGeracaoKwh": 450,
+        "geracaoMensalKwh": 460.8,
+        "prazoEntregaDiasUteis": 15,
+        "freteInclusoParaCaninde": true,
+        "prazoAdicionalDiasUteis": 5
+      },
+      "active": true,
+      "approved": true
+    },
+    {
+      "id": "FOTUS-4200-AUXSOL-3",
+      "kind": "kit",
+      "title": "Kit solar 500 kWh/mês · 4,20 kWp",
+      "price": "9133.28",
+      "payload": {
+        "potenciaKwp": 4.2,
+        "faixaGeracaoKwh": 500,
+        "geracaoMensalKwh": 537.6,
+        "prazoEntregaDiasUteis": 15,
+        "freteInclusoParaCaninde": true,
+        "prazoAdicionalDiasUteis": 5
+      },
+      "active": true,
+      "approved": true
+    },
+    {
+      "id": "FOTUS-4200-AUXSOL-5",
+      "kind": "kit",
+      "title": "Kit solar 500 kWh/mês · 4,20 kWp",
+      "price": "9485.06",
+      "payload": {
+        "potenciaKwp": 4.2,
+        "faixaGeracaoKwh": 500,
+        "geracaoMensalKwh": 537.6,
+        "prazoEntregaDiasUteis": 15,
+        "freteInclusoParaCaninde": true,
+        "prazoAdicionalDiasUteis": 5
+      },
+      "active": true,
+      "approved": true
+    },
+    {
+      "id": "FOTUS-4200-AUXSOL-6",
+      "kind": "kit",
+      "title": "Kit solar 500 kWh/mês · 4,20 kWp",
+      "price": "9828.24",
+      "payload": {
+        "potenciaKwp": 4.2,
+        "faixaGeracaoKwh": 500,
+        "geracaoMensalKwh": 537.6,
+        "prazoEntregaDiasUteis": 15,
+        "freteInclusoParaCaninde": true,
+        "prazoAdicionalDiasUteis": 5
+      },
+      "active": true,
+      "approved": true
+    },
+    {
+      "id": "FOTUS-4200-DEYE-3",
+      "kind": "kit",
+      "title": "Kit solar 500 kWh/mês · 4,20 kWp",
+      "price": "9036.08",
+      "payload": {
+        "potenciaKwp": 4.2,
+        "faixaGeracaoKwh": 500,
+        "geracaoMensalKwh": 537.6,
+        "prazoEntregaDiasUteis": 15,
+        "freteInclusoParaCaninde": true,
+        "prazoAdicionalDiasUteis": 5
+      },
+      "active": true,
+      "approved": true
+    },
+    {
+      "id": "FOTUS-4200-DEYE-5",
+      "kind": "kit",
+      "title": "Kit solar 500 kWh/mês · 4,20 kWp",
+      "price": "9354.50",
+      "payload": {
+        "potenciaKwp": 4.2,
+        "faixaGeracaoKwh": 500,
+        "geracaoMensalKwh": 537.6,
+        "prazoEntregaDiasUteis": 15,
+        "freteInclusoParaCaninde": true,
+        "prazoAdicionalDiasUteis": 5
+      },
+      "active": true,
+      "approved": true
+    },
+    {
+      "id": "FOTUS-4200-DEYE-6",
+      "kind": "kit",
+      "title": "Kit solar 500 kWh/mês · 4,20 kWp",
+      "price": "9667.11",
+      "payload": {
+        "potenciaKwp": 4.2,
+        "faixaGeracaoKwh": 500,
+        "geracaoMensalKwh": 537.6,
+        "prazoEntregaDiasUteis": 15,
+        "freteInclusoParaCaninde": true,
+        "prazoAdicionalDiasUteis": 5
+      },
+      "active": true,
+      "approved": true
+    },
+    {
+      "id": "FOTUS-4200-GOODWE-3P3",
+      "kind": "kit",
+      "title": "Kit solar 500 kWh/mês · 4,20 kWp",
+      "price": "9927.58",
+      "payload": {
+        "potenciaKwp": 4.2,
+        "faixaGeracaoKwh": 500,
+        "geracaoMensalKwh": 537.6,
+        "prazoEntregaDiasUteis": 15,
+        "freteInclusoParaCaninde": true,
+        "prazoAdicionalDiasUteis": 5
+      },
+      "active": true,
+      "approved": true
+    },
+    {
+      "id": "FOTUS-4200-GOODWE-5",
+      "kind": "kit",
+      "title": "Kit solar 500 kWh/mês · 4,20 kWp",
+      "price": "10139.23",
+      "payload": {
+        "potenciaKwp": 4.2,
+        "faixaGeracaoKwh": 500,
+        "geracaoMensalKwh": 537.6,
+        "prazoEntregaDiasUteis": 15,
+        "freteInclusoParaCaninde": true,
+        "prazoAdicionalDiasUteis": 5
+      },
+      "active": true,
+      "approved": true
+    },
+    {
+      "id": "FOTUS-4200-GOODWE-6",
+      "kind": "kit",
+      "title": "Kit solar 500 kWh/mês · 4,20 kWp",
+      "price": "10648.06",
+      "payload": {
+        "potenciaKwp": 4.2,
+        "faixaGeracaoKwh": 500,
+        "geracaoMensalKwh": 537.6,
+        "prazoEntregaDiasUteis": 15,
+        "freteInclusoParaCaninde": true,
+        "prazoAdicionalDiasUteis": 5
+      },
+      "active": true,
+      "approved": true
+    },
+    {
+      "id": "FOTUS-4200-SOLIS-3",
+      "kind": "kit",
+      "title": "Kit solar 500 kWh/mês · 4,20 kWp",
+      "price": "10113.60",
+      "payload": {
+        "potenciaKwp": 4.2,
+        "faixaGeracaoKwh": 500,
+        "geracaoMensalKwh": 537.6,
+        "prazoEntregaDiasUteis": 15,
+        "freteInclusoParaCaninde": true,
+        "prazoAdicionalDiasUteis": 5
+      },
+      "active": true,
+      "approved": true
+    },
+    {
+      "id": "FOTUS-4200-SOLIS-5",
+      "kind": "kit",
+      "title": "Kit solar 500 kWh/mês · 4,20 kWp",
+      "price": "10578.67",
+      "payload": {
+        "potenciaKwp": 4.2,
+        "faixaGeracaoKwh": 500,
+        "geracaoMensalKwh": 537.6,
+        "prazoEntregaDiasUteis": 15,
+        "freteInclusoParaCaninde": true,
+        "prazoAdicionalDiasUteis": 5
+      },
+      "active": true,
+      "approved": true
+    },
+    {
+      "id": "FOTUS-4200-SOLPLANET-5",
+      "kind": "kit",
+      "title": "Kit solar 500 kWh/mês · 4,20 kWp",
+      "price": "9646.23",
+      "payload": {
+        "potenciaKwp": 4.2,
+        "faixaGeracaoKwh": 500,
+        "geracaoMensalKwh": 537.6,
+        "prazoEntregaDiasUteis": 15,
+        "freteInclusoParaCaninde": true,
+        "prazoAdicionalDiasUteis": 5
+      },
+      "active": true,
+      "approved": true
+    },
+    {
+      "id": "FOTUS-4200-SOLPLANET-6",
+      "kind": "kit",
+      "title": "Kit solar 500 kWh/mês · 4,20 kWp",
+      "price": "10046.23",
+      "payload": {
+        "potenciaKwp": 4.2,
+        "faixaGeracaoKwh": 500,
+        "geracaoMensalKwh": 537.6,
+        "prazoEntregaDiasUteis": 15,
+        "freteInclusoParaCaninde": true,
+        "prazoAdicionalDiasUteis": 5
+      },
+      "active": true,
+      "approved": true
+    },
+    {
+      "id": "PAV-001",
+      "kind": "piece",
+      "title": "CABO SOLAR 4MM VERMELHO - 25MT",
+      "price": "130.00",
+      "payload": {
+        "categoria": "cabos"
+      },
+      "active": true,
+      "approved": true
+    },
+    {
+      "id": "PAV-002",
+      "kind": "piece",
+      "title": "CABO SOLAR 4MM PRETO - 25MT",
+      "price": "130.00",
+      "payload": {
+        "categoria": "cabos"
+      },
+      "active": true,
+      "approved": true
+    },
+    {
+      "id": "PAV-003",
+      "kind": "piece",
+      "title": "CABO SOLAR 6MM PRETO - 25MT",
+      "price": "162.50",
+      "payload": {
+        "categoria": "cabos"
+      },
+      "active": true,
+      "approved": true
+    },
+    {
+      "id": "PAV-004",
+      "kind": "piece",
+      "title": "CABO SOLAR 6MM VERMELHO - 25MT",
+      "price": "162.50",
+      "payload": {
+        "categoria": "cabos"
+      },
+      "active": true,
+      "approved": true
+    },
+    {
+      "id": "PAV-005",
+      "kind": "piece",
+      "title": "CABO SOLAR 6MM VERDE 50MT",
+      "price": "325.00",
+      "payload": {
+        "categoria": "cabos"
+      },
+      "active": true,
+      "approved": true
+    },
+    {
+      "id": "PAV-006",
+      "kind": "piece",
+      "title": "KIT GARRA DE ATERRAMENTO COM 2 PEÇAS",
+      "price": "12.86",
+      "payload": {
+        "categoria": "componentes"
+      },
+      "active": true,
+      "approved": true
+    },
+    {
+      "id": "PAV-007",
+      "kind": "piece",
+      "title": "CONECTOR SOLAR MC4 MACHO E FEMEA COM 2 PARES",
+      "price": "13.00",
+      "payload": {
+        "categoria": "componentes"
+      },
+      "active": true,
+      "approved": true
+    },
+    {
+      "id": "PAV-008",
+      "kind": "piece",
+      "title": "DPS CLAMPER SOLAR 1000V 40KA",
+      "price": "168.86",
+      "payload": {
+        "categoria": "componentes"
+      },
+      "active": true,
+      "approved": true
+    },
+    {
+      "id": "PAV-009",
+      "kind": "piece",
+      "title": "FILTRO DE LINHA COM PROTETOR CONTRA SURTOS (DPS) 127/220V 10A 5 TOMADAS 3 PINOS TRANSPARENTE",
+      "price": "90.87",
+      "payload": {
+        "categoria": "componentes"
+      },
+      "active": true,
+      "approved": true
+    },
+    {
+      "id": "PAV-010",
+      "kind": "piece",
+      "title": "QUADRO DE PROTECAO AC FRONT BOX CLAMPER 275V 40A 20KA 2P IP65",
+      "price": "402.87",
+      "payload": {
+        "categoria": "componentes"
+      },
+      "active": true,
+      "approved": true
+    },
+    {
+      "id": "PAV-011",
+      "kind": "piece",
+      "title": "QUADRO DE PROTECÃO AC FRONT BOX CLAMPER 275V 50A 20KA 3P IP65",
+      "price": "558.87",
+      "payload": {
+        "categoria": "componentes"
+      },
+      "active": true,
+      "approved": true
+    },
+    {
+      "id": "PAV-012",
+      "kind": "piece",
+      "title": "STRING CLAMPER SB 1000V 32A 1E/1S",
+      "price": "598.01",
+      "payload": {
+        "categoria": "componentes"
+      },
+      "active": true,
+      "approved": true
+    },
+    {
+      "id": "PAV-014",
+      "kind": "piece",
+      "title": "STRING CLAMPER SB 1000V 32A 2E/2S",
+      "price": "701.87",
+      "payload": {
+        "categoria": "componentes"
+      },
+      "active": true,
+      "approved": true
+    },
+    {
+      "id": "PAV-015",
+      "kind": "piece",
+      "title": "STRING CLAMPER SB-1000V 20A 4E/2S 4D",
+      "price": "778.70",
+      "payload": {
+        "categoria": "componentes"
+      },
+      "active": true,
+      "approved": true
+    },
+    {
+      "id": "PAV-016",
+      "kind": "piece",
+      "title": "STRING CLAMPER SB 1000V 32A 3E/3S P24",
+      "price": "1169.88",
+      "payload": {
+        "categoria": "componentes"
+      },
+      "active": true,
+      "approved": true
+    },
+    {
+      "id": "PAV-021",
+      "kind": "piece",
+      "title": "KIT SUPORTE FIXAÇÃO PARA MICROINVERSOR COM 2 UNIDADES",
+      "price": "41.86",
+      "payload": {
+        "categoria": "estruturas"
+      },
+      "active": true,
+      "approved": true
+    },
+    {
+      "id": "PAV-022",
+      "kind": "piece",
+      "title": "KIT JUNÇÃO PARA PERFIL 2.40MT / 2.70MT COM 2 UNIDADES",
+      "price": "41.86",
+      "payload": {
+        "categoria": "estruturas"
+      },
+      "active": true,
+      "approved": true
+    },
+    {
+      "id": "PAV-023",
+      "kind": "piece",
+      "title": "KIT FIXAÇÃO GRAMPO INTERMEDIARIO PARAFUSO INOX COM 6 UNIDADES",
+      "price": "41.86",
+      "payload": {
+        "categoria": "estruturas"
+      },
+      "active": true,
+      "approved": true
+    },
+    {
+      "id": "PAV-024",
+      "kind": "piece",
+      "title": "PERFIL FIXAÇAO MODULO 27,8MMX45MMX2.36M",
+      "price": "63.00",
+      "payload": {
+        "categoria": "estruturas"
+      },
+      "active": true,
+      "approved": true
+    },
+    {
+      "id": "PAV-025",
+      "kind": "piece",
+      "title": "PERFIL FIXAÇAO MODULO SOLAR ALUMINIO 27,8MMX45MMX2.36M",
+      "price": "63.01",
+      "payload": {
+        "categoria": "estruturas"
+      },
+      "active": true,
+      "approved": true
+    },
+    {
+      "id": "PAV-026",
+      "kind": "piece",
+      "title": "KIT FIXAÇAÕ EM L TELHA METALICA PARA 4 MODULOS FOTOVOLTAICO",
+      "price": "97.86",
+      "payload": {
+        "categoria": "estruturas"
+      },
+      "active": true,
+      "approved": true
+    },
+    {
+      "id": "PAV-027",
+      "kind": "piece",
+      "title": "KIT FIXAÇÃO TELHA FIBROCIMENTO PARAFUSO INOX METAL M10X250 PARA 4 MODULOS FOTOVOLTAICO",
+      "price": "138.60",
+      "payload": {
+        "categoria": "estruturas"
+      },
+      "active": true,
+      "approved": true
+    },
+    {
+      "id": "PAV-028",
+      "kind": "piece",
+      "title": "KIT FIXAÇÃO TELHA FIBROCIMENTO PARAFUSO INOX MADEIRA PARA 4 MODULOS",
+      "price": "166.60",
+      "payload": {
+        "categoria": "estruturas"
+      },
+      "active": true,
+      "approved": true
+    },
+    {
+      "id": "PAV-029",
+      "kind": "piece",
+      "title": "KIT FIXAÇÃO TELHA CERÂMICA COM PROLONGADOR PARA 4 MÓDULOS FOTOVOLTAICO",
+      "price": "139.86",
+      "payload": {
+        "categoria": "estruturas"
+      },
+      "active": true,
+      "approved": true
+    },
+    {
+      "id": "PAV-030",
+      "kind": "piece",
+      "title": "KIT FIXAÇÃO TELHA CERÂMICA COM PROLONGADOR PARA 4 MÓDULOS FOTOVOLTAICO",
+      "price": "139.86",
+      "payload": {
+        "categoria": "estruturas"
+      },
+      "active": true,
+      "approved": true
+    },
+    {
+      "id": "PAV-031",
+      "kind": "piece",
+      "title": "KIT FIXAÇÃO MINI-TRILHO 42CM TELHADO METALICO PARA 4 MODULOS",
+      "price": "167.86",
+      "payload": {
+        "categoria": "estruturas"
+      },
+      "active": true,
+      "approved": true
+    },
+    {
+      "id": "PAV-032",
+      "kind": "piece",
+      "title": "KIT FIXAÇAO TELHA METALICA MINI-TRILHO 42CM PARA 4 MODULOS FOTOVOLTAICO",
+      "price": "167.86",
+      "payload": {
+        "categoria": "estruturas"
+      },
+      "active": true,
+      "approved": true
+    },
+    {
+      "id": "PAV-033",
+      "kind": "piece",
+      "title": "KIT FIXAÇÃO PERFIL MINI-TRILHO ALTO TELHA METALICA PARA MICROINVERSOR 30CM X 10CM",
+      "price": "209.85",
+      "payload": {
+        "categoria": "estruturas"
+      },
+      "active": true,
+      "approved": true
+    },
+    {
+      "id": "PAV-034",
+      "kind": "piece",
+      "title": "MICRO-INVERSOR DEYE-S2.25K-G4 220V",
+      "price": "999.88",
+      "payload": {
+        "categoria": "microinversores"
+      },
+      "active": true,
+      "approved": true
+    },
+    {
+      "id": "PAV-035",
+      "kind": "piece",
+      "title": "INVERSOR DEYE AFCI MONOFASICO 6K ON GRID 220V 2MPPT",
+      "price": "1249.88",
+      "payload": {
+        "categoria": "inversores"
+      },
+      "active": true,
+      "approved": true
+    },
+    {
+      "id": "PAV-036",
+      "kind": "piece",
+      "title": "INVERSOR SAJ AFCI MONO 3K-R5-ON-GRID 220V 1MPPT",
+      "price": "1624.88",
+      "payload": {
+        "categoria": "inversores"
+      },
+      "active": true,
+      "approved": true
+    },
+    {
+      "id": "PAV-037",
+      "kind": "piece",
+      "title": "INVERSOR SAJ MONOFASICO 6K-R5 ON-GRID 220V 2MPPT",
+      "price": "2249.88",
+      "payload": {
+        "categoria": "inversores"
+      },
+      "active": true,
+      "approved": true
+    },
+    {
+      "id": "PAV-038",
+      "kind": "piece",
+      "title": "INVERSOR DEYE MONO 7.3KW ON GRID 220V 2MPPT",
+      "price": "1874.89",
+      "payload": {
+        "categoria": "inversores"
+      },
+      "active": true,
+      "approved": true
+    },
+    {
+      "id": "PAV-039",
+      "kind": "piece",
+      "title": "INVERSOR DEYE AFCI MONO 10.5KW ON GRID-G2 220V 2MPPT",
+      "price": "2499.88",
+      "payload": {
+        "categoria": "inversores"
+      },
+      "active": true,
+      "approved": true
+    },
+    {
+      "id": "PAV-040",
+      "kind": "piece",
+      "title": "INVERSOR SAJ AFCI MONO 7.3KW-R5 220V 2MPPT",
+      "price": "3162.18",
+      "payload": {
+        "categoria": "inversores"
+      },
+      "active": true,
+      "approved": true
+    },
+    {
+      "id": "PAV-041",
+      "kind": "piece",
+      "title": "INVERSOR SAJ AFCI MONO 10KW-R6 220V 3MPPT",
+      "price": "3575.11",
+      "payload": {
+        "categoria": "inversores"
+      },
+      "active": true,
+      "approved": true
+    },
+    {
+      "id": "PAV-042",
+      "kind": "piece",
+      "title": "MODULO 630W N-TYPE TSUN BIFACIAL 30MM",
+      "price": "691.59",
+      "payload": {
+        "categoria": "modulos"
+      },
+      "active": true,
+      "approved": true
+    },
+    {
+      "id": "PAV-043",
+      "kind": "piece",
+      "title": "MODULO 585W RENEPV BIFACIAL 30 MM",
+      "price": "760.00",
+      "payload": {
+        "categoria": "modulos"
+      },
+      "active": true,
+      "approved": true
+    },
+    {
+      "id": "PAV-044",
+      "kind": "piece",
+      "title": "MODULO 600W N-TYPE ZNSHINE MONOFACIAL 30MM",
+      "price": "775.00",
+      "payload": {
+        "categoria": "modulos"
+      },
+      "active": true,
+      "approved": true
+    },
+    {
+      "id": "PAV-045",
+      "kind": "piece",
+      "title": "MODULO 600W N-TYPE TSUN BIFACIAL 30MM",
+      "price": "775.00",
+      "payload": {
+        "categoria": "modulos"
+      },
+      "active": true,
+      "approved": true
+    },
+    {
+      "id": "PAV-046",
+      "kind": "piece",
+      "title": "MODULO 610W RENEPV BIFACIAL 30MM",
+      "price": "785.00",
+      "payload": {
+        "categoria": "modulos"
+      },
+      "active": true,
+      "approved": true
+    },
+    {
+      "id": "PAV-047",
+      "kind": "piece",
+      "title": "MODULO 620W NPLUS BIFACIAL 30MM",
+      "price": "795.00",
+      "payload": {
+        "categoria": "modulos"
+      },
+      "active": true,
+      "approved": true
+    },
+    {
+      "id": "PAV-048",
+      "kind": "piece",
+      "title": "MODULO 620W RENEPV BIFACIAL 30MM (REF. 432446)",
+      "price": "795.00",
+      "payload": {
+        "categoria": "modulos"
+      },
+      "active": true,
+      "approved": true
+    },
+    {
+      "id": "PAV-049",
+      "kind": "piece",
+      "title": "MODULO 625W N-TYPE DMEGC BIFACIAL 30MM",
+      "price": "800.00",
+      "payload": {
+        "categoria": "modulos"
+      },
+      "active": true,
+      "approved": true
+    },
+    {
+      "id": "PAV-050",
+      "kind": "piece",
+      "title": "MODULO 630W N-TYPE TSUN BIFACIAL 30MM",
+      "price": "805.00",
+      "payload": {
+        "categoria": "modulos"
+      },
+      "active": true,
+      "approved": true
+    },
+    {
+      "id": "PAV-051",
+      "kind": "piece",
+      "title": "MODULO 630W N-TYPE TSUN BIFACIAL 30MM",
+      "price": "805.00",
+      "payload": {
+        "categoria": "modulos"
+      },
+      "active": true,
+      "approved": true
+    },
+    {
+      "id": "PAV-052",
+      "kind": "piece",
+      "title": "MODULO 630W RENEPV BIFACIAL 30MM",
+      "price": "805.00",
+      "payload": {
+        "categoria": "modulos"
+      },
+      "active": true,
+      "approved": true
+    },
+    {
+      "id": "PAV-053",
+      "kind": "piece",
+      "title": "MODULO 670W RENEPV BIFACIAL 30MM",
+      "price": "845.00",
+      "payload": {
+        "categoria": "modulos"
+      },
+      "active": true,
+      "approved": true
+    },
+    {
+      "id": "PAV-054",
+      "kind": "piece",
+      "title": "MODULO 710W N-TYPE DMEGC BIFACIAL 30MM",
+      "price": "885.00",
+      "payload": {
+        "categoria": "modulos"
+      },
+      "active": true,
+      "approved": true
+    },
+    {
+      "id": "PAV-056",
+      "kind": "piece",
+      "title": "MODULO 620W RENEPV BIFACIAL 30MM (REF. 563396)",
+      "price": "795.00",
+      "payload": {
+        "categoria": "modulos"
+      },
+      "active": true,
+      "approved": true
+    },
+    {
+      "id": "PAV-057",
+      "kind": "piece",
+      "title": "INVERSOR SAJ AFCI 15KW-R6-T2-32 ON-GRID TRIFASICO 380V 2MPPT",
+      "price": "3874.88",
+      "payload": {
+        "categoria": "inversores"
+      },
+      "active": true,
+      "approved": true
+    },
+    {
+      "id": "PRJ-B-003",
+      "kind": "piece",
+      "title": "Projeto elétrico fotovoltaico Grupo B — até 3 kW (TRT não inclusa; paga pelo contratante)",
+      "price": "300.00",
+      "payload": {
+        "categoria": "projetos"
+      },
+      "active": true,
+      "approved": true
+    },
+    {
+      "id": "PRJ-B-010",
+      "kind": "piece",
+      "title": "Projeto elétrico fotovoltaico Grupo B — acima de 3 e abaixo de 10 kW (TRT não inclusa; paga pelo contratante)",
+      "price": "400.00",
+      "payload": {
+        "categoria": "projetos"
+      },
+      "active": true,
+      "approved": true
+    },
+    {
+      "id": "PRJ-B-020",
+      "kind": "piece",
+      "title": "Projeto elétrico fotovoltaico Grupo B — de 10 a menos de 20 kW (TRT não inclusa; paga pelo contratante)",
+      "price": "500.00",
+      "payload": {
+        "categoria": "projetos"
+      },
+      "active": true,
+      "approved": true
+    },
+    {
+      "id": "PRJ-B-030",
+      "kind": "piece",
+      "title": "Projeto elétrico fotovoltaico Grupo B — de 20 a menos de 30 kW (TRT não inclusa; paga pelo contratante)",
+      "price": "600.00",
+      "payload": {
+        "categoria": "projetos"
+      },
+      "active": true,
+      "approved": true
+    },
+    {
+      "id": "PRJ-B-040",
+      "kind": "piece",
+      "title": "Projeto elétrico fotovoltaico Grupo B — de 30 a menos de 40 kW (TRT não inclusa; paga pelo contratante)",
+      "price": "700.00",
+      "payload": {
+        "categoria": "projetos"
+      },
+      "active": true,
+      "approved": true
+    },
+    {
+      "id": "PRJ-B-050",
+      "kind": "piece",
+      "title": "Projeto elétrico fotovoltaico Grupo B — de 40 a menos de 50 kW (TRT não inclusa; paga pelo contratante)",
+      "price": "800.00",
+      "payload": {
+        "categoria": "projetos"
+      },
+      "active": true,
+      "approved": true
+    },
+    {
+      "id": "PRJ-B-060",
+      "kind": "piece",
+      "title": "Projeto elétrico fotovoltaico Grupo B — de 50 a 60 kW (TRT não inclusa; paga pelo contratante)",
+      "price": "900.00",
+      "payload": {
+        "categoria": "projetos"
+      },
+      "active": true,
+      "approved": true
+    }
+  ]
+}
