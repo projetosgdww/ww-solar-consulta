@@ -88,3 +88,20 @@ test('migração de privilégio mínimo mantém função sem login e com RLS',()
  ])assert.ok(security.includes(marker),marker);
  assert.ok(!security.includes('grant select on table public.wwsolar_catalog to anon'));
 });
+
+test('simulador esclarece limites do catálogo aprovado sem exibir kits inativos',()=>{
+ const source=readFileSync('cliente-dev.js','utf8');
+ assert.ok(source.includes("Math.max(...generations)"));
+ assert.ok(source.includes("Os kits disponíveis atualmente geram até cerca de "));
+ assert.ok(source.includes("consulte uma cotação personalizada."));
+ const actives=data.items.filter(p=>p.kind==='kit');
+ const maxKwh=Math.max(...actives.map(p=>Math.round(Number(p.payload?.potenciaKwp)*128)));
+ assert.equal(maxKwh,538);
+});
+test('preço público e navegação não contradizem a vitrine nem escondem títulos',()=>{
+ const css=readFileSync('cliente-dev.css','utf8');
+ assert.ok(html.includes('Preços no catálogo'));
+ assert.ok(!html.includes('Preço sob consulta'));
+ assert.ok(css.includes('#simulador,#catalogo,#projetos{scroll-margin-top:105px}'));
+ assert.ok(css.includes('#simulador,#catalogo,#projetos{scroll-margin-top:148px}'));
+});
