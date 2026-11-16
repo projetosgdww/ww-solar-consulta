@@ -50,3 +50,7 @@
  .admin-order-actions{justify-content:flex-start}
  .admin-order-toolbar>span{margin-left:0}
 }
+
+/* Associação auditável entre cada projeto elétrico e seu kit. */
+.admin-order-item-description{display:flex;flex-direction:column;gap:4px;min-width:0;flex:1}
+.admin-linked-project-hint{font-size:11px;line-height:1.5;color:#37604f;overflow-wrap:anywhere}
