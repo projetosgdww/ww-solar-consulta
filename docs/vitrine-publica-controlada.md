@@ -26,3 +26,13 @@
 4. Validar carrinho, checkout, histórico e cotação com tentativas de contorno pela API.
 5. Conferir apresentação mobile, transparência de preços/frete e revisão legal.
 6. Publicar em produção somente após aprovação expressa.
+
+## Homologação da RPC dinâmica — 16/11/2026
+- Migração aplicada no banco compartilhado: `wwsolar_public_catalog_readonly_v1`.
+- Função: `public.wwsolar_public_catalog()`; sem parâmetros, somente leitura, resultado com allowlist comercial.
+- Teste no contexto de `anon`: 83 itens = 25 kits + 51 peças + 7 projetos. Nenhum kit WW ativo. Valor de referência `FOTUS-3600-DEYE-3 = R$ 8.260,98`.
+- `anon` **não** recebeu `SELECT` na tabela `public.wwsolar_catalog`; RLS da tabela e dos carrinhos permanece ativa.
+- Verificação do payload da RPC: zero chaves fora da allowlist.
+- Avisos dos advisors após migração: execução intencional de função `SECURITY DEFINER` para `anon` e `authenticated` (Supabase lints 0028 e 0029). Reavaliar modelo de privilégio antes de promoção a PROD: https://supabase.com/docs/guides/database/database-linter?lint=0028_anon_security_definer_function_executable . Outros dois avisos preexistentes: tabela interna sem políticas (RLS ativo) e proteção contra senhas vazadas desativada.
+- O SQL usa `security definer` de forma deliberada, pois a tabela bruta **não pode** tornar-se pública. Revisar redução de privilégios do owner antes de implantação definitiva; nenhuma tabela de cliente é referenciada na RPC.
+- O domínio oficial não foi reimplantado. A prévia já tenta RPC antes de qualquer snapshot; a inspeção final em navegador sem login ainda deve ser executada antes da publicação.
