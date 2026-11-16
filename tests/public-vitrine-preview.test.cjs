@@ -75,3 +75,16 @@ test('build só inclui snapshot na branch DEV exata',()=>{
  assert.ok(build.includes("cp(resolve(root,'dados/vitrine-preview.json'),join(out,'dados/vitrine-preview.json'))"));
  assert.ok(!build.includes("if(process.env.CF_PAGES_BRANCH!=='release/wwsolar-pecas-v1')"));
 });
+
+test('migração de privilégio mínimo mantém função sem login e com RLS',()=>{
+ const security=readFileSync('supabase/drafts/20261116_wwsolar_public_catalog_least_privilege.sql','utf8');
+ for(const marker of [
+  'create role wwsolar_public_reader with nologin noinherit nobypassrls',
+  'grant select (id, kind, title, price, payload, active, approved)',
+  'create policy wwsolar_catalog_public_reader_select',
+  'using (active is true and approved is true and price > 0)',
+  'alter function public.wwsolar_public_catalog() owner to wwsolar_public_reader',
+  'revoke create on schema public from wwsolar_public_reader'
+ ])assert.ok(security.includes(marker),marker);
+ assert.ok(!security.includes('grant select on table public.wwsolar_catalog to anon'));
+});
