@@ -18,8 +18,9 @@ test('a opção do projeto aparece para qualquer kit no carrinho lateral',()=>{
   assert.match(js,/p\.id===tier\.id/);
   assert.match(js,/if\(inDrawer&&!missing&&available\(\)\.some\(p=>p\.id===x\.id&&p\.kind==='kit'\)\)/);
   assert.doesNotMatch(js,/if\(inDrawer&&!missing&&x\.id\.startsWith\('WW-'\)\)/);
-  assert.match(js,/Projeto Grupo B avulso pela potência do kit/);
-  assert.match(js,/const dedicated=project\.id==='PRJ-'\+kitId/);
+  assert.match(js,/Projeto somente para este kit/);
+  assert.ok(js.includes("projectLine?.linkedKits?.includes(x.id)"));
+  assert.ok(js.includes("if(project.id==='PRJ-'+kitId)"));
 });
 test('serviços WW continuam com vínculo dedicado e carrinho cabeçalho extremo direito',()=>{
   assert.match(js,/const dedicated=available\(\)\.find\(p=>p\.id==='PRJ-'\+kit\.id/);
