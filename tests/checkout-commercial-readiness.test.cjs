@@ -79,3 +79,38 @@ test('prévia permanece simulação sem gravação; domínio oficial não é tra
  assert.ok(!preview.includes('.insert('));
  assert.ok(html.includes('cliente-dev.js?v=20261116-checkout-comercial-rc1'));
 });
+
+test('snapshot rejeita vínculo desviado, quantidade adulterada e projeto avulso indevido',()=>{
+ const C=require('../cliente-core.js');
+ const lines=[
+  {id:'FOTUS-3600-DEYE-3',qty:1},
+  {id:'FOTUS-4200-DEYE-3',qty:1},
+  {id:'PRJ-B-010',qty:1,standaloneQty:0,linkedKits:['FOTUS-4200-DEYE-3']}
+ ];
+ const items=[
+  {sku:'FOTUS-3600-DEYE-3',qty:1,subtotal_cents:826098},
+  {sku:'FOTUS-4200-DEYE-3',qty:1,subtotal_cents:903608},
+  {sku:'PRJ-B-010',qty:1,subtotal_cents:40000,linked_kits:[{sku:'FOTUS-4200-DEYE-3',title:'Kit 500'}],standalone_qty:0}
+ ];
+ const clone=()=>JSON.parse(JSON.stringify(items));
+ assert.equal(C.quoteSnapshotMatches(lines,items),true);
+ const wrong=clone();wrong[2].linked_kits=[{sku:'FOTUS-3600-DEYE-3',title:'Kit 450'}];
+ assert.equal(C.quoteSnapshotMatches(lines,wrong),false);
+ const missing=clone();delete missing[2].linked_kits;
+ assert.equal(C.quoteSnapshotMatches(lines,missing),false);
+ const standalone=clone();standalone[2].standalone_qty=1;
+ assert.equal(C.quoteSnapshotMatches(lines,standalone),false);
+ const qty=clone();qty[1].qty=2;
+ assert.equal(C.quoteSnapshotMatches(lines,qty),false);
+ const duplicate=clone();duplicate[1].sku='FOTUS-3600-DEYE-3';
+ assert.equal(C.quoteSnapshotMatches(lines,duplicate),false);
+});
+test('origem pública é somente leitura e não permite uso de função piloto no cliente comercial',()=>{
+ assert.ok(preview.includes('if(payload.action!=="validate")'));
+ assert.ok(!preview.includes('.insert('));
+ assert.ok(!preview.includes('.delete('));
+ assert.ok(!preview.includes('.update('));
+ assert.ok(client.includes("const PREVIEW_HOST="));
+ assert.ok(client.includes("const quoteFunction=PREVIEW_HOST?'wwsolar-quote-preview':'wwsolar-quote';"));
+ assert.doesNotMatch(client,/wwsolar-quote-pilot|REGISTRAR_TESTE_DEV/);
+});
