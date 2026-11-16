@@ -1,6 +1,7 @@
 // WW Solar DEV — pedidos/cotacoes. Somente backend possui chave privilegiada.
 // Snapshot e total calculados AQUI a partir do catálogo aprovado do Supabase.
 import {createClient} from "npm:@supabase/supabase-js@2.119.0";
+import {verifyProjectAssociations,projectAssociationNotes,BadProjectAssociation} from "./quote-links.mjs";
 const url=Deno.env.get("SUPABASE_URL")||"";
 const secret=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")||"";
 const origins=new Set((Deno.env.get("WWSOLAR_ALLOWED_ORIGINS")||
@@ -22,13 +23,14 @@ function brl(cents:number){
 }
 function messageFor(order:{
   id:string,customer_email:string,total_cents:number,
-  items:Array<{sku:string,title:string,qty:number,subtotal_cents:number}>
+  items:Array<{sku:string,title:string,qty:number,subtotal_cents:number,linked_kits?:Array<{sku:string,title:string}>,standalone_qty?:number}>
 }){
  return [
  "Olá! Gostaria de solicitar uma cotação WW Solar.",
  "Referência: "+order.id.slice(0,8).toUpperCase(),
  "Cliente: "+order.customer_email,"",
  ...order.items.map(x=>"- "+x.qty+" × "+x.title+" ["+x.sku+"] — "+brl(x.subtotal_cents)),
+ projectAssociationNotes(order.items),
  "", "Total de referência: "+brl(order.total_cents),
  "Pedido registrado na WW Solar. Confirme preço final, estoque, frete e condições.",
  ...(order.items.some(x=>x.sku.startsWith("FOTUS-"))?[
@@ -119,10 +121,18 @@ Deno.serve(async req=>{
    unique.add(l.id);
  }
  const {data:products,error:catalogError}=await admin.from("wwsolar_catalog")
-   .select("id,title,price,active,approved").in("id",[...unique])
+   .select("id,title,price,kind,payload,active,approved").in("id",[...unique])
    .eq("active",true).eq("approved",true);
  if(catalogError)return result(500,{error:"catalog_read_failed"},origin);
  if(products?.length!==unique.size)return result(409,{error:"product_unavailable"},origin);
+ let projectLinks;
+ try{
+   projectLinks=verifyProjectAssociations(lines,products);
+ }catch(error){
+   if(error instanceof BadProjectAssociation)
+     return result(422,{error:"invalid_project_association"},origin);
+   return result(500,{error:"association_validation_failed"},origin);
+ }
  const byId=new Map(products.map(p=>[String(p.id),p]));
  let total=0;
  const items=[];
@@ -135,7 +145,9 @@ Deno.serve(async req=>{
    const subtotal=unit*l.qty;
    total+=subtotal;
    if(!Number.isSafeInteger(total)||total>1e12)return result(422,{error:"total_too_high"},origin);
-   items.push({sku:l.id,title:String(product!.title),qty:l.qty,unit_cents:unit,subtotal_cents:subtotal});
+   const association=projectLinks.get(l.id);
+   items.push({sku:l.id,title:String(product!.title),qty:l.qty,unit_cents:unit,subtotal_cents:subtotal,
+     ...(association?association:{})});
  }
  if(total!==expectedTotal)return result(409,{error:"price_changed"},origin);
  if(!user.email)return result(409,{error:"missing_email"},origin);
