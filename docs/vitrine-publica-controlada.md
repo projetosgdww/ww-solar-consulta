@@ -43,3 +43,12 @@
 - `wwsolar_public_reader`: `NOLOGIN`, `NOBYPASSRLS`, `NOINHERIT`; sem `CREATE` no schema `public`, sem `SELECT` em `wwsolar_carts` ou `wwsolar_client_access`, nem em `updated_at` do catálogo.
 - Estado DEV homologado pelo usuário: navegação livre, valores na vitrine, login sob demanda, retorno à vitrine e responsividade.
 - Publicação oficial ainda exige liberação explícita. Verificar operação pós-merge sem snapshot, smoke test do checkout/login e validação de revisão jurídica/condições comerciais antes do lançamento.
+
+## Simulação segura da cotação por kit — 16/11/2026
+- O carrinho permite incluir um projeto para apenas um dos kits da mesma faixa, sem marcar o outro; o usuário homologou visualmente os dois sentidos.
+- O backend original `wwsolar-quote` da produção **não foi reimplantado**. Sua atualização, ainda no GitHub, passa a validar `linkedKits` e `standaloneQty` contra os SKUs e as potências do catálogo.
+- A função de testes `wwsolar-quote-preview` está **ativa** no Supabase, com JWT obrigatório, origem restrita a URLs de deploy preview de 8 caracteres e somente ação `validate`. Não contém operações de gravação e devolve itens e mensagem simulados.
+- A versão DEV da Cloudflare `https://b14c70a8.ww-solar.pages.dev/cliente.html` passou em 89 testes automatizados (0 falhas). O botão de cotação em DEV **simula sem registrar pedido e sem abrir WhatsApp**.
+- A relação `linked_kits` e a quantidade de serviço avulso `standalone_qty` serão gravadas dentro do campo existente `items` do pedido quando a atualização do backend oficial for autorizada. Não exige nova coluna.
+- O painel admin preparado exibe explicitamente o nome e o SKU dos kits associados, sem presumir associação por faixa e sem perder compatibilidade com os itens legados.
+- Ainda falta homologar manualmente a simulação no DEV com cliente autenticado e verificar que a mensagem gerada menciona apenas o kit selecionado. **Não mesclar PR nem publicar o backend oficial até essa validação e autorização expressa.**
