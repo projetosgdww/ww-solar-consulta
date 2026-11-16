@@ -5,7 +5,7 @@ import {verifyProjectAssociations,projectAssociationNotes,BadProjectAssociation}
 const url=Deno.env.get("SUPABASE_URL")||"";
 const secret=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")||"";
 // Endpoint de simulação da branch WW Solar: jamais recebe tráfego do domínio oficial.
-const previewOrigin=new RegExp('^https://[a-z0-9]{8}[.]ww-solar[.]pages[.]dev
+const previewOrigin=new RegExp('^https://[a-z0-9]{8}[.]ww-solar[.]pages[.]dev'+String.fromCharCode(36));
 const states=new Set(["registrado","em_atendimento","fechado","cancelado"]);
 const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 function result(status:number,body:Record<string,unknown>,origin:string){
