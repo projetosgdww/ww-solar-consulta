@@ -135,3 +135,33 @@ test('filtro Trilhos e perfis mostra cinco referencias sem duplicar registros',(
  assert.ok(js.includes("parts=partsFromCosts()"));
  assert.doesNotMatch(js,/db\.from\('wwsolar_catalog'\)\.(?:insert|upsert|update)/);
 });
+
+test('quantidade é escolhida à esquerda antes de adicionar e editada no mesmo lugar',()=>{
+ const posLeft=js.indexOf('function renderParts()');
+ const posRight=js.indexOf('function renderLines()');
+ assert.ok(posLeft>=0 && posRight>posLeft);
+ const left=js.slice(posLeft,js.indexOf('function openCost('));
+ const right=js.slice(posRight,js.indexOf('function newDraft('));
+ assert.ok(left.includes("el('div',undefined,'builder-pick-row')"));
+ assert.ok(left.includes("qty.type='number';qty.min='1';qty.max='99';qty.step='1'"));
+ assert.ok(left.includes("const minus=makeButton('−',()=>setQuantity(partQuantity(p)-1)"));
+ assert.ok(left.includes("const plus=makeButton('+',()=>setQuantity(partQuantity(p)+1)"));
+ assert.ok(left.includes("if(addToKit(p,value))syncPartControls()"));
+ assert.ok(left.includes("existing.qty=value;"));
+ assert.ok(left.includes("add.disabled=!cost||inKit;"));
+ assert.ok(left.includes("actions.append(qtyRow,costButton,add)"));
+ assert.ok(right.includes("'Quantidade: '+line.qty"));
+ assert.ok(!right.includes("()=>updateLine(line.sku,line.qty+1)"));
+ assert.ok(!right.includes("()=>updateLine(line.sku,line.qty-1)"));
+});
+test('quantidades salvas sincronizam ao reabrir, duplicar, remover ou começar outro kit',()=>{
+ assert.ok(js.includes('const pendingQuantities=new Map()'));
+ assert.ok(js.includes("return existing?existing.qty:(pendingQuantities.get(part.id)||1)"));
+ assert.ok(js.includes("lines.push(fromPart(part,quantity))"));
+ assert.ok(js.includes("pendingQuantities.delete(sku)"));
+ assert.ok(js.includes("lines=[];currentId=null;pendingQuantities.clear()"));
+ assert.ok(js.includes("currentId=d.id;lines=clean;pendingQuantities.clear()"));
+ assert.ok(js.includes("renderLines();renderParts();status('Rascunho carregado."));
+ assert.ok(js.includes("if(!Number.isSafeInteger(value)||value<1||value>99)"));
+ assert.ok(js.includes("if(!Number.isSafeInteger(quantity)||quantity<1||quantity>99)"));
+});
