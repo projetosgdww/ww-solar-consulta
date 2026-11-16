@@ -58,7 +58,7 @@ test('consulta pública só inclui kits e peças ativos e aprovados, com payload
 });
 
 test('domínio oficial nunca pode usar snapshot de preços da prévia',()=>{
- const line=js.split('\\n').find(row=>row.trim().startsWith('const PREVIEW_HOST='));
+ const line=js.split(String.fromCharCode(10)).find(row=>row.trim().startsWith('const PREVIEW_HOST='));
  assert.ok(line,'Detecção de hostname ausente');
  const regexSource=line.slice(line.indexOf('=/')+2,line.lastIndexOf('/.test('));
  const hostPattern=new RegExp(regexSource);
