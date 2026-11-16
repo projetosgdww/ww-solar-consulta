@@ -7,6 +7,8 @@ const el=(tag,text,cls)=>{const n=document.createElement(tag);if(text!==undefine
 const makeButton=(label,fn,cls='button button-outline')=>{const b=el('button',label,cls);b.type='button';b.addEventListener('click',fn);return b;};
 const categories={todos:'Todos',modulos:'Módulos',inversores:'Inversores',microinversores:'Microinversores',estruturas:'Estruturas',trilhos:'Trilhos e perfis',cabos:'Cabos',componentes:'Componentes',stringbox:'String boxes',outros:'Outros'};
 let db,user=null,ready=false,parts=[],costs=[],drafts=[],lines=[],currentId=null,editing=null,category='todos',supplier='Soollar';
+// Quantidade escolhida à esquerda, antes de adicionar; depois, os controles editam o kit.
+const pendingQuantities=new Map();
 const status=m=>$('builder-status').textContent=String(m||'');
 const authStatus=m=>$('builder-auth-status').textContent=String(m||'');
 const normalizeSupplier=s=>String(s||'').trim().slice(0,64);
@@ -57,9 +59,53 @@ function renderParts(){
    if(cost?.source_date)info.append(el('small','Cotação: '+String(cost.source_date).slice(0,10).split('-').reverse().join('/')+' · Soollar'));
    if(itemCategory(p)==='stringbox')info.append(el('small','Opcional · valor do PDF · sem acréscimo'));
    const actions=el('div',undefined,'builder-part-actions');
-   actions.append(makeButton(cost?'Editar custo':'Cadastrar custo',()=>openCost(p)));
-   const add=makeButton('+ Adicionar',()=>addToKit(p),'button button-accent');
-   add.disabled=!cost;actions.append(add);
+   const costButton=makeButton(cost?'Editar custo':'Cadastrar custo',()=>openCost(p));
+   actions.append(costButton);
+   const qtyRow=el('div',undefined,'builder-pick-row');
+   const qtyLabel=el('span','Quantidade','builder-pick-caption');
+   const qtyControls=el('div',undefined,'builder-pick-controls');
+   const minus=makeButton('−',()=>setQuantity(partQuantity(p)-1),'builder-qty');
+   minus.setAttribute('aria-label','Diminuir quantidade de '+p.title);
+   const qty=el('input',undefined,'builder-pick-input');
+   qty.type='number';qty.min='1';qty.max='99';qty.step='1';qty.inputMode='numeric';
+   qty.setAttribute('aria-label','Quantidade de '+p.title);
+   const plus=makeButton('+',()=>setQuantity(partQuantity(p)+1),'builder-qty');
+   plus.setAttribute('aria-label','Aumentar quantidade de '+p.title);
+   qtyControls.append(minus,qty,plus);
+   qtyRow.append(qtyLabel,qtyControls);
+   const add=makeButton('Adicionar ao kit',()=>{
+     const value=Number(qty.value);
+     if(!setQuantity(value))return;
+     if(addToKit(p,value))syncPartControls();
+   },'button button-accent builder-add-part');
+   const setQuantity=value=>{
+     if(!Number.isSafeInteger(value)||value<1||value>99){
+       qty.value=String(partQuantity(p));
+       status('Informe uma quantidade inteira entre 1 e 99.');return false;
+     }
+     const existing=lines.find(x=>x.sku===p.id);
+     if(existing){
+       existing.qty=value;
+       renderLines();
+       status('Quantidade de '+p.title+' atualizada para '+value+'. Salve o rascunho para preservar a alteração.');
+     }else pendingQuantities.set(p.id,value);
+     syncPartControls();
+     return true;
+   };
+   const syncPartControls=()=>{
+     const current=partQuantity(p);
+     const inKit=lines.some(x=>x.sku===p.id);
+     qty.value=String(current);
+     minus.disabled=!cost||current<=1;plus.disabled=!cost||current>=99;
+     qty.disabled=!cost;
+     add.disabled=!cost||inKit;
+     add.textContent=inKit?'✓ No kit — altere aqui':'+ Adicionar '+current+' ao kit';
+     qtyRow.classList.toggle('builder-pick-added',inKit);
+   };
+   qty.addEventListener('change',()=>setQuantity(Number(qty.value)));
+   qty.addEventListener('keydown',ev=>{if(ev.key==='Enter'){ev.preventDefault();qty.blur();}});
+   actions.append(qtyRow,add);
+   syncPartControls();
    card.append(info,actions);list.append(card);
  }
 }
@@ -96,20 +142,33 @@ async function saveCost(ev){
  }catch(e){status(e.message||'Erro ao salvar custo.');}
  finally{save.disabled=false;}
 }
-function addToKit(part){
+function partQuantity(part){
+ const existing=lines.find(x=>x.sku===part.id);
+ return existing?existing.qty:(pendingQuantities.get(part.id)||1);
+}
+function addToKit(part,quantity=1){
  try{
-   const old=lines.find(x=>x.sku===part.id);
-   if(old){if(old.qty>=99)throw Error('Máximo de 99 unidades por componente.');old.qty++;}
-   else{if(lines.length>=80)throw Error('Máximo de 80 linhas.');lines.push(fromPart(part));}
-   renderLines();status(part.id+' incluído no rascunho.');
- }catch(e){status(e.message||'Não foi possível adicionar.');}
+   if(!Number.isSafeInteger(quantity)||quantity<1||quantity>99)
+     throw Error('Informe uma quantidade inteira entre 1 e 99.');
+   if(lines.some(x=>x.sku===part.id))
+     throw Error('Este item já está no kit. Ajuste a quantidade nos controles à esquerda.');
+   if(lines.length>=80)throw Error('Máximo de 80 linhas.');
+   lines.push(fromPart(part,quantity));
+   renderLines();
+   status(quantity+' × '+part.title+' adicionados ao kit. Continue ajustando a quantidade à esquerda.');
+   return true;
+ }catch(e){status(e.message||'Não foi possível adicionar.');return false;}
 }
 function updateLine(sku,quantity){
  const line=lines.find(x=>x.sku===sku);
  if(!line)return;
- if(quantity<=0){lines=lines.filter(x=>x.sku!==sku);renderLines();return;}
+ if(quantity<=0){
+   lines=lines.filter(x=>x.sku!==sku);
+   pendingQuantities.delete(sku);
+   renderLines();renderParts();return;
+ }
  if(!Number.isSafeInteger(quantity)||quantity>99)return;
- line.qty=quantity;renderLines();
+ line.qty=quantity;renderLines();renderParts();
 }
 function updateSnapshotCost(sku){
  const current=findCost(sku),line=lines.find(x=>x.sku===sku);
@@ -130,9 +189,7 @@ function renderLines(){
      info.append(makeButton('↻ Atualizar custo deste item',()=>updateSnapshotCost(line.sku),'builder-update-cost'));
    }
    const controls=el('div',undefined,'builder-line-controls');
-   controls.append(makeButton('−',()=>updateLine(line.sku,line.qty-1),'builder-qty'));
-   controls.append(el('strong',line.qty));
-   controls.append(makeButton('+',()=>updateLine(line.sku,line.qty+1),'builder-qty'));
+   controls.append(el('strong','Quantidade: '+line.qty,'builder-selected-badge'));
    controls.append(makeButton('Remover',()=>updateLine(line.sku,0),'builder-remove'));
    row.append(info,controls,el('strong',C.money(line.qty*line.unit_cost_cents),'builder-line-total'));
    list.append(row);
@@ -153,9 +210,9 @@ function renderLines(){
 }
 function newDraft(ask=true){
  if(ask&&lines.length&&!window.confirm('Iniciar um novo rascunho? Alterações não salvas serão descartadas.'))return;
- lines=[];currentId=null;
+ lines=[];currentId=null;pendingQuantities.clear();
  $('builder-title').value='';$('builder-notes').value='';$('builder-freight').value='0.00';$('builder-markup').value='25';
- renderLines();status('Novo rascunho iniciado. Nenhum kit foi publicado.');
+ renderLines();renderParts();status('Novo rascunho iniciado. Nenhum kit foi publicado.');
 }
 async function loadData(){
  if(!ready)return;
@@ -187,12 +244,12 @@ function openDraft(d){
  if(lines.length&&!window.confirm('Abrir '+d.title+'? Alterações não salvas serão descartadas.'))return;
  const clean=C.normalizedLines(d.lines);
  if(!clean||!clean.length){status('Rascunho inválido ou vazio.');return;}
- currentId=d.id;lines=clean;
+ currentId=d.id;lines=clean;pendingQuantities.clear();
  $('builder-title').value=d.title;
  $('builder-notes').value=d.notes||'';
  $('builder-freight').value=(Number(d.freight_cents)/100).toFixed(2);
  $('builder-markup').value=Number(d.markup_percent);
- renderLines();status('Rascunho carregado. Custos históricos preservados.');
+ renderLines();renderParts();status('Rascunho carregado. Custos históricos preservados.');
  window.scrollTo({top:0,behavior:'smooth'});
 }
 async function saveDraft(){
