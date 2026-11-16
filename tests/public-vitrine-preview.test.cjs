@@ -56,3 +56,21 @@ test('consulta pública só inclui kits e peças ativos e aprovados, com payload
    "security definer","set search_path = ''","pg_catalog.jsonb_build_object",
    "(c.kind='kit')"])assert.ok(draft.includes(expected),expected);
 });
+
+test('domínio oficial nunca pode usar snapshot de preços da prévia',()=>{
+ const source=js.match(/const PREVIEW_HOST=(\\/.+\\/)\\.test\\(window\\.location\\.hostname\\)/);
+ assert.ok(source,'Detecção de hostname ausente');
+ const hostPattern=new RegExp(source[1].slice(1,-1));
+ assert.equal(hostPattern.test('b582a4e8.ww-solar.pages.dev'),true);
+ assert.equal(hostPattern.test('ww-solar.pages.dev'),false);
+ assert.equal(hostPattern.test('catalogo.wwplatform.com.br'),false);
+ assert.equal(hostPattern.test('localhost'),true);
+ assert.match(js,/if\\(!PREVIEW_HOST\\)throw error/);
+ assert.ok(js.includes("show('client-preview-disclaimer',PREVIEW_HOST)"));
+});
+test('build só inclui snapshot na branch DEV exata',()=>{
+ const build=readFileSync('scripts/build-cliente-dev.mjs','utf8');
+ assert.ok(build.includes("if(process.env.CF_PAGES_BRANCH==='feat/vitrine-publica-controlada-v1')"));
+ assert.ok(build.includes("cp(resolve(root,'dados/vitrine-preview.json'),join(out,'dados/vitrine-preview.json'))"));
+ assert.ok(!build.includes("if(process.env.CF_PAGES_BRANCH!=='release/wwsolar-pecas-v1')"));
+});
