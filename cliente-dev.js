@@ -835,18 +835,24 @@
         return;
       }
       if(!S.orderKey)S.orderKey=crypto.randomUUID();
-      // PREVIEW usa função isolada: a versão oficial mantém o backend existente.
       const quoteFunction=PREVIEW_HOST?'wwsolar-quote-preview':'wwsolar-quote';
+      if(!PREVIEW_HOST){
+        // Bloqueia a gravação até o backend oficial confirmar suporte ao vínculo por kit.
+        const {data:capabilities,error:capabilityError}=await S.db.functions.invoke(quoteFunction,{
+          body:{action:'capabilities'}
+        });
+        if(capabilityError||capabilities?.quote_version!==2||
+           capabilities?.project_link_snapshots!==true){
+          status('O envio está temporariamente indisponível: aguardando a atualização segura do sistema de pedidos. Seu carrinho foi preservado.');
+          showToast('Sistema de pedidos aguardando atualização.');
+          return;
+        }
+      }
       const {data,error}=await S.db.functions.invoke(quoteFunction,{
         body:{action:PREVIEW_HOST?'validate':'submit',request_key:S.orderKey,expected_total_cents:current.cents}
       });
       if(PREVIEW_HOST&&!error&&data?.validated===true&&Array.isArray(data.items)){
-        const expectedLinks=S.lines.filter(line=>Array.isArray(line.linkedKits))
-          .flatMap(line=>line.linkedKits.map(kit=>line.id+'|'+kit)).sort();
-        const actualLinks=data.items.flatMap(item=>
-          (Array.isArray(item.linked_kits)?item.linked_kits:[])
-            .map(kit=>String(item.sku)+'|'+String(kit.sku))).sort();
-        if(JSON.stringify(expectedLinks)!==JSON.stringify(actualLinks)||
+        if(!C.quoteSnapshotMatches(S.lines,data.items)||
            Number(data.total_cents)!==current.cents){
           status('Simulação rejeitada: associação dos projetos ou total divergente. Nenhum pedido foi criado.');
           return;
@@ -873,32 +879,15 @@
         }
         return;
       }
-      const serverMessage=String(data.message);
-      // Não abrir WhatsApp com vínculo diferente do histórico salvo no servidor.
-      const chosenLinks=S.lines.filter(line=>Array.isArray(line.linkedKits)&&line.linkedKits.length);
-      const persistedItems=Array.isArray(data.order.items)?data.order.items:[];
-      const serverLinks=persistedItems.flatMap(item=>
-        Array.isArray(item.linked_kits)?item.linked_kits.map(kit=>({
-          project:String(item.sku),kit:String(kit.sku)
-        })):[]
-      );
-      const expectedLinks=chosenLinks.flatMap(line=>line.linkedKits.map(kit=>({
-        project:line.id,kit
-      })));
-      const linkKey=x=>x.project+'|'+x.kit;
-      if(PREVIEW_HOST &&(
-        serverLinks.length!==expectedLinks.length||
-        serverLinks.some(x=>!expectedLinks.some(y=>linkKey(y)===linkKey(x)))
-      )){
-        status('Pedido registrado, porém a associação do projeto não foi confirmada no histórico. Não enviaremos WhatsApp com dados divergentes; solicite atendimento.');
-        showToast('Confira a associação do projeto no histórico.');
+      // O WhatsApp usa somente o texto do servidor e os vínculos já registrados.
+      // Nenhuma anotação do carrinho local pode completar um snapshot ausente.
+      if(data.quote_version!==2||
+         !C.quoteSnapshotMatches(S.lines,data.order.items)){
+        status('O pedido foi registrado, mas o resumo recebido não corresponde ao carrinho. Não abriremos o WhatsApp automaticamente; entre em contato com a WW Solar com a referência do pedido.');
+        showToast('Pedido registrado: confira o resumo antes de enviar.');
         return;
       }
-      // Em produção antiga, até atualizar o backend, mantém-se o complemento
-      // legado; na nova função a mensagem é gerada do snapshot persistido.
-      const projectNote=serverLinks.length?'':C.linkedProjectNote(S.lines,available());
-      const message=projectNote&&!serverMessage.includes('Projetos elétricos associados a cada kit')
-        ?serverMessage+String.fromCharCode(10,10)+projectNote:serverMessage;
+      const message=String(data.message);
       if(message.length>4000)throw Error('message_length');
       const reference=String(data.order.id).slice(0,8).toUpperCase();
       status('Solicitação '+reference+' registrada no histórico. O envio da mensagem deve ser confirmado no WhatsApp.');
