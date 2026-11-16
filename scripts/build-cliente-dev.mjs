@@ -6,6 +6,7 @@ import { execFileSync } from 'node:child_process';
 execFileSync(process.execPath,['--test','tests/cliente-core.test.cjs','tests/kit-line-commercial-v2.test.cjs','tests/kit-line-eight-review.test.cjs','tests/password-setup.test.cjs','tests/fotus-kits-presentation.test.cjs','tests/projects-standalone.test.cjs','tests/single-cart-panel.test.cjs','tests/project-options-all-kits.test.cjs','tests/header-navigation-right.test.cjs','tests/brand-icon-color.test.cjs','tests/brand-lime-icon.test.cjs','tests/grouped-cart-project.test.cjs','tests/access-whatsapp-login.test.cjs','tests/public-vitrine-preview.test.cjs','tests/quote-project-associations.test.cjs','tests/quote-pilot-dev.test.cjs'],{stdio:'inherit'});
 
 execFileSync(process.execPath,['--check','cliente-dev.js'],{stdio:'inherit'});
+execFileSync(process.execPath,['--check','admin-dev.js'],{stdio:'inherit'});
 const root=process.cwd();
 const out=resolve(root,'dist-cliente-dev');
 const allowed=[
