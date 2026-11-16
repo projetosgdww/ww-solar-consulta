@@ -25,5 +25,5 @@ test('cliente conserva links e botão Sair, sem alterar fluxo comercial',()=>{
    assert.ok(html.includes('id="'+id+'"'),id);
  }
  assert.match(html,/cliente-dev\.css\?v=20261116-public-rpc-v2/);
- assert.match(html,/cliente-dev\.js\?v=20261116-quote-linked-v2/);
+ assert.match(html,/cliente-dev\.js\?v=20261116-quote-validation-v3/);
 });
