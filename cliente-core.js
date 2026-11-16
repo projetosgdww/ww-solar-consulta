@@ -143,6 +143,39 @@
       return [item];
     });
   }
+  // Verifica que o servidor salvou exatamente o carrinho e os vínculos escolhidos.
+  // Impede abrir WhatsApp quando o backend antigo desconhece o campo linked_kits.
+  function quoteSnapshotMatches(lines,orderItems) {
+    let chosen;
+    try { chosen=cleanLines(lines); } catch (_) { return false; }
+    if(!Array.isArray(orderItems)||orderItems.length!==chosen.length)return false;
+    const seen=new Set(),byId=new Map();
+    for(const item of orderItems){
+      if(!item||typeof item.sku!=='string'||seen.has(item.sku)||
+         !Number.isInteger(item.qty)||item.qty<1)return false;
+      seen.add(item.sku);
+      byId.set(item.sku,item);
+    }
+    for(const line of chosen){
+      const snapshot=byId.get(line.id);
+      if(!snapshot||snapshot.qty!==line.qty)return false;
+      const isProject=line.id.startsWith('PRJ-B-');
+      if(!isProject){
+        if(Array.isArray(snapshot.linked_kits)&&snapshot.linked_kits.length)return false;
+        continue;
+      }
+      const expected=[...(line.linkedKits||[])].sort();
+      const actual=Array.isArray(snapshot.linked_kits)
+        ?snapshot.linked_kits.map(x=>x&&x.sku).sort():[];
+      if(actual.some(x=>typeof x!=='string')||
+         JSON.stringify(expected)!==JSON.stringify(actual))return false;
+      const standalone=line.standaloneQty??line.qty;
+      const actualStandalone=Number.isInteger(snapshot.standalone_qty)
+        ?snapshot.standalone_qty:snapshot.qty;
+      if(standalone!==actualStandalone)return false;
+    }
+    return true;
+  }
   // Complemento de WhatsApp: deixa inequívoco qual kit recebeu cada projeto.
   // O valor permanece no item PRJ-B do carrinho, calculado pelo servidor.
   function linkedProjectNote(input,catalog) {
@@ -217,5 +250,5 @@
     const seconds=Math.max(0,Math.ceil(Number(remainingMs||0)/1000));
     return String(Math.floor(seconds/60)).padStart(2,'0')+':'+String(seconds%60).padStart(2,'0');
   }
-  return Object.freeze({quantity,money,sumCart,PROJECT_TIERS,projectForKwp,GENERATION_FACTOR,kitKwp,estimatedGeneration,matchingKits,recommendedKit,cartDisplayRows,setProjectForKit,removeKitProjectLinks,linkedProjectNote,buildMessage,cleanLines,quoteRemainingMs,quoteClock,QUOTE_MINUTES});
+  return Object.freeze({quantity,money,sumCart,PROJECT_TIERS,projectForKwp,GENERATION_FACTOR,kitKwp,estimatedGeneration,matchingKits,recommendedKit,cartDisplayRows,setProjectForKit,removeKitProjectLinks,quoteSnapshotMatches,linkedProjectNote,buildMessage,cleanLines,quoteRemainingMs,quoteClock,QUOTE_MINUTES});
 });
