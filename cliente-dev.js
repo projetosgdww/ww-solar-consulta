@@ -453,7 +453,7 @@
       card.append(top);
       const heading=el('h3',p.title);
       card.append(heading);
-      if(p.kind==='kit')card.append(el('small',kitVariantLabel(p),'client-muted'));
+      if(p.kind==='kit')card.append(el('div',kitVariantLabel(p),'client-muted'));
       if(p.kind==='kit'){
         const x=p.payload||{};
         const gen=el('p',undefined,'kit-generation');
@@ -690,7 +690,7 @@
     const itemName=isLinkedService?'Projeto elétrico do kit ('+x.id.slice(7)+')':x.title;
     label.append(el('strong',itemName));
     const selectedProduct=available().find(p=>p.id===x.id);
-    if(selectedProduct?.kind==='kit')label.append(el('small',kitVariantLabel(selectedProduct),'client-muted'));
+    if(selectedProduct?.kind==='kit')label.append(el('div',kitVariantLabel(selectedProduct),'client-muted'));
     label.append(el('p',missing?'Indisponível — remova este item':euro(x.unit/100)+' por unidade','client-muted'));
     if(inDrawer&&!missing&&x.id.startsWith('PRJ-B-')&&
        !S.lines.find(item=>item.id===x.id)?.linkedKits){
