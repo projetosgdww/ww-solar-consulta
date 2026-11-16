@@ -1,7 +1,7 @@
 // WW Solar Montador interno DEV — cálculos puros, sem acesso ao catálogo comercial.
 (function(root,factory){
  const module=factory();
- if(typeof module!=='undefined' && typeof exports==='object')exports.assign=Object.assign(exports,module);
+ if(typeof exports==='object')Object.assign(exports,module);
  if(root)root.WWSolarMontadorCore=module;
 })(typeof window!=='undefined'?window:null,function(){
  'use strict';
