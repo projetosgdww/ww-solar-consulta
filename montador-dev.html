@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow"><meta name="theme-color" content="#0e2023">
+<title>WW Solar | Montador de Kits DEV</title>
+<link rel="icon" href="./favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="./styles.css">
+<link rel="stylesheet" href="./admin-dev.css">
+<link rel="stylesheet" href="./montador-dev.css?v=20261116-montador-v1">
+<link rel="stylesheet" href="./palette-wwsolar.css">
+</head>
+<body>
+<header class="header"><div class="shell header-inner">
+<a class="brand" href="./admin.html" aria-label="Voltar ao painel WW Solar">
+<span class="brand-symbol" aria-hidden="true"><svg viewBox="0 0 44 44" fill="none"><circle cx="22" cy="22" r="12" stroke="currentColor" stroke-width="4"/><path d="M22 2v7M22 35v7M2 22h7M35 22h7M8 8l5 5M31 31l5 5M36 8l-5 5M13 31l-5 5" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/></svg></span><span class="brand-copy"><strong>WW<span>SOLAR</span></strong><small>MONTADOR INTERNO · DEV</small></span></a>
+<nav class="nav"><a href="./admin.html">← Painel Admin</a></nav>
+</div></header>
+<main class="shell builder-main">
+<div class="section-label">WW SOLAR / FERRAMENTA INTERNA DEV</div>
+<h1 class="builder-title">Montador de <em>kits solares.</em></h1>
+<p class="builder-subtitle">Escolha os componentes, informe o <strong>custo real do fornecedor</strong> e salve composições privadas para revisão. Nada nesta tela publica um kit nem altera preços de venda.</p>
+<p id="builder-auth-status" role="status" aria-live="polite" class="builder-status">Conferindo acesso de administrador…</p>
+<div id="builder-app" hidden>
+<div class="builder-banner" role="note">🔒 Somente administração · Custos internos · Rascunhos não publicados · Compatibilidade elétrica sujeita à análise técnica.</div>
+<div class="builder-topbar">
+<label>Fornecedor <input id="builder-supplier" maxlength="64" value="Sola" aria-label="Fornecedor"></label>
+<button id="builder-new" class="button button-outline" type="button">+ Novo rascunho</button>
+<button id="builder-export" class="button button-outline" type="button">Exportar JSON</button>
+<button id="builder-print" class="button button-outline" type="button">Imprimir / salvar PDF</button>
+</div>
+<div class="builder-grid">
+<section class="builder-card builder-parts" aria-label="Selecionar equipamentos">
+<div class="builder-section-head"><div><span class="section-label">01 / COMPONENTES</span><h2>Peças do fornecedor</h2></div><span id="builder-piece-count"></span></div>
+<p class="builder-help">O preço do catálogo é preço comercial, <strong>não é custo</strong>. Cadastre o custo de compra antes de adicionar uma peça.</p>
+<label class="builder-search-label">Pesquisar<input type="search" id="builder-search" placeholder="Módulo 620W, Deye, cabo, cerâmica…" autocomplete="off"></label>
+<div id="builder-categories" class="builder-categories" role="group" aria-label="Categorias"></div>
+<div id="builder-parts-list" class="builder-parts-list"></div>
+<div id="builder-cost-panel" class="builder-cost-editor" hidden>
+<h3>Custo de compra — <span id="builder-cost-name"></span></h3>
+<form id="builder-cost-form">
+<label>Preço de custo unitário (R$)<input id="builder-cost-value" inputmode="decimal" type="number" min="0.01" max="1000000000" step="0.01" required></label>
+<div class="builder-two">
+<label>Potência do módulo (Wp)<input id="builder-module-wp" type="number" min="0" max="2000" step="1"></label>
+<label>Potência do inversor (W)<input id="builder-inverter-w" type="number" min="0" max="200000" step="1"></label>
+</div>
+<div class="builder-actions"><button class="button button-accent" type="submit">Salvar custo</button><button type="button" id="builder-cancel-cost" class="button button-outline">Cancelar</button></div>
+</form>
+<p class="builder-help">Valores e potências devem ser conferidos na cotação e na ficha técnica do fabricante.</p>
+</div>
+</section>
+<section class="builder-card builder-assembly" aria-label="Kit em montagem">
+<span class="section-label">02 / COMPOSIÇÃO</span><h2>Seu kit em montagem</h2>
+<label>Nome do kit<input id="builder-title" maxlength="180" placeholder="Ex.: WW Solar 500 kWh · cerâmica"></label>
+<div class="builder-stats">
+<div><small>Potência FV</small><strong id="builder-power">0,00 kWp</strong></div>
+<div><small>Geração estimada*</small><strong id="builder-generation">0 kWh/mês</strong></div>
+<div><small>Inversores</small><strong id="builder-inverter-power">—</strong></div>
+</div>
+<p class="builder-help">* Estimativa preliminar: kWp × 128 kWh/mês. Não equivale a garantia de geração.</p>
+<div id="builder-lines" class="builder-lines"><p>Selecione peças à esquerda.</p></div>
+<div class="builder-summary">
+<div><span>Custo das peças</span><strong id="builder-cost-total">R$ 0,00</strong></div>
+<label>Frete e despesas (R$)<input id="builder-freight" type="number" min="0" max="1000000000" step="0.01" value="0.00" inputmode="decimal"></label>
+<label>Acréscimo sobre custo (%)<input id="builder-markup" type="number" min="0" max="300" step="0.01" value="25" inputmode="decimal"></label>
+<div><span>Custo + despesas</span><strong id="builder-base-total">R$ 0,00</strong></div>
+<div><span>Acréscimo bruto estimado</span><strong id="builder-profit">R$ 0,00</strong></div>
+<div class="builder-grand-total"><span>Preço sugerido (não publicado)</span><strong id="builder-final-price">R$ 0,00</strong></div>
+</div>
+<label>Observações internas<textarea id="builder-notes" maxlength="1500" rows="3" placeholder="Ex.: telha cerâmica, compatibilidade a confirmar, condições de frete…"></textarea></label>
+<p id="builder-technical" class="builder-warning" role="status">Aguardando módulos e inversores para triagem preliminar.</p>
+<div class="builder-actions"><button id="builder-save" class="button button-accent" type="button">Salvar rascunho</button><button id="builder-duplicate" class="button button-outline" type="button">Duplicar composição</button></div>
+<p id="builder-status" class="builder-status" role="status" aria-live="polite"></p>
+</section>
+</div>
+<section class="builder-card builder-saved"><div class="builder-section-head"><div><span class="section-label">03 / HISTÓRICO</span><h2>Rascunhos salvos</h2></div><button id="builder-reload" class="button button-outline" type="button">Atualizar lista</button></div>
+<p class="builder-help">Os custos são preservados em cada rascunho. Alterar uma peça depois não modifica automaticamente kits já salvos.</p>
+<div id="builder-drafts-list" class="builder-drafts-list"></div>
+</section>
+</div>
+</main>
+<footer class="footer"><div class="shell footer-inner"><span><strong>WW</strong>SOLAR</span><span>Ferramenta administrativa DEV · Não publicada</span></div></footer>
+<script defer src="./cliente-dev-config.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0/dist/umd/supabase.min.js"></script>
+<script defer src="./montador-core.js?v=20261116-montador-v1"></script>
+<script defer src="./montador-dev.js?v=20261116-montador-v1"></script>
+</body></html>

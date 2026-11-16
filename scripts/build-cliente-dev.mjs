@@ -3,10 +3,12 @@ import { resolve, join } from 'node:path';
 import { execFileSync } from 'node:child_process';
 
 // A geração por kWp e o filtro de kits devem passar nos testes antes do deploy.
-execFileSync(process.execPath,['--test','tests/cliente-core.test.cjs','tests/kit-line-commercial-v2.test.cjs','tests/kit-line-eight-review.test.cjs','tests/password-setup.test.cjs','tests/fotus-kits-presentation.test.cjs','tests/projects-standalone.test.cjs','tests/single-cart-panel.test.cjs','tests/project-options-all-kits.test.cjs','tests/header-navigation-right.test.cjs','tests/brand-icon-color.test.cjs','tests/brand-lime-icon.test.cjs','tests/grouped-cart-project.test.cjs','tests/access-whatsapp-login.test.cjs','tests/public-vitrine-preview.test.cjs','tests/quote-project-associations.test.cjs','tests/checkout-commercial-readiness.test.cjs'],{stdio:'inherit'});
+execFileSync(process.execPath,['--test','tests/cliente-core.test.cjs','tests/kit-line-commercial-v2.test.cjs','tests/kit-line-eight-review.test.cjs','tests/password-setup.test.cjs','tests/fotus-kits-presentation.test.cjs','tests/projects-standalone.test.cjs','tests/single-cart-panel.test.cjs','tests/project-options-all-kits.test.cjs','tests/header-navigation-right.test.cjs','tests/brand-icon-color.test.cjs','tests/brand-lime-icon.test.cjs','tests/grouped-cart-project.test.cjs','tests/access-whatsapp-login.test.cjs','tests/public-vitrine-preview.test.cjs','tests/quote-project-associations.test.cjs','tests/checkout-commercial-readiness.test.cjs','tests/montador-dev.test.cjs'],{stdio:'inherit'});
 
 execFileSync(process.execPath,['--check','cliente-dev.js'],{stdio:'inherit'});
 execFileSync(process.execPath,['--check','admin-dev.js'],{stdio:'inherit'});
+execFileSync(process.execPath,['--check','montador-dev.js'],{stdio:'inherit'});
+execFileSync(process.execPath,['--check','montador-core.js'],{stdio:'inherit'});
 const root=process.cwd();
 const out=resolve(root,'dist-cliente-dev');
 const allowed=[
@@ -27,6 +29,14 @@ for(const file of allowed){
 if(process.env.CF_PAGES_BRANCH==='feat/vitrine-publica-controlada-v1'){
   await mkdir(join(out,'dados'),{recursive:true});
   await cp(resolve(root,'dados/vitrine-preview.json'),join(out,'dados/vitrine-preview.json'));
+}
+// Montador é liberado SOMENTE em preview isolado, nunca no build de release.
+if(process.env.CF_PAGES_BRANCH==='feat/wwsolar-montador-kits-dev-v1'){
+  for(const file of ['montador-dev.html','montador-dev.js','montador-dev.css','montador-core.js']){
+    await cp(resolve(root,file),join(out,file));
+  }
+  const builder=(await readFile(join(out,'montador-dev.html'),'utf8'));
+  await writeFile(join(out,'montador.html'),builder);
 }
 execFileSync(process.execPath,['scripts/generate-wwsolar-icons.mjs'],{stdio:'inherit'});
 // URLs comerciais limpas sem mudar IDs internos, scripts ou estilos já homologados.
