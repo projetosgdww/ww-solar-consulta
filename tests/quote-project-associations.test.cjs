@@ -83,7 +83,9 @@ test('Edge Function preview aceita apenas validação autenticada e não grava p
  assert.ok(preview.includes('validated:true,preview_only:true'));
  assert.ok(preview.includes('verifyProjectAssociations(lines,products)'));
  assert.ok(preview.includes('projectAssociationNotes(order.items)'));
- assert.ok(!/\\.insert\\(|\\.update\\(|\\.delete\\(/.test(preview));
+ assert.ok(!preview.includes('.insert('));
+ assert.ok(!preview.includes('.update('));
+ assert.ok(!preview.includes('.delete('));
  assert.ok(!preview.includes('https://catalogo.wwplatform.com.br'));
  assert.ok(!preview.includes('https://ww-solar.pages.dev'));
  assert.ok(preview.includes('previewOrigin.test(origin)'));
