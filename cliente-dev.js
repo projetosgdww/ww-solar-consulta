@@ -19,6 +19,13 @@
      && /^(sb_publishable_[A-Za-z0-9_-]+|eyJ[A-Za-z0-9._-]+)$/.test(cfg.publishableKey||'')
      && /^55\d{10,11}$/.test(cfg.whatsapp||'');
   function available(){return S.catalog.filter(p=>p.active===true&&p.approved===true&&Number(p.price)>0);}
+  // Titulos de kits podem se repetir entre fabricantes/potencias de inversor.
+  // Usar dados do SKU selecionado, nunca adivinhar a variante a partir do titulo.
+  function kitVariantLabel(kit){
+    if(!kit||kit.kind!=='kit')return '';
+    const inverter=typeof kit.payload?.inversor==='string'?kit.payload.inversor.trim():'';
+    return (inverter?'Inversor: '+inverter+' · ':'')+'SKU: '+kit.id;
+  }
   async function authorized(user){
     if(user?.app_metadata?.wwsolar_role==='admin')return true;
     const {data,error}=await S.db.from('wwsolar_client_access')
@@ -448,6 +455,7 @@
       card.append(top);
       const heading=el('h3',p.title);
       card.append(heading);
+      if(p.kind==='kit')card.append(el('small',kitVariantLabel(p),'client-muted'));
       if(p.kind==='kit'){
         const x=p.payload||{};
         const gen=el('p',undefined,'kit-generation');
@@ -682,7 +690,10 @@
     const row=el('div',undefined,'client-cart-line'),label=el('div'),tools=el('div',undefined,'client-qty');
     const isLinkedService=x.id.startsWith('PRJ-WW-');
     const itemName=isLinkedService?'Projeto elétrico do kit ('+x.id.slice(7)+')':x.title;
-    label.append(el('strong',itemName),el('p',missing?'Indisponível — remova este item':euro(x.unit/100)+' por unidade','client-muted'));
+    label.append(el('strong',itemName));
+    const selectedProduct=available().find(p=>p.id===x.id);
+    if(selectedProduct?.kind==='kit')label.append(el('small',kitVariantLabel(selectedProduct),'client-muted'));
+    label.append(el('p',missing?'Indisponível — remova este item':euro(x.unit/100)+' por unidade','client-muted'));
     if(inDrawer&&!missing&&x.id.startsWith('PRJ-B-')&&
        !S.lines.find(item=>item.id===x.id)?.linkedKits){
       label.append(el('small','Projeto avulso sem kit definido. Para vincular a um kit, remova esta linha e marque a opção no kit desejado.','client-muted'));
@@ -695,7 +706,7 @@
         const projectLine=S.lines.find(item=>item.id===project.id);
         checkbox.checked=project.id==='PRJ-'+x.id
           ?!!projectLine:!!projectLine?.linkedKits?.includes(x.id);
-        checkbox.setAttribute('aria-label','Incluir projeto elétrico para '+x.title);
+        checkbox.setAttribute('aria-label','Incluir projeto elétrico para '+x.title+' ('+kitVariantLabel(kit)+')');
         checkbox.addEventListener('change',()=>setKitProject(x.id,checkbox.checked));
         const caption=el('span');
         caption.append(el('strong','Incluir projeto elétrico · '+euro(project.price)),
@@ -750,7 +761,9 @@
     }else{
       for(const x of visibleRows.slice(0,3)){
         const line=el('div',undefined,'client-preview-row');
-        line.append(el('span',x.qty+' × '+x.title),el('b',bad.includes(x)?'Indisponível':euro(x.amount/100)));
+        const selectedProduct=products.find(p=>p.id===x.id);
+        const variant=selectedProduct?.kind==='kit'?' · '+kitVariantLabel(selectedProduct):'';
+        line.append(el('span',x.qty+' × '+x.title+variant),el('b',bad.includes(x)?'Indisponível':euro(x.amount/100)));
         preview.append(line);
       }
       if(visibleRows.length>3)preview.append(el('p','E mais '+(visibleRows.length-3)+' produto(s)...','client-muted'));
