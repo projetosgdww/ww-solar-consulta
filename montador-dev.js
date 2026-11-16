@@ -5,7 +5,7 @@ const $=id=>document.getElementById(id);
 const C=window.WWSolarMontadorCore,cfg=window.WWSOLAR_CLIENTE_CONFIG||{};
 const el=(tag,text,cls)=>{const n=document.createElement(tag);if(text!==undefined)n.textContent=String(text);if(cls)n.className=cls;return n;};
 const makeButton=(label,fn,cls='button button-outline')=>{const b=el('button',label,cls);b.type='button';b.addEventListener('click',fn);return b;};
-const categories={todos:'Todos',modulos:'Módulos',inversores:'Inversores',microinversores:'Microinversores',estruturas:'Estruturas',cabos:'Cabos',componentes:'Componentes',stringbox:'String boxes',outros:'Outros'};
+const categories={todos:'Todos',modulos:'Módulos',inversores:'Inversores',microinversores:'Microinversores',estruturas:'Estruturas',trilhos:'Trilhos e perfis',cabos:'Cabos',componentes:'Componentes',stringbox:'String boxes',outros:'Outros'};
 let db,user=null,ready=false,parts=[],costs=[],drafts=[],lines=[],currentId=null,editing=null,category='todos',supplier='Soollar';
 const status=m=>$('builder-status').textContent=String(m||'');
 const authStatus=m=>$('builder-auth-status').textContent=String(m||'');
@@ -22,6 +22,9 @@ function draftSnapshot(){
  return C.calculate(lines,freight,markup);
 }
 function itemCategory(p){return String(p.payload?.categoria||'outros').toLowerCase();}
+ // Classificação visual, sem alterar os preços nem criar produtos duplicados.
+ // Perfis de 2,36 m e mini-trilhos continuam registrados em "estruturas".
+ const isRail=p=>itemCategory(p)==='estruturas' && /trilho|perfil/i.test(String(p.title||''));
 function fromPart(p,qty=1){
  const cost=findCost(p.id);
  if(!cost)throw Error('Cadastre o custo do fornecedor antes de adicionar a peça.');
@@ -32,14 +35,15 @@ function selectCategory(value){category=value;renderParts();}
 function renderCategories(){
  const host=$('builder-categories');host.replaceChildren();
  for(const [key,title] of Object.entries(categories)){
-   const b=makeButton(title,()=>selectCategory(key),'builder-chip'+(category===key?' active':''));
+   const label=key==='trilhos'?title+' ('+parts.filter(isRail).length+')':title;
+   const b=makeButton(label,()=>selectCategory(key),'builder-chip'+(category===key?' active':''));
    b.setAttribute('aria-pressed',String(category===key));host.append(b);
  }
 }
 function renderParts(){
  renderCategories();
  const q=$('builder-search').value.trim().toLocaleLowerCase('pt-BR');
- const filtered=parts.filter(p=>(category==='todos'||itemCategory(p)===category)&&
+ const filtered=parts.filter(p=>(category==='todos'||(category==='trilhos'?isRail(p):itemCategory(p)===category))&&
    (p.title.toLocaleLowerCase('pt-BR').includes(q)||p.id.toLowerCase().includes(q)));
  $('builder-piece-count').textContent=filtered.length+' peças';
  const list=$('builder-parts-list');list.replaceChildren();
