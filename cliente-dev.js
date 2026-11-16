@@ -44,8 +44,8 @@
     show('client-back-to-catalog',!S.user&&S.catalog.length>0);
   }
   // A vitrine só recebe os campos comerciais explicitamente públicos.
-  // A função RPC segura ainda não foi aplicada ao banco compartilhado.
-  // Durante a homologação, o snapshot é o fallback sinalizado na interface.
+  // A RPC comercial foi ativada no Supabase; a tabela original permanece protegida.
+  // Snapshot apenas para falhas temporárias na prévia DEV; produção falha fechada.
   const PUBLIC_KIT_FIELDS=['potenciaKwp','faixaGeracaoKwh','geracaoMensalKwh',
     'freteInclusoParaCaninde','prazoEntregaDiasUteis','prazoAdicionalDiasUteis'];
   const PUBLIC_CATEGORIES=new Set(['modulos','microinversores','inversores',
