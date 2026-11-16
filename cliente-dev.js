@@ -18,7 +18,11 @@
   const configOK=()=>/^https:\/\/[a-z0-9-]+\.supabase\.co$/.test(cfg.supabaseUrl||'')
      && /^(sb_publishable_[A-Za-z0-9_-]+|eyJ[A-Za-z0-9._-]+)$/.test(cfg.publishableKey||'')
      && /^55\d{10,11}$/.test(cfg.whatsapp||'');
-  function available(){return S.catalog.filter(p=>p.active===true&&p.approved===true&&Number(p.price)>0);}
+  // A vitrine oficial vende kits geradores; serviços PRJ-B continuam opcionais.
+  // As peças avulsas permanecem no banco para o montador interno, jamais no checkout.
+  const quotableProduct=p=>p?.kind==='kit' ||
+    (p?.kind==='piece'&&p?.payload?.categoria==='projetos'&&/^PRJ-B-/.test(p.id));
+  function available(){return S.catalog.filter(p=>p.active===true&&p.approved===true&&Number(p.price)>0&&quotableProduct(p));}
   // O mesmo título/geração pode corresponder a inversores de fabricantes ou potências diferentes.
   // O SKU é a fonte da identidade comercial da composição selecionada.
   function kitVariantLabel(kit){
@@ -55,8 +59,7 @@
   // Snapshot apenas para falhas temporárias na prévia DEV; produção falha fechada.
   const PUBLIC_KIT_FIELDS=['potenciaKwp','faixaGeracaoKwh','geracaoMensalKwh',
     'freteInclusoParaCaninde','prazoEntregaDiasUteis','prazoAdicionalDiasUteis'];
-  const PUBLIC_CATEGORIES=new Set(['modulos','microinversores','inversores',
-    'estruturas','cabos','componentes','projetos']);
+  const PUBLIC_CATEGORIES=new Set(['projetos']);
   const PREVIEW_HOST=/(^localhost$|^127\.0\.0\.1$|^[a-z0-9]{8}\.ww-solar\.pages\.dev$)/.test(window.location.hostname);
   function validatePublicItems(rows){
     if(!Array.isArray(rows)||rows.length===0||rows.length>200)
@@ -68,6 +71,8 @@
          item.title.length>300||item.active!==true||item.approved!==true||
          !Number.isFinite(Number(item.price))||Number(item.price)<=0||
          ids.has(item.id))throw Error('Registro público não autorizado');
+      // Compatibilidade durante o corte: ignora peças que possam vir de cache/RPC legado.
+      if(item.kind==='piece'&&item.payload?.categoria!=='projetos')continue;
       if(item.kind==='piece'&&(
          !PUBLIC_CATEGORIES.has(item.payload?.categoria)||
          (item.payload.categoria==='projetos'&&!/^PRJ-B-/.test(item.id))
@@ -387,7 +392,7 @@
 
   }
   function setKind(kind){
-    S.kind=kind;
+    S.kind='kit';
     S.category='all';
     for(const x of document.querySelectorAll('[data-kind]')){
       const active=x.dataset.kind===kind;
@@ -429,8 +434,7 @@
   }
   function renderProducts(){
     const q=S.query.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
-    const products=(S.kind==='kit'?C.matchingKits(available(),S.target):available().filter(p=>p.kind==='piece'&&p.payload?.categoria!=='projetos'))
-      .filter(p=>S.kind==='kit'||S.category==='all'||String(p.payload?.categoria||'').toLowerCase()===S.category)
+    const products=C.matchingKits(available(),S.target)
       .filter(p=>!q||[p.id,p.title,p.payload?.inversor,p.payload?.categoria]
         .some(v=>String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().includes(q)))
       .slice(0,150);
@@ -440,9 +444,9 @@
       const box=el('div',undefined,'empty-state');
       box.append(el('h3',S.kind==='kit'?'Kits em preparação':'Nenhum equipamento encontrado'));
       box.append(el('p',S.kind==='kit'
-        ?(available().some(p=>p.kind==='kit')?'Nenhum kit atende à geração informada. Escolha outra faixa ou solicite orientação. Reduza a geração desejada ou consulte as peças avulsas.':'As opções estão sendo preparadas para cotação. Consulte também as peças avulsas.')
+        ?(available().some(p=>p.kind==='kit')?'Nenhum kit atende à geração informada. Escolha outra faixa ou solicite um kit personalizado.':'Os kits geradores estão em preparação. Consulte nossa equipe.')
         :'Experimente outra potência, fabricante ou nome.'));
-      if(S.kind==='kit')box.append(btn('Ver peças avulsas ↗',()=>setKind('piece'),'button button-accent'));
+      if(S.kind==='kit')box.append(btn('Solicitar kit sob medida ↗',()=>document.getElementById('client-custom-kit-cta')?.scrollIntoView({behavior:'smooth',block:'nearest'}),'button button-accent'));
       grid.append(box);return;
     }
     for(const p of products){
@@ -754,7 +758,7 @@
     }
     if(!S.lines.length){
       area.append(el('p','Seu carrinho está vazio.','client-muted'));
-      drawer.append(el('p','Seu carrinho está vazio. Escolha um projeto, peça ou kit para solicitar uma cotação.','client-muted'));
+      drawer.append(el('p','Seu carrinho está vazio. Escolha um kit gerador ou projeto elétrico para solicitar uma cotação.','client-muted'));
       preview.append(el('p','Nenhum item adicionado.','client-muted'));
     }else{
       for(const x of visibleRows.slice(0,3)){
@@ -766,7 +770,7 @@
       }
       if(visibleRows.length>3)preview.append(el('p','E mais '+(visibleRows.length-3)+' produto(s)...','client-muted'));
     }
-    if(S.cartInvalid)status('Há produtos indisponíveis no carrinho. Remova-os antes de finalizar.');
+    if(S.cartInvalid)status('Existem peças avulsas ou itens indisponíveis no carrinho antigo. Remova-os antes de finalizar.');
     updateClock();
   }
   // Serviços PRJ-B são avulsos e independentes de qualquer kit (PRJ-WW).
@@ -786,7 +790,7 @@
       'Entre na sua conta para adicionar somente o projeto ao carrinho.';
   }
   function renderAll(){
-    $('client-available-count').textContent=String(available().filter(p=>p.payload?.categoria!=='projetos').length);
+    $('client-available-count').textContent=String(available().filter(p=>p.kind==='kit').length);
     renderRecommendation();renderCategories();renderProducts();renderStandaloneProjects();renderCart();setTarget(S.target);
   }
   async function refreshQuote(){
@@ -798,7 +802,7 @@
       await S.saveQueue;
       const newCatalog=await getFreshCatalog();
       S.catalog=newCatalog;
-      const invalid=S.lines.filter(line=>!newCatalog.some(p=>p.id===line.id));
+      const invalid=S.lines.filter(line=>!newCatalog.some(p=>p.id===line.id&&quotableProduct(p)));
       renderProducts();
       renderRecommendation();
       renderCategories();
@@ -842,7 +846,13 @@
         .select('id,title,price,kind,active,approved,payload')
         .in('id',S.lines.map(x=>x.id)).eq('active',true).eq('approved',true);
       if(catalogError)throw catalogError;
-      const current=C.sumCart(S.lines,fresh||[]);
+      if(S.lines.some(line=>!(fresh||[]).some(p=>p.id===line.id&&quotableProduct(p)))){
+        S.catalog=S.catalog.map(p=>(fresh||[]).find(v=>v.id===p.id)||p);
+        renderCart();
+        status('Itens avulsos não estão mais disponíveis para cotação. Remova-os do carrinho antes de continuar.');
+        return;
+      }
+      const current=C.sumCart(S.lines,(fresh||[]).filter(quotableProduct));
       const local=C.sumCart(S.lines,available());
       const known=new Map(local.selected.map(x=>[x.id,x.unit]));
       if(current.cents!==local.cents||current.selected.some(x=>known.get(x.id)!==x.unit)){
@@ -950,7 +960,7 @@
   for(const tab of document.querySelectorAll('[data-kind]'))
     tab.addEventListener('click',()=>setKind(tab.dataset.kind));
   $('client-kits-link').addEventListener('click',()=>setKind('kit'));
-  $('client-pieces-link').addEventListener('click',()=>setKind('piece'));
+  // A navegação por peças avulsas foi retirada do catálogo comercial.
   $('client-result-button').addEventListener('click',()=>{
     const kit=C.recommendedKit(available(),S.target);
     if(kit)add(kit.id);
