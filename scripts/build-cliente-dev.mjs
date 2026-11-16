@@ -3,8 +3,9 @@ import { resolve, join } from 'node:path';
 import { execFileSync } from 'node:child_process';
 
 // A geração por kWp e o filtro de kits devem passar nos testes antes do deploy.
-execFileSync(process.execPath,['--test','tests/cliente-core.test.cjs','tests/kit-line-commercial-v2.test.cjs','tests/kit-line-eight-review.test.cjs','tests/password-setup.test.cjs','tests/fotus-kits-presentation.test.cjs','tests/projects-standalone.test.cjs','tests/single-cart-panel.test.cjs','tests/project-options-all-kits.test.cjs','tests/header-navigation-right.test.cjs','tests/brand-icon-color.test.cjs','tests/brand-lime-icon.test.cjs','tests/grouped-cart-project.test.cjs','tests/access-whatsapp-login.test.cjs'],{stdio:'inherit'});
+execFileSync(process.execPath,['--test','tests/cliente-core.test.cjs','tests/kit-line-commercial-v2.test.cjs','tests/kit-line-eight-review.test.cjs','tests/password-setup.test.cjs','tests/fotus-kits-presentation.test.cjs','tests/projects-standalone.test.cjs','tests/single-cart-panel.test.cjs','tests/project-options-all-kits.test.cjs','tests/header-navigation-right.test.cjs','tests/brand-icon-color.test.cjs','tests/brand-lime-icon.test.cjs','tests/grouped-cart-project.test.cjs','tests/access-whatsapp-login.test.cjs','tests/public-vitrine-preview.test.cjs'],{stdio:'inherit'});
 
+execFileSync(process.execPath,['--check','cliente-dev.js'],{stdio:'inherit'});
 const root=process.cwd();
 const out=resolve(root,'dist-cliente-dev');
 const allowed=[
@@ -19,6 +20,9 @@ for(const file of allowed){
   if(!info.isFile())throw Error('Arquivo esperado não encontrado: '+file);
   await cp(source,join(out,file));
 }
+// Snapshot estático de homologação: nunca publicar em produção sem feed seguro dinâmico.
+await mkdir(join(out,'dados'),{recursive:true});
+await cp(resolve(root,'dados/vitrine-preview.json'),join(out,'dados/vitrine-preview.json'));
 execFileSync(process.execPath,['scripts/generate-wwsolar-icons.mjs'],{stdio:'inherit'});
 // URLs comerciais limpas sem mudar IDs internos, scripts ou estilos já homologados.
 const customer=(await readFile(join(out,'cliente-dev.html'),'utf8'))
