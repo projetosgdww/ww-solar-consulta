@@ -41,6 +41,7 @@
     show('client-entry',true);show('client-login',true);show('client-password-setup',false);
     show('client-app',false);show('client-nav',false);show('client-cart-top',false);
     show('client-logout',false);show('client-login-open',false);show('client-preview-disclaimer',false);
+    show('client-back-to-catalog',!S.user&&S.catalog.length>0);
   }
   // A vitrine só recebe os campos comerciais explicitamente públicos.
   // A função RPC segura ainda não foi aplicada ao banco compartilhado.
@@ -125,7 +126,14 @@
   async function enter(user){
     if(!(await authorized(user))){
       await S.db.auth.signOut();
-      status('Acesso não autorizado ou suspenso. Entre em contato com a WW Solar.','client-login-status');
+      S.user=null;S.catalog=[];S.lines=[];
+      try{
+        await showPublicCatalog();
+        $('client-identity').textContent='Seu acesso está suspenso. Você pode consultar a vitrine; solicite orientação à WW Solar para fazer uma cotação.';
+      }catch(_){
+        showLogin();
+        status('Acesso não autorizado ou suspenso. Entre em contato com a WW Solar.','client-login-status');
+      }
       return;
     }
     if(S.recoveryMode||user.app_metadata?.wwsolar_password_change_required===true){
@@ -168,8 +176,7 @@
     }catch(e){
       S.user=null;S.catalog=[];S.lines=[];
       await S.db.auth.signOut();
-      show('client-entry',true);show('client-app',false);show('client-nav',false);show('client-cart-top',false);
-      show('client-logout',false);
+      showLogin();
       status('Não foi possível carregar os produtos. Solicite atendimento.','client-login-status');
     }
   }
@@ -823,6 +830,13 @@
   $('client-password-cancel').addEventListener('click',()=>void cancelPasswordSetup());
   $('client-logout').addEventListener('click',logout);
   $('client-login-open').addEventListener('click',()=>requestLoginFor(null));
+  $('client-back-to-catalog').addEventListener('click',()=>{
+    S.pendingProductId=null;
+    void showPublicCatalog().catch(()=>{
+      showLogin();
+      status('Não foi possível abrir a vitrine. Tente novamente.','client-login-status');
+    });
+  });
   // O campo numérico só aplica após confirmar; permite digitar 1200 sem ser forçado a 300 a cada tecla.
   $('client-target').addEventListener('change',ev=>setTarget(ev.target.value));
   $('client-target').addEventListener('keydown',ev=>{if(ev.key==='Enter'){ev.preventDefault();setTarget(ev.target.value);}});
