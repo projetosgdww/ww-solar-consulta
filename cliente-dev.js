@@ -42,21 +42,72 @@
     show('client-app',false);show('client-nav',false);show('client-cart-top',false);
     show('client-logout',false);show('client-login-open',false);show('client-preview-disclaimer',false);
   }
-  // DEV: vitrine alimentada por snapshot comercial sanitizado, sem alterar a RLS atual.
-  async function showPublicCatalog(){
+  // A vitrine só recebe os campos comerciais explicitamente públicos.
+  // A função RPC segura ainda não foi aplicada ao banco compartilhado.
+  // Durante a homologação, o snapshot é o fallback sinalizado na interface.
+  const PUBLIC_KIT_FIELDS=['potenciaKwp','faixaGeracaoKwh','geracaoMensalKwh',
+    'freteInclusoParaCaninde','prazoEntregaDiasUteis','prazoAdicionalDiasUteis'];
+  const PUBLIC_CATEGORIES=new Set(['modulos','microinversores','inversores',
+    'estruturas','cabos','componentes','projetos']);
+  function validatePublicItems(rows){
+    if(!Array.isArray(rows)||rows.length===0||rows.length>200)
+      throw Error('Resposta pública inválida');
+    const ids=new Set(),clean=[];
+    for(const item of rows){
+      if(!item||typeof item.id!=='string'||!/^[-A-Za-z0-9]+$/.test(item.id)||
+         !['kit','piece'].includes(item.kind)||typeof item.title!=='string'||
+         item.title.length>300||item.active!==true||item.approved!==true||
+         !Number.isFinite(Number(item.price))||Number(item.price)<=0||
+         ids.has(item.id))throw Error('Registro público não autorizado');
+      if(item.kind==='piece'&&(
+         !PUBLIC_CATEGORIES.has(item.payload?.categoria)||
+         (item.payload.categoria==='projetos'&&!/^PRJ-B-/.test(item.id))
+      ))throw Error('Serviço fora da vitrine permitida');
+      if(item.kind==='kit'&&!/^([A-Z0-9]+-)/.test(item.id))
+        throw Error('Kit com identificação inesperada');
+      ids.add(item.id);
+      const payload={};
+      if(item.kind==='kit'){
+        for(const field of PUBLIC_KIT_FIELDS){
+          if(Object.prototype.hasOwnProperty.call(item.payload||{},field))
+            payload[field]=item.payload[field];
+        }
+      }else payload.categoria=item.payload.categoria;
+      clean.push({
+        id:item.id,kind:item.kind,title:item.title,
+        price:Number(item.price),payload,active:true,approved:true
+      });
+    }
+    return clean;
+  }
+  async function readPublicCatalog(){
+    if(!S.db)throw Error('Conexão não configurada');
+    const {data,error}=await S.db.rpc('wwsolar_public_catalog');
+    if(error)throw error;
+    return validatePublicItems(data);
+  }
+  async function readPreviewSnapshot(){
     const response=await fetch('./dados/vitrine-preview.json',{cache:'no-store'});
     if(!response.ok)throw Error('Vitrine de prévia indisponível');
     const snapshot=await response.json();
-    if(snapshot.previewOnly!==true||!Array.isArray(snapshot.items)||snapshot.items.length>150)
-      throw Error('Formato de vitrine inesperado');
-    const publicItems=snapshot.items.filter(p=>
-      p&&p.active===true&&p.approved===true&&Number(p.price)>0&&
-      (p.kind==='kit'||p.kind==='piece'));
+    if(snapshot.previewOnly!==true)throw Error('Snapshot não autorizado');
+    return {items:validatePublicItems(snapshot.items),date:snapshot.generatedOn||'16/11/2026'};
+  }
+  async function showPublicCatalog(){
+    let publicItems,source='rpc',snapshotDate='';
+    try{publicItems=await readPublicCatalog();}
+    catch(_){
+      const snapshot=await readPreviewSnapshot();
+      publicItems=snapshot.items;source='snapshot';snapshotDate=snapshot.date;
+    }
     S.user=null;S.admin=false;S.catalog=publicItems;S.lines=[];S.cartUpdatedAt=null;
     show('client-entry',false);show('client-app',true);show('client-nav',true);
     show('client-cart-top',false);show('client-admin-link',false);
     show('client-logout',false);show('client-login-open',true);
     show('client-preview-disclaimer',true);
+    $('client-preview-disclaimer').textContent=source==='snapshot'
+      ?'Prévia DEV · preços de '+snapshotDate+' (não atualizados em tempo real). Confirme os valores antes de solicitar cotação.'
+      :'Prévia DEV · preços públicos consultados no Supabase. Cotação sujeita à confirmação.';
     $('client-identity').textContent='Consulte preços livremente. Para detalhes completos e cotação, entre na sua conta.';
     renderAll();
   }
