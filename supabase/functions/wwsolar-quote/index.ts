@@ -66,6 +66,10 @@ Deno.serve(async req=>{
  }catch{
    return result(400,{error:"bad_json"},origin);
  }
+ if(payload.action==="capabilities"){
+   // Consulta autenticada antes do checkout: evita registrar pedidos via backend antigo.
+   return result(200,{quote_version:2,project_link_snapshots:true,idempotent_request_key:true},origin);
+ }
  if(payload.action==="status"){
    if(!isAdmin)return result(403,{error:"admin_only"},origin);
    const id=String(payload.id||"");
@@ -103,7 +107,7 @@ Deno.serve(async req=>{
    .select("id,customer_email,items,total_cents,created_at,status")
    .eq("user_id",user.id).eq("request_key",key).maybeSingle();
  if(duperr)return result(500,{error:"request_check_failed"},origin);
- if(already)return result(200,{order:already,message:messageFor(already),existing:true},origin);
+ if(already)return result(200,{quote_version:2,order:already,message:messageFor(already),existing:true},origin);
  const {data:cart,error:cartError}=await admin.from("wwsolar_carts")
    .select("lines,updated_at").eq("user_id",user.id).maybeSingle();
  if(cartError)return result(500,{error:"cart_read_failed"},origin);
@@ -164,9 +168,9 @@ Deno.serve(async req=>{
      const {data:prev}=await admin.from("wwsolar_quote_requests")
        .select("id,customer_email,items,total_cents,created_at,status")
        .eq("user_id",user.id).eq("request_key",key).maybeSingle();
-     if(prev)return result(200,{order:prev,message:messageFor(prev),existing:true},origin);
+     if(prev)return result(200,{quote_version:2,order:prev,message:messageFor(prev),existing:true},origin);
    }
    return result(500,{error:"order_write_failed"},origin);
  }
- return result(201,{order:saved,message:messageFor(saved),existing:false},origin);
+ return result(201,{quote_version:2,order:saved,message:messageFor(saved),existing:false},origin);
 });
