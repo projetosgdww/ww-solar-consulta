@@ -36,3 +36,25 @@ test('piloto exige ação explícita do administrador e mantém checkout oficial
  assert.ok(client.includes("PEDIDO TESTE DEV "));
  assert.ok(client.includes("Registr"));
 });
+
+test('exibe inversor e SKU para diferenciar kits com mesmo nome, sem alterar preco',()=>{
+ const vm=require('node:vm');
+ const match=client.match(/function kitVariantLabel\\(kit\\)\\{[\\s\\S]*?\\n  \\}/);
+ assert.ok(match,'Helper de variante ausente');
+ const describe=vm.runInNewContext('('+match[0]+')');
+ const title='Kit solar 500 kWh/mês · 4,20 kWp';
+ const kit3={id:'FOTUS-4200-DEYE-3',title,kind:'kit',payload:{inversor:'Deye 3 kW (G05P1-EU-CM1)'},price:9036.08};
+ const kit5={id:'FOTUS-4200-DEYE-5',title,kind:'kit',payload:{inversor:'Deye 5 kW (G05P1-EU-CM2)'},price:9354.50};
+ assert.match(describe(kit3),/Deye 3 kW/);
+ assert.match(describe(kit5),/Deye 5 kW/);
+ assert.match(describe(kit3),/SKU: FOTUS-4200-DEYE-3/);
+ assert.match(describe(kit5),/SKU: FOTUS-4200-DEYE-5/);
+ assert.notEqual(describe(kit3),describe(kit5));
+ assert.equal(kit3.price,9036.08);
+ assert.equal(kit5.price,9354.50);
+ assert.ok(client.includes("card.append(el('small',kitVariantLabel(p),'client-muted'))"));
+ assert.ok(client.includes("label.append(el('small',kitVariantLabel(selectedProduct),'client-muted'))"));
+ assert.ok(client.includes("Incluir projeto elétrico para '+x.title+' ('+kitVariantLabel(kit)+')"));
+ assert.ok(client.includes("x.qty+' × '+x.title+variant"));
+ assert.equal(describe({id:'FOTUS-4200-DEYE-3',title,kind:'kit',payload:{}}),'SKU: FOTUS-4200-DEYE-3');
+});
