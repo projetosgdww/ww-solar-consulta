@@ -185,6 +185,13 @@ function renderOrders(){
    for(const x of Array.isArray(item.items)?item.items:[]){
      const one=element('div',undefined,'admin-order-item');
      one.append(element('span',String(x.qty)+' × '+String(x.title)+' ['+String(x.sku)+']'));
+     const links=Array.isArray(x.linked_kits)?x.linked_kits:[];
+     if(links.length){
+       const names=links.map(kit=>String(kit.title)+' ['+String(kit.sku)+']');
+       one.append(element('small','Projeto elétrico vinculado a: '+names.join('; '),'admin-linked-project-hint'));
+     }
+     if(Number.isInteger(x.standalone_qty)&&x.standalone_qty>0)
+       one.append(element('small',x.standalone_qty+' projeto(s) avulso(s) sem kit vinculado.','admin-linked-project-hint'));
      one.append(element('strong',money(x.subtotal_cents)));
      rows.append(one);
    }
