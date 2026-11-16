@@ -297,6 +297,12 @@
     $('result-panels').textContent=number(x.placas)+' × '+number(x.moduloWp)+' Wp';
     $('result-inverter').textContent=String(x.inversor||'A confirmar');
     $('result-price').textContent=euro(kit.price);
+    $('client-result-button').textContent=S.user?'Adicionar à cotação ↗':'Ver detalhes ↗';
+    if(!S.user){
+      $('result-description').textContent='Geração média mensal estimada · detalhes técnicos completos após login';
+      $('result-panels').textContent='Após login';
+      $('result-inverter').textContent='Após login';
+    }
 
   }
   function setKind(kind){
@@ -378,8 +384,13 @@
         ]){
           const row=el('div');row.append(el('span',title),el('strong',value));facts.append(row);
         }
-        card.append(facts);
-        card.append(el('small','Inclui módulos, inversor, fixação, perfis, cabos e conectores.','client-muted'));
+        if(S.user){
+          card.append(facts);
+          card.append(el('small','Inclui módulos, inversor, fixação, perfis, cabos e conectores.','client-muted'));
+        }else{
+          card.append(el('p','Potência instalada: '+decimal(x.potenciaKwp)+' kWp · Consulte os detalhes após entrar.','client-muted'));
+          if(x.freteInclusoParaCaninde)card.append(el('small','Frete incluso para Canindé/CE. Outras cidades sob consulta.','client-muted'));
+        }
         if(x.origemKit==='fotus_pronto'){
           card.append(el('small','Kit pronto do fornecedor · Frete incluso para Canindé/CE. Prazo previsto: até 15 dias úteis, podendo acrescentar até 5 dias úteis após confirmação do pedido e da disponibilidade. Para outras cidades, frete sob consulta.','client-muted'));
         }
@@ -390,7 +401,8 @@
       }
       const bottom=el('div',undefined,'kit-bottom');
       const price=el('div');price.append(el('small','Valor dos equipamentos'),el('b',euro(p.price)));
-      bottom.append(price,btn(p.kind==='kit'?'Solicitar cotação +':'Adicionar ao carrinho +',()=>add(p.id),'details-button'));
+      bottom.append(price,btn(!S.user?'Ver detalhes ↗':(p.kind==='kit'?'Solicitar cotação +':'Adicionar ao carrinho +'),
+        ()=>S.user?add(p.id):requestLoginFor(p.id),'details-button'));
       card.append(bottom);
       if(p.kind==='kit')card.append(el('small','Estimativa de geração. Equipamentos, compatibilidade e instalação sujeitos à validação técnica antes da contratação.','client-muted'));
       grid.append(card);
@@ -487,6 +499,7 @@
     return S.saveQueue;
   }
   function add(id){
+    if(!S.user){requestLoginFor(id);return;}
     if(!available().some(p=>p.id===id)){status('Este produto não está disponível.');return;}
     const next=S.lines.map(x=>({...x}));
     const row=next.find(x=>x.id===id);
@@ -635,8 +648,8 @@
         p.kind==='piece' && p.payload?.categoria==='projetos' && !p.payload?.kitCodigo);
       const price=button.parentElement?.querySelector('strong');
       if(price)price.textContent=project?euro(project.price):'Sob consulta';
-      button.disabled=!S.user||!project;
-      button.textContent=project?'Adicionar +':'Indisponível';
+      button.disabled=!project;
+      button.textContent=!project?'Indisponível':S.user?'Adicionar +':'Ver detalhes ↗';
     }
     const hint=$('client-projects-hint');
     if(hint)hint.textContent=S.user?
@@ -747,6 +760,7 @@
   $('client-password-setup-form').addEventListener('submit',event=>void savePersonalPassword(event));
   $('client-password-cancel').addEventListener('click',()=>void cancelPasswordSetup());
   $('client-logout').addEventListener('click',logout);
+  $('client-login-open').addEventListener('click',()=>requestLoginFor(null));
   // O campo numérico só aplica após confirmar; permite digitar 1200 sem ser forçado a 300 a cada tecla.
   $('client-target').addEventListener('change',ev=>setTarget(ev.target.value));
   $('client-target').addEventListener('keydown',ev=>{if(ev.key==='Enter'){ev.preventDefault();setTarget(ev.target.value);}});
@@ -775,7 +789,8 @@
       const id=button.dataset.projectId;
       const project=available().find(p=>p.id===id && p.kind==='piece' &&
         p.payload?.categoria==='projetos' && !p.payload?.kitCodigo);
-      if(!project||!S.user){status('Faça login para solicitar o projeto.');return;}
+      if(!project){status('Projeto indisponível.');return;}
+      if(!S.user){requestLoginFor(id);return;}
       add(id);
       status('Projeto elétrico adicionado. Você pode cotar apenas esse serviço; TRT não inclusa.');
       openDrawer();
