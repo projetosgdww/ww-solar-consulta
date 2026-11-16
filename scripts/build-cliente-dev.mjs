@@ -21,8 +21,10 @@ for(const file of allowed){
   await cp(source,join(out,file));
 }
 // Snapshot estático de homologação: nunca publicar em produção sem feed seguro dinâmico.
-await mkdir(join(out,'dados'),{recursive:true});
-await cp(resolve(root,'dados/vitrine-preview.json'),join(out,'dados/vitrine-preview.json'));
+if(process.env.CF_PAGES_BRANCH!=='release/wwsolar-pecas-v1'){
+  await mkdir(join(out,'dados'),{recursive:true});
+  await cp(resolve(root,'dados/vitrine-preview.json'),join(out,'dados/vitrine-preview.json'));
+}
 execFileSync(process.execPath,['scripts/generate-wwsolar-icons.mjs'],{stdio:'inherit'});
 // URLs comerciais limpas sem mudar IDs internos, scripts ou estilos já homologados.
 const customer=(await readFile(join(out,'cliente-dev.html'),'utf8'))
