@@ -5,13 +5,15 @@ const $=id=>document.getElementById(id);
 const C=window.WWSolarMontadorCore,cfg=window.WWSOLAR_CLIENTE_CONFIG||{};
 const el=(tag,text,cls)=>{const n=document.createElement(tag);if(text!==undefined)n.textContent=String(text);if(cls)n.className=cls;return n;};
 const makeButton=(label,fn,cls='button button-outline')=>{const b=el('button',label,cls);b.type='button';b.addEventListener('click',fn);return b;};
-const categories={todos:'Todos',modulos:'Módulos',inversores:'Inversores',microinversores:'Microinversores',estruturas:'Estruturas',cabos:'Cabos',componentes:'Componentes',outros:'Outros'};
-let db,user=null,ready=false,parts=[],costs=[],drafts=[],lines=[],currentId=null,editing=null,category='todos',supplier='Sola';
+const categories={todos:'Todos',modulos:'Módulos',inversores:'Inversores',microinversores:'Microinversores',estruturas:'Estruturas',cabos:'Cabos',componentes:'Componentes',stringbox:'String boxes',outros:'Outros'};
+let db,user=null,ready=false,parts=[],costs=[],drafts=[],lines=[],currentId=null,editing=null,category='todos',supplier='Soollar';
 const status=m=>$('builder-status').textContent=String(m||'');
 const authStatus=m=>$('builder-auth-status').textContent=String(m||'');
 const normalizeSupplier=s=>String(s||'').trim().slice(0,64);
 const findCost=sku=>costs.find(c=>c.sku===sku&&c.supplier===supplier);
 const findPart=sku=>parts.find(p=>p.id===sku);
+const partsFromCosts=()=>costs.map(c=>({id:c.sku,title:c.title,payload:{categoria:c.category}}))
+ .sort((a,b)=>a.title.localeCompare(b.title,'pt-BR'));
 function parseInput(id){return C.parseBRL($(id).value);}
 function draftSnapshot(){
  const freight=parseInput('builder-freight');
@@ -48,6 +50,8 @@ function renderParts(){
    const info=el('div');
    info.append(el('strong',p.title),el('small',p.id+' · '+(categories[itemCategory(p)]||'Outros')));
    info.append(el('span',cost?'Custo: '+C.money(cost.unit_cost_cents):'Custo ainda não cadastrado',cost?'builder-price':'builder-missing'));
+   if(cost?.source_date)info.append(el('small','Cotação: '+String(cost.source_date).slice(0,10).split('-').reverse().join('/')+' · Soollar'));
+   if(itemCategory(p)==='stringbox')info.append(el('small','Opcional · valor do PDF · sem acréscimo'));
    const actions=el('div',undefined,'builder-part-actions');
    actions.append(makeButton(cost?'Editar custo':'Cadastrar custo',()=>openCost(p)));
    const add=makeButton('+ Adicionar',()=>addToKit(p),'button button-accent');
@@ -77,11 +81,13 @@ async function saveCost(ev){
  const save=$('builder-cost-form').querySelector('button[type="submit"]');save.disabled=true;
  try{
    const data={owner_id:user.id,supplier,sku:part.id,title:part.title,category:itemCategory(part),
-     unit_cost_cents:value,module_wp:wp,inverter_w:inv,updated_at:new Date().toISOString()};
+     unit_cost_cents:value,module_wp:wp,inverter_w:inv,
+     source_date:new Date().toISOString().slice(0,10),source_reference:'Atualização manual no Montador DEV',
+     updated_at:new Date().toISOString()};
    const {data:saved,error}=await db.from('wwsolar_builder_costs').upsert(data,{onConflict:'owner_id,supplier,sku'}).select().single();
    if(error||!saved)throw Error('Não foi possível registrar custo. Verifique o login ou as permissões.');
    costs=costs.filter(c=>!(c.sku===saved.sku&&c.supplier===supplier));costs.push(saved);
-   hideCost();renderParts();renderLines();
+   parts=partsFromCosts();hideCost();renderParts();renderLines();
    status('Custo de '+part.id+' atualizado. Rascunhos salvos continuam com valores históricos; atualize a linha manualmente quando necessário.');
  }catch(e){status(e.message||'Erro ao salvar custo.');}
  finally{save.disabled=false;}
@@ -133,6 +139,7 @@ function renderLines(){
    $('builder-cost-total').textContent=C.money(c.parts_cents);
    $('builder-base-total').textContent=C.money(c.base_cents);
    $('builder-profit').textContent=C.money(c.markup_cents);
+   $('builder-stringbox-pass').textContent=C.money(c.pass_through_cents);
    $('builder-final-price').textContent=C.money(c.total_cents);
    $('builder-power').textContent=(c.dc_wp/1000).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})+' kWp';
    $('builder-generation').textContent=c.monthly_kwh.toLocaleString('pt-BR')+' kWh/mês';
@@ -148,14 +155,13 @@ function newDraft(ask=true){
 }
 async function loadData(){
  if(!ready)return;
- const [p,c,d]=await Promise.all([
-   db.from('wwsolar_catalog').select('id,title,payload').eq('kind','piece').eq('active',true).eq('approved',true).limit(200),
-   db.from('wwsolar_builder_costs').select('id,owner_id,supplier,sku,title,category,unit_cost_cents,module_wp,inverter_w,updated_at').eq('owner_id',user.id).eq('supplier',supplier).order('updated_at',{ascending:false}).limit(500),
+ const [c,d]=await Promise.all([
+   db.from('wwsolar_builder_costs').select('id,owner_id,supplier,sku,title,category,unit_cost_cents,module_wp,inverter_w,source_date,source_reference,updated_at').eq('owner_id',user.id).eq('supplier',supplier).order('category',{ascending:true}).order('sku',{ascending:true}).limit(500),
    db.from('wwsolar_builder_drafts').select('id,owner_id,supplier,title,notes,lines,total_cost_cents,freight_cents,markup_percent,status,updated_at,created_at').eq('owner_id',user.id).eq('supplier',supplier).order('updated_at',{ascending:false}).limit(100)
  ]);
- if(p.error||c.error||d.error){status('Falha ao carregar peças, custos ou rascunhos. Atualize ou confira as permissões.');return;}
- parts=(p.data||[]).filter(x=>itemCategory(x)!=='projetos');
+ if(c.error||d.error){status('Falha ao carregar custos ou rascunhos privados. Atualize ou confira as permissões.');return;}
  costs=c.data||[];drafts=d.data||[];
+ parts=partsFromCosts();
  renderParts();renderDrafts();renderLines();
  status('Dados carregados. Preços de custo cadastrados: '+costs.length+'. Rascunhos salvos: '+drafts.length+'.');
 }
