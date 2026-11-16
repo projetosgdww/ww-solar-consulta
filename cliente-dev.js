@@ -576,17 +576,19 @@
     else{if(next.length>=25){status('Máximo de 25 tipos de produto.');return;}next.push({id,qty:1});}
     const linked=next.find(x=>x.id==='PRJ-'+id);
     if(linked)linked.qty=next.find(x=>x.id===id).qty;
+    // Projetos avulsos são independentes dos projetos vinculados a kits.
+    if(id.startsWith('PRJ-B-')&&row?.linkedKits){
+      row.standaloneQty+=1;
+    }
     save(next,'Produto adicionado ao carrinho!');
   }
-  // Cada kit tem uma referência própria de projeto; isso evita misturar
-  // seleções quando dois kits utilizam a mesma faixa de preço.
+  // Um projeto PRJ-B pode ser usado por vários kits com a mesma faixa de potência.
+  // O vínculo agora é feito por SKU de kit e não pela faixa compartilhada.
   function projectForKit(kit){
     if(!kit||kit.kind!=='kit')return null;
-    // Preservar os projetos próprios dos oito kits WW.
     const dedicated=available().find(p=>p.id==='PRJ-'+kit.id &&
       p.payload?.categoria==='projetos' && p.payload?.kitCodigo===kit.id);
     if(dedicated)return dedicated;
-    // Kits de fornecedores: localizar serviço avulso Grupo B pela potência real.
     const tier=C.projectForKwp(C.kitKwp(kit));
     return tier?available().find(p=>p.id===tier.id && p.kind==='piece' &&
       p.payload?.categoria==='projetos' && !p.payload?.kitCodigo)||null:null;
@@ -596,17 +598,21 @@
     const line=S.lines.find(x=>x.id===kitId);
     const project=projectForKit(kit);
     if(!line||!project){status('Confira o kit e tente novamente.');return;}
-    // Serviço de kit WW acompanha a quantidade do kit; projeto Grupo B é avulso.
-    const dedicated=project.id==='PRJ-'+kitId;
-    const existing=S.lines.find(x=>x.id===project.id);
-    let next=S.lines.map(x=>({...x})).filter(x=>x.id!==project.id);
-    if(include){
-      if(next.length>=25){status('Limite de 25 produtos por cotação.');return;}
-      next.push({id:project.id,qty:dedicated?line.qty:(existing?.qty||1)});
-    }
-    save(next,include?
-      'Projeto incluído. TRT não inclusa; paga pelo contratante.':
-      'Projeto retirado da cotação.');
+    try{
+      let next;
+      if(project.id==='PRJ-'+kitId){
+        next=S.lines.map(x=>({...x})).filter(x=>x.id!==project.id);
+        if(include){
+          if(next.length>=25)throw Error('Limite de 25 tipos de produto');
+          next.push({id:project.id,qty:line.qty});
+        }
+      }else{
+        next=C.setProjectForKit(S.lines,kitId,project.id,include);
+      }
+      save(next,include?
+        'Projeto incluído somente para este kit. TRT não inclusa; paga pelo contratante.':
+        'Projeto retirado somente deste kit.');
+    }catch(e){status(e?.message||'Não foi possível alterar este projeto.');renderCart();}
   }
   function addWithProject(kitId){
     const kit=available().find(p=>p.kind==='kit'&&p.id===kitId);
@@ -615,25 +621,52 @@
     const next=S.lines.map(x=>({...x}));
     const row=next.find(x=>x.id===kitId);
     if(row){if(row.qty>=99){status('Limite por produto: 99 unidades.');return;}row.qty++;}
-    else{if(next.length>=24){status('Máximo de 25 tipos de produto.');return;}next.push({id:kitId,qty:1});}
-    const projectLine=next.find(x=>x.id===project.id);
-    if(projectLine)projectLine.qty=row?row.qty:1;
-    else if(next.length<25)next.push({id:project.id,qty:row?row.qty:1});
-    else {status('Limite de 25 tipos de produto.');return;}
-    save(next,'Kit e projeto incluídos. TRT não inclusa; paga pelo contratante.');
+    else{if(next.length>=25){status('Máximo de 25 tipos de produto.');return;}next.push({id:kitId,qty:1});}
+    try{
+      if(project.id==='PRJ-'+kitId){
+        const dedicated=next.find(x=>x.id===project.id);
+        if(dedicated)dedicated.qty=next.find(x=>x.id===kitId).qty;
+        else next.push({id:project.id,qty:next.find(x=>x.id===kitId).qty});
+      }else{
+        const selected=C.setProjectForKit(next,kitId,project.id,true);
+        save(selected,'Kit e projeto incluídos somente para este kit. TRT não inclusa.');
+        return;
+      }
+      save(next,'Kit e projeto incluídos somente para este kit. TRT não inclusa.');
+    }catch(e){status(e?.message||'Limite de itens atingido.');}
   }
   function removeCartItem(id){
-    const next=S.lines.filter(x=>x.id!==id && x.id!=='PRJ-'+id);
+    const item=S.lines.find(x=>x.id===id);
+    if(!item)return;
+    const product=available().find(p=>p.id===id);
+    let next;
+    if(product?.kind==='kit'){
+      next=C.removeKitProjectLinks(S.lines,id);
+    }else if(id.startsWith('PRJ-B-')&&Array.isArray(item.linkedKits)){
+      // O botão Remover no serviço avulso não desfaz os projetos de outros kits.
+      next=S.lines.filter(x=>x.id!==id);
+      if(item.linkedKits.length>0)next.push({
+        id,qty:item.linkedKits.length,standaloneQty:0,linkedKits:[...item.linkedKits]
+      });
+    }else next=S.lines.filter(x=>x.id!==id);
     save(next,'Item removido.');
   }
   function quantity(id,delta){
     const next=S.lines.map(x=>({...x})),r=next.find(x=>x.id===id);if(!r)return;
-    // Serviços vinculados acompanham a quantidade de kits.
     if(id.startsWith('PRJ-WW-'))return;
-    r.qty=Math.max(0,Math.min(99,r.qty+delta));
-    const service=next.find(x=>x.id==='PRJ-'+id);
-    if(service)service.qty=r.qty;
-    save(next.filter(x=>x.qty>0),'Quantidade atualizada.');
+    if(id.startsWith('PRJ-B-')&&Array.isArray(r.linkedKits)){
+      // O controle de quantidade atua somente sobre projetos avulsos.
+      const standalone=Math.max(0,Math.min(99-r.linkedKits.length,r.standaloneQty+delta));
+      r.standaloneQty=standalone;
+      r.qty=standalone+r.linkedKits.length;
+    }else r.qty=Math.max(0,Math.min(99,r.qty+delta));
+    const dedicated=next.find(x=>x.id==='PRJ-'+id);
+    if(dedicated)dedicated.qty=r.qty;
+    let cleaned=next.filter(x=>x.qty>0);
+    if(r.qty===0&&available().some(p=>p.id===id&&p.kind==='kit')){
+      cleaned=C.removeKitProjectLinks(cleaned,id);
+    }
+    save(cleaned,'Quantidade atualizada.');
   }
   function makeCartRow(x,missing=false,inDrawer=false){
     const row=el('div',undefined,'client-cart-line'),label=el('div'),tools=el('div',undefined,'client-qty');
@@ -645,14 +678,16 @@
       if(project){
         const option=el('label',undefined,'client-project-option');
         const checkbox=el('input');checkbox.type='checkbox';
-        checkbox.checked=S.lines.some(item=>item.id===project.id);
+        const projectLine=S.lines.find(item=>item.id===project.id);
+        checkbox.checked=project.id==='PRJ-'+x.id
+          ?!!projectLine:!!projectLine?.linkedKits?.includes(x.id);
         checkbox.setAttribute('aria-label','Incluir projeto elétrico para '+x.title);
         checkbox.addEventListener('change',()=>setKitProject(x.id,checkbox.checked));
         const caption=el('span');
         caption.append(el('strong','Incluir projeto elétrico · '+euro(project.price)),
           el('small',project.id==='PRJ-'+x.id
             ?'Projeto opcional vinculado ao kit · TRT paga pelo contratante'
-            :'Projeto Grupo B avulso pela potência do kit · TRT paga pelo contratante'));
+            :'Projeto somente para este kit · TRT paga pelo contratante'));
         option.append(checkbox,caption);label.append(option);
       }
     }
@@ -681,7 +716,7 @@
     S.cartInvalid=bad.length>0;
     // Os projetos incorporados ao kit não ocupam outra linha visual.
     // Os itens originais permanecem intactos para valor, persistência e cotação.
-    const visibleValid=C.cartDisplayRows(valid,products);
+    const visibleValid=C.cartDisplayRows(valid,products,S.lines);
     const visibleRows=[...visibleValid,...bad];
     const count=visibleRows.reduce((n,x)=>n+x.qty,0);
     $('client-cart-count').textContent=String(count);
