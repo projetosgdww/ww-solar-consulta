@@ -25,5 +25,5 @@ test('cliente conserva links e botão Sair, sem alterar fluxo comercial',()=>{
    assert.ok(html.includes('id="'+id+'"'),id);
  }
  assert.match(html,/cliente-dev\.css\?v=20261116-simulator-polish-v5/);
- assert.match(html,/cliente-dev\.js\?v=20261116-simulator-polish-v5/);
+ assert.match(html,/cliente-dev\.js\?v=20261116-checkout-comercial-rc1/);
 });
