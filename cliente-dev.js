@@ -2,7 +2,7 @@
   'use strict';
   const $ = id => document.getElementById(id);
   const C=window.WWSolarClienteCore, cfg=window.WWSOLAR_CLIENTE_CONFIG||{};
-  const S={db:null,user:null,admin:false,catalog:[],lines:[],kind:'kit',category:'all',query:'',target:300,cartUpdatedAt:null,cartInvalid:false,saveQueue:Promise.resolve(),timer:null,toastTimer:null,drawerOpen:false,expiryNotified:false,checkoutPending:false,orderKey:null,recoveryMode:false};
+  const S={db:null,user:null,admin:false,catalog:[],lines:[],kind:'kit',category:'all',query:'',target:300,cartUpdatedAt:null,cartInvalid:false,saveQueue:Promise.resolve(),timer:null,toastTimer:null,drawerOpen:false,expiryNotified:false,checkoutPending:false,orderKey:null,recoveryMode:false,pendingProductId:null};
   const status=(m,id='client-action-status')=>{$(id).textContent=m;};
   const show=(id,visible)=>{$(id).hidden=!visible;};
   const euro = v => C.money(v);
@@ -28,7 +28,7 @@
   function showPasswordSetup(mode){
     show('client-entry',true);show('client-login',false);show('client-password-setup',true);
     show('client-app',false);show('client-nav',false);show('client-cart-top',false);
-    show('client-logout',false);
+    show('client-logout',false);show('client-login-open',false);show('client-preview-disclaimer',false);
     S.recoveryMode=mode==='recovery';
     $('client-password-setup-title').textContent=S.recoveryMode?'Defina uma nova senha':'Crie sua senha pessoal';
     $('client-password-setup-description').textContent=S.recoveryMode
@@ -40,7 +40,32 @@
   function showLogin(){
     show('client-entry',true);show('client-login',true);show('client-password-setup',false);
     show('client-app',false);show('client-nav',false);show('client-cart-top',false);
-    show('client-logout',false);
+    show('client-logout',false);show('client-login-open',false);show('client-preview-disclaimer',false);
+  }
+  // DEV: vitrine alimentada por snapshot comercial sanitizado, sem alterar a RLS atual.
+  async function showPublicCatalog(){
+    const response=await fetch('./dados/vitrine-preview.json',{cache:'no-store'});
+    if(!response.ok)throw Error('Vitrine de prévia indisponível');
+    const snapshot=await response.json();
+    if(snapshot.previewOnly!==true||!Array.isArray(snapshot.items)||snapshot.items.length>150)
+      throw Error('Formato de vitrine inesperado');
+    const publicItems=snapshot.items.filter(p=>
+      p&&p.active===true&&p.approved===true&&Number(p.price)>0&&
+      (p.kind==='kit'||p.kind==='piece'));
+    S.user=null;S.admin=false;S.catalog=publicItems;S.lines=[];S.cartUpdatedAt=null;
+    show('client-entry',false);show('client-app',true);show('client-nav',true);
+    show('client-cart-top',false);show('client-admin-link',false);
+    show('client-logout',false);show('client-login-open',true);
+    show('client-preview-disclaimer',true);
+    $('client-identity').textContent='Consulte preços livremente. Para detalhes completos e cotação, entre na sua conta.';
+    renderAll();
+  }
+  function requestLoginFor(id){
+    S.pendingProductId=id||null;
+    showLogin();
+    status('Entre na sua conta para consultar detalhes e solicitar cotação. Ainda não tem acesso? Solicite pelo WhatsApp abaixo.','client-login-status');
+    window.scrollTo({top:0,behavior:'smooth'});
+    $('client-email').focus({preventScroll:true});
   }
   async function enter(user){
     if(!(await authorized(user))){
@@ -65,9 +90,18 @@
       S.catalog=data||[];S.lines=C.cleanLines(cart?.lines||[]);S.cartUpdatedAt=cart?.updated_at||null;
       show('client-entry',false);show('client-app',true);show('client-nav',true);show('client-cart-top',true);
       show('client-admin-link',S.admin);
-      show('client-logout',true);
+      show('client-logout',true);show('client-login-open',false);show('client-preview-disclaimer',false);
       $('client-identity').textContent=user.email||'Conta autorizada';
       renderAll();
+      if(S.pendingProductId){
+        const requested=S.pendingProductId;S.pendingProductId=null;
+        if(requested.startsWith('PRJ-B-')){
+          document.getElementById('projetos')?.scrollIntoView({behavior:'smooth'});
+        }else{
+          setKind(requested.startsWith('FOTUS-')?'kit':'piece');
+          document.getElementById('catalogo')?.scrollIntoView({behavior:'smooth'});
+        }
+      }
       if(S.timer)clearInterval(S.timer);
       S.timer=setInterval(updateClock,1000);
     }catch(e){
@@ -102,6 +136,13 @@
     });
     const {data,error}=await S.db.auth.getUser();
     if(!error&&data?.user)await enter(data.user);
+    else{
+      try{await showPublicCatalog();}
+      catch(_){
+        showLogin();
+        status('A vitrine de prévia está temporariamente indisponível. Entre com sua conta para continuar.','client-login-status');
+      }
+    }
   }
   async function login(event){
     event.preventDefault();
@@ -209,8 +250,9 @@
     S.user=null;S.catalog=[];S.lines=[];S.admin=false;S.cartUpdatedAt=null;S.orderKey=null;
     if(S.timer){clearInterval(S.timer);S.timer=null;}
     closeDrawer();
-    showLogin();
-    $('client-password').value='';status('','client-login-status');
+    try{await showPublicCatalog();}
+    catch(_){showLogin();status('A vitrine está temporariamente indisponível.','client-login-status');}
+    $('client-password').value='';
   }
   const number=n=>new Intl.NumberFormat('pt-BR',{maximumFractionDigits:0}).format(Number(n)||0);
   const decimal=n=>new Intl.NumberFormat('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}).format(Number(n)||0);
