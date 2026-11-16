@@ -836,8 +836,26 @@
       // PREVIEW usa função isolada: a versão oficial mantém o backend existente.
       const quoteFunction=PREVIEW_HOST?'wwsolar-quote-preview':'wwsolar-quote';
       const {data,error}=await S.db.functions.invoke(quoteFunction,{
-        body:{action:'submit',request_key:S.orderKey,expected_total_cents:current.cents}
+        body:{action:PREVIEW_HOST?'validate':'submit',request_key:S.orderKey,expected_total_cents:current.cents}
       });
+      if(PREVIEW_HOST&&!error&&data?.validated===true&&Array.isArray(data.items)){
+        const expectedLinks=S.lines.filter(line=>Array.isArray(line.linkedKits))
+          .flatMap(line=>line.linkedKits.map(kit=>line.id+'|'+kit)).sort();
+        const actualLinks=data.items.flatMap(item=>
+          (Array.isArray(item.linked_kits)?item.linked_kits:[])
+            .map(kit=>String(item.sku)+'|'+String(kit.sku))).sort();
+        if(JSON.stringify(expectedLinks)!==JSON.stringify(actualLinks)||
+           Number(data.total_cents)!==current.cents){
+          status('Simulação rejeitada: associação dos projetos ou total divergente. Nenhum pedido foi criado.');
+          return;
+        }
+        const details=$('client-quote-preview');
+        details.hidden=false;
+        $('client-quote-preview-text').textContent=String(data.message||'');
+        status('Simulação DEV aprovada. Confira o resumo abaixo. Nenhum pedido foi registrado ou enviado ao WhatsApp.');
+        showToast('Simulação validada! Nenhum pedido real criado.');
+        return;
+      }
       if(error||!data?.order?.id||!data?.message){
         let code='';
         try{code=(await error?.context?.json?.())?.error||'';}catch(_){/*sem detalhe*/}
