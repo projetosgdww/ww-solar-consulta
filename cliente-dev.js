@@ -50,7 +50,7 @@
     'freteInclusoParaCaninde','prazoEntregaDiasUteis','prazoAdicionalDiasUteis'];
   const PUBLIC_CATEGORIES=new Set(['modulos','microinversores','inversores',
     'estruturas','cabos','componentes','projetos']);
-  const PREVIEW_HOST=/(^localhost$|^127\.0\.0\.1$|^[a-z0-9-]+\.ww-solar\.pages\.dev$)/.test(window.location.hostname);
+  const PREVIEW_HOST=/(^localhost$|^127\.0\.0\.1$|^[a-z0-9]{8}\.ww-solar\.pages\.dev$)/.test(window.location.hostname);
   function validatePublicItems(rows){
     if(!Array.isArray(rows)||rows.length===0||rows.length>200)
       throw Error('Resposta pública inválida');
