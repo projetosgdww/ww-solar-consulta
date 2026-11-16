@@ -124,3 +124,14 @@ test('montador preserva atualização manual de custo e origens de preço',()=>{
  assert.ok(js.includes('onConflict:\'owner_id,supplier,sku\''));
  assert.ok(js.includes('Rascunhos salvos continuam com valores históricos'));
 });
+
+test('filtro Trilhos e perfis mostra cinco referencias sem duplicar registros',()=>{
+ assert.ok(js.includes("trilhos:'Trilhos e perfis'"));
+ assert.ok(js.includes("const isRail=p=>itemCategory(p)==='estruturas'"));
+ assert.ok(js.includes("/trilho|perfil/i.test"));
+ assert.ok(js.includes("parts.filter(isRail).length"));
+ assert.ok(js.includes("category==='trilhos'?isRail(p):itemCategory(p)===category"));
+ assert.ok(js.includes("const partsFromCosts=()=>costs.map"));
+ assert.ok(js.includes("parts=partsFromCosts()"));
+ assert.doesNotMatch(js,/db\.from\('wwsolar_catalog'\)\.(?:insert|upsert|update)/);
+});
