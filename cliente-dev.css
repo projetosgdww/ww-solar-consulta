@@ -350,3 +350,8 @@ body .header{position:sticky;top:0;z-index:80}
 
 /* Destaque discreto do produto selecionado antes do login. */
 .client-returned-item{outline:3px solid #81F002;outline-offset:3px}
+
+/* Exibe a mensagem da cotação simulada apenas no DEV. */
+.client-quote-preview{max-height:220px;overflow:auto;padding:10px;border:1px solid #d6e8df;border-radius:12px;background:#f7fbf7}
+.client-quote-preview summary{cursor:pointer;font-weight:700;font-size:12px}
+.client-quote-preview pre{white-space:pre-wrap;overflow-wrap:anywhere;font:11px/1.55 system-ui,sans-serif}
