@@ -129,6 +129,11 @@ Deno.serve(async req=>{
    .eq("active",true).eq("approved",true);
  if(catalogError)return result(500,{error:"catalog_read_failed"},origin);
  if(products?.length!==unique.size)return result(409,{error:"product_unavailable"},origin);
+ // Peças avulsas continuam no catálogo interno do montador, mas não são cotáveis.
+ // Projetos PRJ-B permanecem opcionais para kits e solicitações de serviço.
+ if(products.some(p=>p.kind!=="kit" &&
+   !(p.kind==="piece"&&p.payload?.categoria==="projetos"&&/^PRJ-B-/.test(String(p.id)))))
+   return result(409,{error:"item_removed_from_catalog"},origin);
  let projectLinks;
  try{
    projectLinks=verifyProjectAssociations(lines,products);
