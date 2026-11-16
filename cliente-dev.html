@@ -17,7 +17,7 @@
 <a class="skip-link" href="#client-main">Ir para o conteúdo</a>
 <header class="header"><div class="shell header-inner">
 <a class="brand" href="./index.html" aria-label="WW Solar, início"><span class="brand-symbol" aria-hidden="true"><svg viewBox="0 0 44 44" fill="none"><circle cx="22" cy="22" r="12" stroke="currentColor" stroke-width="4"/><path d="M22 2v7M22 35v7M2 22h7M35 22h7M8 8l5 5M31 31l5 5M36 8l-5 5M13 31l-5 5" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/></svg></span><span class="brand-copy"><strong>WW<span>SOLAR</span></strong><small>CATÁLOGO FOTOVOLTAICO</small></span></a>
-<nav class="nav" id="client-nav" aria-label="Navegação do catálogo" hidden><a href="#simulador" id="client-nav-simulate">Simular</a><a href="#catalogo" id="client-kits-link">Ver kits</a><a href="#catalogo" id="client-pieces-link">Peças</a><a href="#projetos" id="client-projects-link">Projetos</a></nav>
+<nav class="nav" id="client-nav" aria-label="Navegação do catálogo" hidden><a href="#simulador" id="client-nav-simulate">Simular</a><a href="#catalogo" id="client-kits-link">Ver kits</a><a href="#projetos" id="client-projects-link">Projetos</a></nav>
 <div class="client-header-actions"><button id="client-login-open" class="client-account-link client-signin" type="button" hidden>Entrar ↗</button><a id="client-admin-link" class="client-account-link" href="./admin-dev.html" hidden>Admin</a><button id="client-logout" class="client-account-link client-exit" type="button" hidden aria-label="Sair da conta">Sair ↗</button></div>
 <div id="client-cart-top" class="client-cart-top" hidden>
   <button id="client-cart-trigger" class="client-cart-trigger" type="button" aria-label="Abrir carrinho" aria-controls="client-cart-drawer" aria-expanded="false">
@@ -110,9 +110,9 @@
     </section>
 <section class="catalogue-section" id="catalogo" aria-labelledby="catalogo-title">
       <div class="shell">
-        <div class="section-title catalogue-heading"><div><div class="section-label">02 / CATÁLOGO DE EQUIPAMENTOS</div><h2 id="catalogo-title">Consulte as opções disponíveis.</h2><p>Kits e peças disponíveis para solicitar cotação. O dimensionamento definitivo dependerá das condições da instalação.</p></div><div class="catalogue-counter"><strong id="client-available-count">—</strong><small>itens para consulta</small></div></div><div class="client-filter-tabs" role="group" aria-label="Tipo de produto" style="margin-bottom:14px"><button type="button" data-kind="kit" class="active" aria-pressed="true">Kits solares</button><button type="button" data-kind="piece" aria-pressed="false">Peças avulsas</button></div>
+        <div class="section-title catalogue-heading"><div><div class="section-label">02 / KITS GERADORES SOLARES</div><h2 id="catalogo-title">Escolha seu kit gerador.</h2><p>Catálogo dedicado aos kits geradores fotovoltaicos. A composição e o dimensionamento definitivo dependem das condições da instalação.</p></div><div class="catalogue-counter"><strong id="client-available-count">—</strong><small>kits geradores para cotação</small></div></div>
 <div class="client-category-tabs" id="client-category-tabs" role="group" aria-label="Categorias de peças" hidden></div>
-<div class="filterbar"><label class="search-wrap"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m16 16 5 5"/></svg><span class="sr-only">Pesquisar equipamentos</span><input type="search" id="client-search" placeholder="Pesquisar por fabricante, potência ou equipamento..." autocomplete="off"></label><span class="reset-filters" id="client-filter-label">CD Fortaleza • Cotação a confirmar</span></div>
+<div class="filterbar"><label class="search-wrap"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m16 16 5 5"/></svg><span class="sr-only">Pesquisar kits solares</span><input type="search" id="client-search" placeholder="Pesquisar kit por potência ou fabricante..." autocomplete="off"></label><span class="reset-filters" id="client-filter-label">CD Fortaleza • Cotação a confirmar</span></div>
 <div class="result-count" id="client-result-count" aria-live="polite">Carregando catálogo...</div>
 <div class="kit-grid client-product-grid" id="client-product-grid"></div>
       </div>
@@ -157,6 +157,6 @@
 <script src="./cliente-dev-config.js?v=20261114-password-setup-v2" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0/dist/umd/supabase.min.js" defer></script>
 <script src="./cliente-core.js?v=20261116-quote-snapshot-v4" defer></script>
-<script src="./cliente-dev.js?v=20261116-checkout-comercial-rc2" defer></script>
+<script src="./cliente-dev.js?v=20261116-kits-only-v1" defer></script>
 <script src="./cliente-pwa.js?v=20261114-password-setup-v2" defer></script>
 </body></html>
