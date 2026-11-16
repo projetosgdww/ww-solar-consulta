@@ -39,7 +39,7 @@ test('piloto exige ação explícita do administrador e mantém checkout oficial
 
 test('exibe inversor e SKU para diferenciar kits com mesmo nome, sem alterar preco',()=>{
  const vm=require('node:vm');
- const match=client.match(/function kitVariantLabel\\(kit\\)\\{[\\s\\S]*?\\n  \\}/);
+ const match=client.match(/function kitVariantLabel\(kit\)\{[\s\S]*?\n  \}/);
  assert.ok(match,'Helper de variante ausente');
  const describe=vm.runInNewContext('('+match[0]+')');
  const title='Kit solar 500 kWh/mês · 4,20 kWp';
