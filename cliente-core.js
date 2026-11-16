@@ -91,7 +91,7 @@
   function setProjectForKit(input,kitId,projectId,include) {
     const lines=cleanLines(input);
     if(!lines.some(x=>x.id===kitId))throw Error('Kit não está no carrinho');
-    if(!/^PRJ-B-\\d{3}$/.test(projectId))throw Error('Projeto de faixa inválido');
+    if(!/^PRJ-B-[0-9]{3}$/.test(projectId))throw Error('Projeto de faixa inválido');
     const project=lines.find(x=>x.id===projectId);
     const standalone=project?(project.standaloneQty??project.qty):0;
     const linked=project?.linkedKits||[];
@@ -111,7 +111,7 @@
     const lines=cleanLines(input);
     const next=[];
     for(const x of lines){
-      if(!/^PRJ-B-\\d{3}$/.test(x.id)||!x.linkedKits?.includes(kitId)){
+      if(!/^PRJ-B-[0-9]{3}$/.test(x.id)||!x.linkedKits?.includes(kitId)){
         if(x.id!==kitId&&x.id!=='PRJ-'+kitId)next.push(x);
         continue;
       }
