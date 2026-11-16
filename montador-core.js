@@ -46,11 +46,12 @@
    const freight=integer(freightCents,0,CENTS_LIMIT);
    const markup=Number(markupPercent);
    if(!clean||freight===null||!Number.isFinite(markup)||markup<0||markup>300)throw Error('invalid_builder_amount');
-   let parts=0,dcWp=0,acW=0,modules=0,inverters=0;
+   let parts=0,passThrough=0,dcWp=0,acW=0,modules=0,inverters=0;
    for(const row of clean){
      const sub=row.qty*row.unit_cost_cents;
      if(!Number.isSafeInteger(sub)||parts+sub>CENTS_LIMIT)throw Error('amount_out_of_range');
      parts+=sub;
+     if(row.category==='stringbox')passThrough+=sub;
      dcWp+=row.qty*row.module_wp;
      acW+=row.qty*row.inverter_w;
      if(row.module_wp>0)modules+=row.qty;
@@ -58,11 +59,13 @@
    }
    const base=parts+freight;
    if(!Number.isSafeInteger(base)||base>CENTS_LIMIT)throw Error('amount_out_of_range');
-   const total=Math.round(base*(1+markup/100));
+   // String boxes são opcionais e repassadas exatamente ao custo de PDF.
+   const markupCents=Math.round((base-passThrough)*markup/100);
+   const total=base+markupCents;
    if(!Number.isSafeInteger(total)||total>CENTS_LIMIT)throw Error('amount_out_of_range');
    const dcAcRatio=acW>0?Math.round(dcWp/acW*100)/100:null;
    return {lines:clean,parts_cents:parts,freight_cents:freight,base_cents:base,markup_percent:markup,total_cents:total,
-     markup_cents:total-base,dc_wp:dcWp,ac_w:acW,modules,inverters,
+     markup_cents:markupCents,pass_through_cents:passThrough,dc_wp:dcWp,ac_w:acW,modules,inverters,
      monthly_kwh:Math.round(dcWp/1000*128),dc_ac_ratio:dcAcRatio};
  }
  function technicalAlert(calc){
