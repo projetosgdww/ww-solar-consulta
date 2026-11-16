@@ -64,10 +64,9 @@ test('RPC mantém kits aprovados e projetos PRJ-B, sem avulsos nem alterações 
    assert.ok(!sql.toLowerCase().includes(fragment));
 });
 
-test('o montador DEV permanece independente e a consulta de custos não é alterada',()=>{
- const builder=fs.readFileSync('montador-dev.js','utf8');
+test('a mudança comercial não mistura montador DEV nem expõe custos privados',()=>{
  const build=fs.readFileSync('scripts/build-cliente-dev.mjs','utf8');
- assert.ok(builder.includes("db.from('wwsolar_catalog').select('id,title,payload')"));
- assert.ok(builder.includes("db.from('wwsolar_builder_costs').upsert"));
- assert.ok(build.includes("CF_PAGES_BRANCH==='feat/wwsolar-montador-kits-dev-v1'"));
+ assert.ok(!build.includes("montador-dev.js"));
+ assert.ok(!js.includes('wwsolar_builder_costs'));
+ assert.ok(!sql.includes('wwsolar_builder_costs'));
 });
