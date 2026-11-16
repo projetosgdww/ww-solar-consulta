@@ -90,3 +90,14 @@ test('vínculos inconsistentes e duplicados são rejeitados antes de salvar',()=
  assert.throws(()=>C.cleanLines([{id,qty:2,standaloneQty:0,linkedKits:['FOTUS-A']}]),/Quantidade/);
  assert.throws(()=>C.cleanLines([{id,qty:1,standaloneQty:0,linkedKits:'FOTUS-A'}]),/Vínculos/);
 });
+
+test('nota de WhatsApp cita exclusivamente o SKU do kit com projeto marcado',()=>{
+ const a=kit('FOTUS-4200-DEYE-3',10139.23),b=kit('FOTUS-4200-GOODWE-3',10578.67),p=project('PRJ-B-010');
+ const lines=C.setProjectForKit([{id:a.id,qty:1},{id:b.id,qty:1}],a.id,p.id,true);
+ const note=C.linkedProjectNote(lines,[a,b,p]);
+ assert.match(note,/FOTUS-4200-DEYE-3/);
+ assert.doesNotMatch(note,/FOTUS-4200-GOODWE-3/);
+ assert.match(note,/PRJ-B-010/);
+ assert.match(note,/TRT não inclusa/);
+ assert.equal(C.linkedProjectNote([{id:a.id,qty:1}],[a,b,p]),'');
+});
