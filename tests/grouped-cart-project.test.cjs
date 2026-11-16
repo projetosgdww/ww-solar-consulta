@@ -101,3 +101,40 @@ test('nota de WhatsApp cita exclusivamente o SKU do kit com projeto marcado',()=
  assert.match(note,/TRT não inclusa/);
  assert.equal(C.linkedProjectNote([{id:a.id,qty:1}],[a,b,p]),'');
 });
+
+test('histórico confirmado corresponde ao kit escolhido e quantidade de projetos',()=>{
+ const a=kit('FOTUS-4200-DEYE-3',10139.23);
+ const b=kit('FOTUS-4200-GOODWE-3',10578.67);
+ const p=project('PRJ-B-010');
+ const lines=C.setProjectForKit([{id:a.id,qty:1},{id:b.id,qty:1}],b.id,p.id,true);
+ const items=[
+  {sku:a.id,qty:1},{sku:b.id,qty:1},
+  {sku:p.id,qty:1,standalone_qty:0,linked_kits:[{sku:b.id,title:b.id}]}
+ ];
+ assert.equal(C.quoteSnapshotMatches(lines,items),true);
+ assert.equal(C.quoteSnapshotMatches(lines,items.map(x=>x.sku===p.id?{
+  ...x,linked_kits:[{sku:a.id,title:a.id}]
+ }:x)),false);
+ assert.equal(C.quoteSnapshotMatches(lines,items.map(x=>x.sku===p.id?{
+  ...x,standalone_qty:1
+ }:x)),false);
+ assert.equal(C.quoteSnapshotMatches(lines,items.slice(1)),false);
+});
+test('histórico de projeto avulso legado é preservado sem vínculo fictício',()=>{
+ const k=kit('FOTUS-4200-DEYE-3');
+ const lines=[{id:k.id,qty:1},{id:'PRJ-B-010',qty:1}];
+ assert.equal(C.quoteSnapshotMatches(lines,[{sku:k.id,qty:1},{sku:'PRJ-B-010',qty:1}]),true);
+ assert.equal(C.quoteSnapshotMatches(lines,[{sku:k.id,qty:1},{
+  sku:'PRJ-B-010',qty:1,linked_kits:[{sku:k.id}],standalone_qty:0
+ }]),false);
+});
+test('histórico de dois kits e projeto avulso pode conservar vínculos mistos',()=>{
+ const a=kit('FOTUS-4200-DEYE-3'),b=kit('FOTUS-4200-GOODWE-3');
+ const lines=C.setProjectForKit([{id:a.id,qty:1},{id:b.id,qty:1},
+  {id:'PRJ-B-010',qty:1}],a.id,'PRJ-B-010',true);
+ const saved=[
+  {sku:a.id,qty:1},{sku:b.id,qty:1},
+  {sku:'PRJ-B-010',qty:2,standalone_qty:1,linked_kits:[{sku:a.id,title:a.id}]}
+ ];
+ assert.equal(C.quoteSnapshotMatches(lines,saved),true);
+});
