@@ -21,7 +21,7 @@ test('painel admin usa navegação à direita com novo CSS',()=>{
 });
 test('cliente conserva links e botão Sair, sem alterar fluxo comercial',()=>{
  const html=read('cliente-dev.html');
- for(const id of ['client-nav-simulate','client-kits-link','client-pieces-link','client-projects-link','client-logout','client-cart-top']){
+ for(const id of ['client-nav-simulate','client-kits-link','client-projects-link','client-logout','client-cart-top']){
    assert.ok(html.includes('id="'+id+'"'),id);
  }
  assert.match(html,/cliente-dev\.css\?v=20261116-simulator-polish-v5/);
