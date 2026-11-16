@@ -58,14 +58,15 @@ test('consulta pública só inclui kits e peças ativos e aprovados, com payload
 });
 
 test('domínio oficial nunca pode usar snapshot de preços da prévia',()=>{
- const source=js.match(/const PREVIEW_HOST=(\\/.+\\/)\\.test\\(window\\.location\\.hostname\\)/);
- assert.ok(source,'Detecção de hostname ausente');
- const hostPattern=new RegExp(source[1].slice(1,-1));
+ const line=js.split('\\n').find(row=>row.trim().startsWith('const PREVIEW_HOST='));
+ assert.ok(line,'Detecção de hostname ausente');
+ const regexSource=line.slice(line.indexOf('=/')+2,line.lastIndexOf('/.test('));
+ const hostPattern=new RegExp(regexSource);
  assert.equal(hostPattern.test('b582a4e8.ww-solar.pages.dev'),true);
  assert.equal(hostPattern.test('ww-solar.pages.dev'),false);
  assert.equal(hostPattern.test('catalogo.wwplatform.com.br'),false);
  assert.equal(hostPattern.test('localhost'),true);
- assert.match(js,/if\\(!PREVIEW_HOST\\)throw error/);
+ assert.ok(js.includes('if(!PREVIEW_HOST)throw error'));
  assert.ok(js.includes("show('client-preview-disclaimer',PREVIEW_HOST)"));
 });
 test('build só inclui snapshot na branch DEV exata',()=>{
