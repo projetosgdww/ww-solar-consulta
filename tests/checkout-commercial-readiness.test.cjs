@@ -68,8 +68,8 @@ test('inversor e SKU distinguem kits da mesma potência sem alterar os preços',
  assert.match(label(a),/Deye 3 kW.*FOTUS-4200-DEYE-3/);
  assert.match(label(b),/Deye 5 kW.*FOTUS-4200-DEYE-5/);
  assert.equal(a.price,9036.08);assert.equal(b.price,9354.50);
- assert.ok(client.includes("card.append(el('small',kitVariantLabel(p),'client-muted'))"));
- assert.ok(client.includes("label.append(el('small',kitVariantLabel(selectedProduct),'client-muted'))"));
+ assert.ok(client.includes("card.append(el('div',kitVariantLabel(p),'client-muted'))"));
+ assert.ok(client.includes("label.append(el('div',kitVariantLabel(selectedProduct),'client-muted'))"));
  assert.ok(client.includes("x.qty+' × '+x.title+variant"));
 });
 test('prévia permanece simulação sem gravação; domínio oficial não é tratado como preview',()=>{
@@ -77,7 +77,7 @@ test('prévia permanece simulação sem gravação; domínio oficial não é tra
  assert.ok(client.includes('Nenhum pedido foi registrado ou enviado ao WhatsApp.'));
  assert.ok(preview.includes('if(payload.action!=="validate")'));
  assert.ok(!preview.includes('.insert('));
- assert.ok(html.includes('cliente-dev.js?v=20261116-checkout-comercial-rc1'));
+ assert.ok(html.includes('cliente-dev.js?v=20261116-checkout-comercial-rc2'));
 });
 
 test('snapshot rejeita vínculo desviado, quantidade adulterada e projeto avulso indevido',()=>{
