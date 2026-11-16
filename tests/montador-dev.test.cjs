@@ -95,3 +95,32 @@ test('exportação de rascunho não equivale a publicação',()=>{
  assert.ok(!js.includes('approved:true'));
  assert.ok(!js.includes('published:true'));
 });
+
+test('string boxes entram pelo valor original do PDF, sem margem de 25%',()=>{
+ const box={sku:'SOO-49672',title:'STRING CLAMPER SB 1000V 32A 1E/1S',category:'stringbox',qty:1,unit_cost_cents:46001,module_wp:0,inverter_w:0};
+ const kitPlus=C.calculate([...kit,box],30000,25);
+ assert.equal(kitPlus.parts_cents,321001);
+ assert.equal(kitPlus.pass_through_cents,46001);
+ assert.equal(kitPlus.markup_cents,76250);
+ assert.equal(kitPlus.total_cents,427251);
+ const onlyBox=C.calculate([box],0,25);
+ assert.equal(onlyBox.total_cents,46001);
+ assert.equal(onlyBox.markup_cents,0);
+});
+test('37 equipamentos Soollar são abastecidos exclusivamente da tabela privada',()=>{
+ assert.ok(js.includes("supplier='Soollar'"));
+ assert.ok(html.includes('value="Soollar"'));
+ assert.ok(js.includes("db.from('wwsolar_builder_costs').select"));
+ assert.ok(js.includes("parts=partsFromCosts()"));
+ assert.ok(!js.includes("db.from('wwsolar_catalog').select"));
+ assert.ok(html.includes('id="builder-stringbox-pass"'));
+ assert.ok(js.includes("if(itemCategory(p)==='stringbox')"));
+ assert.ok(js.includes("source_date,source_reference,updated_at"));
+});
+test('montador preserva atualização manual de custo e origens de preço',()=>{
+ assert.ok(js.includes('source_reference:'));
+ assert.ok(js.includes('Atualização manual no Montador DEV'));
+ assert.ok(js.includes("db.from('wwsolar_builder_costs').upsert"));
+ assert.ok(js.includes('onConflict:\'owner_id,supplier,sku\''));
+ assert.ok(js.includes('Rascunhos salvos continuam com valores históricos'));
+});
