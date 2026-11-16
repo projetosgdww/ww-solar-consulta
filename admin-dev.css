@@ -54,3 +54,10 @@
 /* Associação auditável entre cada projeto elétrico e seu kit. */
 .admin-order-item-description{display:flex;flex-direction:column;gap:4px;min-width:0;flex:1}
 .admin-linked-project-hint{font-size:11px;line-height:1.5;color:#37604f;overflow-wrap:anywhere}
+
+/* Acesso DEV ao montador, exibido somente após validação do administrador. */
+.admin-tabs .admin-builder-tab{background:#f4fff1;border:1px solid #b7dec0;border-radius:16px;padding:20px 23px;text-align:left;display:grid;grid-template-columns:32px 1fr;column-gap:10px;row-gap:5px;color:#123c2c;text-decoration:none}
+.admin-tabs .admin-builder-tab span{grid-row:span 2;font-size:24px}
+.admin-tabs .admin-builder-tab strong{font-size:19px}
+.admin-tabs .admin-builder-tab small{font-size:12px;color:#507b5d}
+.admin-tabs .admin-builder-tab:focus-visible{outline:3px solid #84dc9f;outline-offset:3px}
