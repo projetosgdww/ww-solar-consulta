@@ -52,3 +52,13 @@
 - A relação `linked_kits` e a quantidade de serviço avulso `standalone_qty` serão gravadas dentro do campo existente `items` do pedido quando a atualização do backend oficial for autorizada. Não exige nova coluna.
 - O painel admin preparado exibe explicitamente o nome e o SKU dos kits associados, sem presumir associação por faixa e sem perder compatibilidade com os itens legados.
 - Ainda falta homologar manualmente a simulação no DEV com cliente autenticado e verificar que a mensagem gerada menciona apenas o kit selecionado. **Não mesclar PR nem publicar o backend oficial até essa validação e autorização expressa.**
+
+## Pré-lançamento do envio real — 16/11/2026
+- O backend candidato `wwsolar-quote` anuncia `{quote_version:2, project_link_snapshots:true, idempotent_request_key:true}` na ação autenticada `capabilities`, antes de qualquer INSERT.
+- O frontend de produção candidato **não envia** o pedido se a ação de capacidades falhar ou não informar suporte ao vínculo por kit. A cotação permanece no carrinho.
+- Depois da gravação, o cliente confere que `order.items` coincide integralmente com os itens, quantidades, `linked_kits` e `standalone_qty` antes de abrir WhatsApp, usando somente `message` do servidor.
+- O reenvio com mesma `request_key` é idempotente no backend e preserva o histórico da primeira resposta.
+- Corrigida a expressão regular que seleciona o WhatsApp específico de projetos: `/^55[0-9]{10,11}$/`.
+- A função de simulação `wwsolar-quote-preview` segue ativa, autenticada e sem INSERT/UPDATE/DELETE. **O backend real ainda não foi implantado**.
+- Prévia de homologação com guardas de compatibilidade: `https://2c4ac4d1.ww-solar.pages.dev/cliente.html`.
+- Testes automatizados: 95 aprovados, nenhuma falha na compilação inicial. Homologação de pedido real e entrega do WhatsApp ficam condicionadas à liberação oficial.
