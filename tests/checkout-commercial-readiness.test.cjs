@@ -77,7 +77,7 @@ test('prévia permanece simulação sem gravação; domínio oficial não é tra
  assert.ok(client.includes('Nenhum pedido foi registrado ou enviado ao WhatsApp.'));
  assert.ok(preview.includes('if(payload.action!=="validate")'));
  assert.ok(!preview.includes('.insert('));
- assert.ok(html.includes('cliente-dev.js?v=20261117-cards-modelo-v1'));
+ assert.ok(html.includes('cliente-dev.js?v=20261117-cards-modelo-v2'));
 });
 
 test('snapshot rejeita vínculo desviado, quantidade adulterada e projeto avulso indevido',()=>{
