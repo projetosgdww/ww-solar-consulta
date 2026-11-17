@@ -475,49 +475,76 @@
       if(S.kind==='kit')box.append(btn('Solicitar kit sob medida ↗',()=>document.getElementById('client-custom-kit-cta')?.scrollIntoView({behavior:'smooth',block:'nearest'}),'button button-accent'));
       grid.append(box);return;
     }
+
     for(const p of products){
-      const card=el('article',undefined,'kit-card');
+      // O SKU e o preço originais seguem intocados; muda somente a apresentação.
+      const x=p.payload||{};
+      const kwp=C.kitKwp(p);
+      const monthly=C.estimatedGeneration(p);
+      const band=Number(x.faixaGeracaoKwh);
+      const advertised=Number.isFinite(band)&&band>0?band:Math.round(monthly||0);
+      const card=el('article',undefined,'kit-card ww-kit-card-v2');
       card.dataset.productId=p.id;
-      const top=el('div',undefined,'kit-top');
-      top.append(el('span',p.kind==='kit'?'Kit solar':'Peça avulsa','kit-id'),el('span','Cotação a confirmar','kit-status'));
+      card.setAttribute('aria-label',p.title+' · SKU: '+p.id);
+      const top=el('div',undefined,'kit-top ww-kit-head');
+      top.append(el('span','KIT SOLAR','kit-id ww-kit-chip'));
+      top.append(el('span','· Cotação a confirmar','kit-status ww-kit-quote'));
       card.append(top);
-      const heading=el('h3',p.title);
-      card.append(heading);
-      if(p.kind==='kit')card.append(el('div',kitVariantLabel(p),'client-muted'));
-      if(p.kind==='kit'){
-        const x=p.payload||{};
-        const gen=el('p',undefined,'kit-generation');
-        gen.append(el('strong',number(C.estimatedGeneration(p))+' kWh/mês'),document.createTextNode(' de média mensal estimada*'));
-        card.append(gen);
-        const facts=el('div',undefined,'kit-facts');
-        for(const [title,value] of [
-          ['Módulos',number(x.placas)+' × '+number(x.moduloWp)+' Wp'],
-          ['Inversor',String(x.inversor||'A confirmar')],
-          ['Tipo de ligação',String(x.tipoRede||'Conforme avaliação do local')]
-        ]){
-          const row=el('div');row.append(el('span',title),el('strong',value));facts.append(row);
-        }
-        if(S.user){
-          card.append(facts);
-          card.append(el('small','Inclui módulos, inversor, fixação, perfis, cabos e conectores.','client-muted'));
-        }else{
-          card.append(el('p','Potência instalada: '+decimal(x.potenciaKwp)+' kWp · Consulte os detalhes após entrar.','client-muted'));
-          if(x.freteInclusoParaCaninde)card.append(el('small','Frete incluso para Canindé/CE. Outras cidades sob consulta.','client-muted'));
-        }
-        if(x.origemKit==='fotus_pronto'){
-          card.append(el('small','Kit pronto do fornecedor · Frete incluso para Canindé/CE. Prazo previsto: até 15 dias úteis, podendo acrescentar até 5 dias úteis após confirmação do pedido e da disponibilidade. Para outras cidades, frete sob consulta.','client-muted'));
-        }
-      }else{
-        const facts=el('div',undefined,'kit-facts');
-        const row=el('div');row.append(el('span','Categoria'),el('strong',String(p.payload?.categoria||'Equipamento')));
-        facts.append(row);card.append(facts);
+      card.append(el('h3','Kit Solar '+decimal(kwp)+' kWp','ww-kit-title'));
+      card.append(el('p','Geração média de '+number(advertised)+' kWh/mês','ww-kit-generation'));
+      card.append(el('p','SKU: '+p.id,'ww-kit-sku'));
+
+      const freight=el('div',undefined,'ww-kit-freight');
+      const freightIcon=el('span',undefined,'ww-kit-freight-icon');
+      freightIcon.append(wwKitIcon('truck'));
+      const freightText=el('div',undefined,'ww-kit-freight-copy');
+      freightText.append(el('strong',x.freteInclusoParaCaninde?'Frete incluso para Canindé/CE':'Frete sob consulta'));
+      freightText.append(el('small',x.freteInclusoParaCaninde?'Outras cidades sob consulta':'Confirme condições de entrega no atendimento'));
+      freight.append(freightIcon,freightText);
+      card.append(freight);
+
+      const stats=el('div',undefined,'ww-kit-stats');
+      for(const stat of [
+        {icon:'power',label:'POTÊNCIA INSTALADA',value:decimal(kwp)+' kWp'},
+        {icon:'chart',label:'MÉDIA MENSAL',value:number(Math.round(monthly||0))+' kWh/mês*'}
+      ]){
+        const box=el('div',undefined,'ww-kit-stat');
+        const label=el('div',undefined,'ww-kit-stat-label');
+        label.append(wwKitIcon(stat.icon),el('span',stat.label));
+        box.append(label,el('strong',stat.value,'ww-kit-stat-value'));
+        stats.append(box);
       }
-      const bottom=el('div',undefined,'kit-bottom');
-      const price=el('div');price.append(el('small','Valor dos equipamentos'),el('b',euro(p.price)));
-      bottom.append(price,btn(!S.user?'Ver detalhes ↗':(p.kind==='kit'?'Solicitar cotação +':'Adicionar ao carrinho +'),
-        ()=>S.user?add(p.id):requestLoginFor(p.id),'details-button'));
-      card.append(bottom);
-      if(p.kind==='kit')card.append(el('small','Estimativa de geração. Equipamentos, compatibilidade e instalação sujeitos à validação técnica antes da contratação.','client-muted'));
+      card.append(stats);
+
+      // Mantém as características técnicas do produto e as libera somente após login.
+      if(S.user){
+        const more=el('span',undefined,'sr-only');
+        more.textContent=[
+          x.placas?number(x.placas)+' módulos de '+number(x.moduloWp)+' Wp':'',
+          x.inversor?'Inversor: '+x.inversor:'',
+          x.tipoRede?'Tipo de ligação: '+x.tipoRede:''
+        ].filter(Boolean).join('. ');
+        card.append(more);
+      }
+
+      const commercial=el('div',undefined,'ww-kit-commercial');
+      commercial.append(el('span','Valor dos equipamentos','ww-kit-price-label'));
+      const price=el('div',undefined,'ww-kit-price');
+      price.append(el('span','R$','ww-kit-price-currency'));
+      price.append(el('strong',euro(p.price).replace(/^R\$\s*/,''),'ww-kit-price-value'));
+      commercial.append(price);
+      const hint=el('p',undefined,'ww-kit-login-hint');
+      hint.append(wwKitIcon('info'),el('span','Consulte detalhes e condições após entrar.'));
+      commercial.append(hint);
+      // Preserva integralmente a ação existente: login ou adicionar à cotação.
+      const action=btn('Ver Detalhes do Kit →',
+        ()=>S.user?add(p.id):requestLoginFor(p.id),'details-button ww-kit-cta');
+      action.setAttribute('aria-label',S.user?'Adicionar '+p.title+' à cotação':'Entrar para consultar detalhes de '+p.title);
+      commercial.append(action);
+      card.append(commercial);
+      card.append(el('p',
+        'Estimativa de geração. Equipamentos, compatibilidade e instalação sujeitos à validação técnica antes da contratação. A geração real varia conforme a localidade, as condições de instalação e as condições climáticas de cada mês.',
+        'ww-kit-disclaimer'));
       grid.append(card);
     }
   }
