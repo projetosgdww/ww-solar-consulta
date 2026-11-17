@@ -32,9 +32,10 @@ function messageFor(order:{
  ...order.items.map(x=>"- "+x.qty+" × "+x.title+" ["+x.sku+"] — "+brl(x.subtotal_cents)),
  projectAssociationNotes(order.items),
  "", "Total de referência: "+brl(order.total_cents),
+ "Kits: venda somente dos equipamentos; projeto elétrico e instalação não inclusos no valor dos kits. Projetos opcionais, quando selecionados, são cobrados separadamente. Frete sob consulta para todas as cidades.",
  "Pedido registrado na WW Solar. Confirme preço final, estoque, frete e condições.",
  ...(order.items.some(x=>x.sku.startsWith("FOTUS-"))?[
-   "Kits prontos Fotus: frete incluso para Canindé/CE; outras cidades sob consulta.",
+   "Kits prontos Fotus: frete sob consulta para todas as cidades, inclusive Canindé/CE.",
    "Entrega prevista em até 15 dias úteis, com possibilidade de mais 5 dias úteis após confirmação do pedido e disponibilidade."
  ]:[]),
  "Este envio é uma solicitação de negociação, não uma compra confirmada."
