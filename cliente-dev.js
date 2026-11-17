@@ -491,7 +491,7 @@
       top.append(el('span','· Cotação a confirmar','kit-status ww-kit-quote'));
       card.append(top);
       card.append(el('h3','Kit Solar '+decimal(kwp)+' kWp','ww-kit-title'));
-      card.append(el('p','Geração média de '+number(advertised)+' kWh/mês','ww-kit-generation'));
+      card.append(el('p','Kit solar '+number(advertised)+' kWh/mês','ww-kit-generation'));
       card.append(el('p','SKU: '+p.id,'ww-kit-sku'));
 
       const freight=el('div',undefined,'ww-kit-freight');
