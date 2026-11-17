@@ -79,6 +79,6 @@ test('estilos seguem o card aprovado e permanecem isolados do restante do site',
  assert.match(css,/background:#FA4100;color:#17241a/);
  assert.match(css,/@media\(max-width:360px\)/);
  assert.match(css, /prefers-reduced-motion:reduce/);
- assert.match(html,/cliente-dev\.css\?v=20261117-santa-peek-v1/);
+ assert.match(html,/cliente-dev\.css\?v=20261117-natal-scene-v2/);
  assert.match(html,/cliente-dev\.js\?v=20261117-cards-modelo-v2/);
 });
