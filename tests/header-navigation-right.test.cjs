@@ -24,7 +24,7 @@ test('cliente conserva links e botão Sair, sem alterar fluxo comercial',()=>{
  for(const id of ['client-nav-simulate','client-kits-link','client-projects-link','client-logout','client-cart-top']){
    assert.ok(html.includes('id="'+id+'"'),id);
  }
- assert.match(html,/cliente-dev\.css\?v=20261117-cards-paleta-v3/);
+ assert.match(html,/cliente-dev\.css\?v=20261117-project-cards-v1/);
  assert.match(html,/cliente-dev\.js\?v=20261117-cards-modelo-v2/);
 });
 
