@@ -26,7 +26,7 @@
 <div class="builder-topbar">
 <label>Fornecedor <input id="builder-supplier" maxlength="64" value="Soollar" aria-label="Fornecedor"></label>
 <button id="builder-new" class="button button-outline" type="button">+ Novo rascunho</button>
-<button id="builder-export" class="button button-outline" type="button">Exportar JSON</button>
+<button id="builder-export" class="button button-outline" type="button">Exportar kit aberto (JSON)</button>
 <button id="builder-print" class="button button-outline" type="button">Imprimir / salvar PDF</button>
 </div>
 <div class="builder-grid">
@@ -74,8 +74,8 @@
 <p id="builder-status" class="builder-status" role="status" aria-live="polite"></p>
 </section>
 </div>
-<section class="builder-card builder-saved"><div class="builder-section-head"><div><span class="section-label">03 / HISTÓRICO</span><h2>Rascunhos salvos</h2></div><button id="builder-reload" class="button button-outline" type="button">Atualizar lista</button></div>
-<p class="builder-help">Os custos são preservados em cada rascunho. Alterar uma peça depois não modifica automaticamente kits já salvos.</p>
+<section class="builder-card builder-saved"><div class="builder-section-head"><div><span class="section-label">03 / HISTÓRICO</span><h2>Rascunhos salvos</h2></div><div class="builder-actions"><button id="builder-export-batch" class="button button-accent" type="button" disabled>Exportar lote (0) em JSON</button><button id="builder-reload" class="button button-outline" type="button">Atualizar lista</button></div></div>
+<p class="builder-help">Cada kit salvo aparece abaixo e pode ser reaberto. Ao finalizar 10, 15 ou mais kits, use <strong>Exportar lote em JSON</strong> para baixar um único arquivo com todos os rascunhos deste fornecedor, preços, margem e composição. Somente os kits já salvos entram no lote. Nada é publicado automaticamente.</p><p class="builder-help">Os custos são preservados em cada rascunho. Alterar uma peça depois não modifica automaticamente kits já salvos.</p>
 <div id="builder-drafts-list" class="builder-drafts-list"></div>
 </section>
 </div>
@@ -84,5 +84,5 @@
 <script defer src="./cliente-dev-config.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0/dist/umd/supabase.min.js"></script>
 <script defer src="./montador-core.js?v=20261117-margem-v1"></script>
-<script defer src="./montador-dev.js?v=20261117-margem-v1"></script>
+<script defer src="./montador-dev.js?v=20261117-export-lote-v1"></script>
 </body></html>
