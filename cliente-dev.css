@@ -678,3 +678,14 @@ body .header{position:sticky;top:0;z-index:80}
 #consumo .ww-consumo-note{font-size:11px;line-height:1.65;color:#6e847b;margin:15px 0 0}
 @media(max-width:760px){#consumo .ww-consumo-card{grid-template-columns:1fr;gap:15px}#consumo{scroll-margin-top:160px}}
 @media(max-width:360px){#consumo .ww-consumo-form{gap:10px}#consumo .ww-consumo-field input,#consumo .ww-consumo-field select{padding:8px;font-size:13px}}
+
+/* Consumo V2: potência recolhida por padrão e modo mensal para equipamentos cíclicos. */
+#consumo .ww-consumo-source{font-size:11px;color:#607b6d;margin:-5px 0 3px;line-height:1.5}
+#consumo .ww-consumo-time-rows{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px}
+#consumo .ww-consumo-manual{border:1px solid #d4e5d7;border-radius:11px;padding:11px 14px;background:#f8fcf7}
+#consumo .ww-consumo-manual summary{cursor:pointer;font-size:12px;color:#315844;font-weight:800;list-style:revert}
+#consumo .ww-consumo-manual .ww-consumo-field{margin-top:12px}
+#consumo .ww-consumo-guide,#consumo .ww-consumo-hint{font-size:12px;line-height:1.55;color:#5b7469;margin:0}
+#consumo .ww-consumo-warning{font-size:12px;line-height:1.6;color:#865219;background:#fff7eb;border:1px solid #f3dfc5;padding:9px 12px;border-radius:9px;margin:0}
+#consumo .ww-consumo-note a{color:#9e431c;text-decoration:underline;text-underline-offset:2px}
+@media(max-width:380px){#consumo .ww-consumo-time-rows{gap:9px}}
