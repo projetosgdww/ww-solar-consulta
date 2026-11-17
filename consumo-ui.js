@@ -41,20 +41,28 @@
   monthly.value=item.monthlyKwh==null?'':String(item.monthlyKwh);
   cycleKwh.value=item.cycleKwh==null?'':String(item.cycleKwh);
   source.replaceChildren();
-  if(item.model){
-    source.append(document.createTextNode('Exemplo real: '+item.model+' · '));
+  if(item.basis==='estimativa'){
+    source.textContent='Potência fixa de referência: '+item.watts+' W. '+item.note;
+  }else if(item.basis==='inmetro'){
+    source.append(document.createTextNode('Modelo Inmetro: '+item.model+' · '+item.source+' · '));
     const link=document.createElement('a');link.href=item.sourceUrl;link.target='_blank';link.rel='noopener noreferrer';
-    link.textContent='Consultar ficha do fabricante';source.append(link);
+    link.textContent='Consultar PBE';source.append(link);
+  }else if(item.model){
+    source.append(document.createTextNode('Exemplo de modelo: '+item.model+' · '));
+    if(item.sourceUrl){
+      const link=document.createElement('a');link.href=item.sourceUrl;link.target='_blank';link.rel='noopener noreferrer';
+      link.textContent='Consultar ficha do fabricante';source.append(link);
+    }
   }else source.textContent='Modelo específico ainda não verificado. Informe a potência ou o consumo na etiqueta para calcular.';
-  warning.hidden=!isMonthly&&!isCycle&&item.id!=='arcondicionado'&&item.id!=='notebook';
+  warning.hidden=!isMonthly&&!isCycle&&!item.variable&&item.basis!=='estimativa';
   warning.textContent=isMonthly?'Consumo mensal da ficha de um modelo, não uma média universal. Confira sua etiqueta ENCE.':
     isCycle?'Consumo medido por ciclo. Informe quantas lavagens faz por semana.':
-    item.id==='notebook'?'65 W é a potência do adaptador, não uma medição de consumo contínuo.':
-    'Ar-condicionado inverter varia conforme modelo, temperatura e condições de uso. Consulte a etiqueta ENCE.';
+    item.basis==='estimativa'?'Estimativa de referência, não potência medida de um computador específico. Ajuste se souber o valor do seu aparelho.':
+    'Ar-condicionado inverter varia conforme temperatura, ambiente e carga térmica. Os watts apresentados são de um modelo a 35 °C em carga total, e não o consumo médio contínuo.';
   $('ww-consumo-note').textContent=isMonthly
     ?'Pode substituir o consumo mensal pelo indicado na etiqueta do seu modelo.'
     :isCycle?'O consumo depende do programa de lavagem e do equipamento.'
-    :item.manual?'Sem modelo confirmado: informe a potência indicada na etiqueta ou no manual.':'Valor de um modelo de exemplo, não de todos os aparelhos desta categoria.';
+    :item.manual?'Sem modelo confirmado: informe a potência indicada na etiqueta ou no manual.':item.basis==='inmetro'?'Potência elétrica em carga total de modelo PBE; pode variar no uso real.':'A potência indicada é um valor de referência ajustável, não universal.';
   validate();
  }
  function render(){
