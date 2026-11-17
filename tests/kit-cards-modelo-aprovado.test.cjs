@@ -17,7 +17,9 @@ test('cards de kits usam somente dados reais e identidade por SKU',()=>{
  assert.match(card,/card\.dataset\.productId=p\.id/);
  assert.match(card,/SKU: '\+p\.id/);
  assert.match(card,/Kit Solar '\+decimal\(kwp\)\+' kWp'/);
- assert.match(card,/Geração média de '\+number\(advertised\)\+' kWh\/mês'/);
+ assert.match(card,/Kit solar '\+number\(advertised\)\+' kWh\/mês'/);
+ assert.doesNotMatch(card,/Geração média de '\+number\(advertised\)/);
+ assert.match(card,/label:'MÉDIA MENSAL',value:number\(Math\.round\(monthly\|\|0\)\)\+' kWh\/mês\*'/);
  assert.match(card,/Math\.round\(monthly\|\|0\)/);
 });
 test('modelo aprovado tem faixas visualmente separadas e ícones vetoriais',()=>{
