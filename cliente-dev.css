@@ -361,3 +361,126 @@ body .header{position:sticky;top:0;z-index:80}
 @media(max-width:700px){
   #simulador,#catalogo,#projetos{scroll-margin-top:148px}
 }
+
+
+/* WW SOLAR — Cards de Kits V2: reprodução da referência aprovada (somente DEV).
+   Classes restritas a #client-product-grid; carrinho, login, projetos e painel
+   administrativo continuam com seus estilos anteriores. */
+#client-app #client-product-grid .ww-kit-card-v2{
+  position:relative;isolation:isolate;overflow:hidden;min-width:0;
+  display:flex;flex-direction:column;gap:0;padding:26px 22px 19px;
+  background:#fff;border:1px solid #e3ebef;border-radius:23px;
+  box-shadow:0 16px 42px rgba(8,39,58,.085);
+  color:#0c2d40;min-height:552px;
+  transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease;
+}
+#client-app #client-product-grid .ww-kit-card-v2:before{
+  content:"";position:absolute;inset:0 0 auto;height:4px;
+  background:linear-gradient(90deg,#123b4c 0%,#0b7583 48%,#25d6a2 100%);
+}
+#client-app #client-product-grid .ww-kit-card-v2:hover{
+  border-color:#a9e3d1;box-shadow:0 20px 48px rgba(8,39,58,.14);transform:translateY(-2px);
+}
+#client-product-grid .ww-kit-head{display:flex;align-items:center;justify-content:space-between;gap:8px;min-width:0}
+#client-product-grid .ww-kit-chip{
+  padding:5px 8px;border-radius:6px;background:#eff5f8;color:#356482;
+  font-weight:900;font-size:9px;line-height:1.2;letter-spacing:.07em;white-space:nowrap;
+}
+#client-app #client-product-grid .ww-kit-quote{
+  padding:5px 9px;flex-shrink:0;border:1px solid #ffcb6d;border-radius:20px;
+  background:#fff9ee;color:#b87808;font-size:9px;font-weight:700;
+  letter-spacing:0;line-height:1.2;white-space:nowrap;
+}
+#client-app #client-product-grid .ww-kit-card-v2 h3.ww-kit-title{
+  margin:19px 0 4px;font-size:clamp(18px,1.9vw,22px);
+  color:#0a293e;font-weight:850;line-height:1.18;letter-spacing:-.04em;
+}
+#client-product-grid .ww-kit-generation{font-size:13px;line-height:1.4;font-weight:800;color:#008a6f}
+#client-product-grid .ww-kit-sku{
+  font-size:10px;line-height:1.4;font-weight:500;margin-top:5px;color:#8293a7;
+  overflow-wrap:anywhere;
+}
+#client-product-grid .ww-kit-freight{
+  display:flex;align-items:center;gap:12px;margin-top:20px;
+  min-height:55px;border:1px solid #9be9c5;border-radius:12px;
+  padding:10px 11px;background:#ebfbf3;color:#103d4a;
+}
+#client-product-grid .ww-kit-freight-icon{
+  width:32px;height:32px;flex:none;display:grid;place-items:center;
+  color:#008d72;background:#d1f9e7;border-radius:10px;
+}
+#client-product-grid .ww-kit-freight-icon svg{width:18px;height:18px}
+#client-product-grid .ww-kit-freight-copy{display:grid;gap:3px;min-width:0}
+#client-product-grid .ww-kit-freight-copy strong{
+  font-weight:800;font-size:11px;line-height:1.35;color:#092b3e;
+}
+#client-product-grid .ww-kit-freight-copy small{font-size:10px;line-height:1.3;color:#027f6a}
+#client-product-grid .ww-kit-stats{
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin-top:14px;
+}
+#client-product-grid .ww-kit-stat{
+  background:#f7f9fb;border:1px solid #e0e9f0;border-radius:13px;
+  min-height:77px;min-width:0;padding:12px 11px 11px;
+  display:flex;flex-direction:column;justify-content:space-between;gap:7px;
+}
+#client-product-grid .ww-kit-stat-label{
+  display:flex;gap:7px;align-items:center;color:#436b8b;
+  font-size:10px;line-height:1.22;letter-spacing:.035em;font-weight:800;
+}
+#client-product-grid .ww-kit-stat-label svg{flex:none;width:16px;height:16px;color:#00a486}
+#client-app #client-product-grid .ww-kit-stat-value{
+  display:block;color:#092b3e;font-size:15px;font-weight:850;
+  line-height:1.2;letter-spacing:-.04em;overflow-wrap:break-word;
+}
+#client-product-grid .ww-kit-commercial{
+  margin-top:auto;padding-top:19px;border-top:1px solid #e4edf1;
+  display:flex;flex-direction:column;min-width:0;
+}
+#client-product-grid .ww-kit-price-label{font-size:10px;line-height:1.3;color:#6e86a0}
+#client-product-grid .ww-kit-price{
+  display:flex;align-items:baseline;gap:4px;margin:7px 0 0;min-width:0;
+}
+#client-product-grid .ww-kit-price-currency{
+  color:#008e70;font-size:14px;font-weight:900;white-space:nowrap;
+}
+#client-app #client-product-grid .ww-kit-price-value{
+  color:#082b43;font-size:clamp(23px,2.5vw,29px);line-height:1.15;
+  letter-spacing:-.055em;font-weight:900;white-space:nowrap;
+}
+#client-product-grid .ww-kit-login-hint{
+  display:flex;align-items:center;gap:6px;color:#7088a0;
+  font-size:10px;line-height:1.45;margin-top:7px;
+}
+#client-product-grid .ww-kit-login-hint svg{width:12px;height:12px;flex:none;color:#729ac1}
+#client-app #client-product-grid .ww-kit-cta{
+  width:100%;display:flex;align-items:center;justify-content:center;
+  margin-top:15px;min-height:44px;padding:11px 10px;border:0;border-radius:10px;
+  background:#009c7c;color:#fff;font-size:12px;font-weight:850;
+  box-shadow:0 6px 14px rgba(0,141,105,.17);
+  white-space:normal;text-align:center;
+  transition:background .2s ease,transform .2s ease,box-shadow .2s ease;
+}
+#client-app #client-product-grid .ww-kit-cta:hover{
+  background:#008268;color:#fff;box-shadow:0 8px 17px rgba(0,141,105,.24);
+}
+#client-app #client-product-grid .ww-kit-cta:focus-visible{
+  outline:3px solid #ffb85b;outline-offset:3px;
+}
+#client-product-grid .ww-kit-disclaimer{
+  border-top:1px solid #e6edf1;margin-top:15px;padding-top:12px;
+  color:#8194aa;font-size:10px;line-height:1.5;overflow-wrap:break-word;
+}
+@media(max-width:1080px){
+  #client-app #client-product-grid .ww-kit-card-v2{padding:24px 19px 18px}
+}
+@media(max-width:360px){
+  #client-app #client-product-grid .ww-kit-card-v2{padding:23px 16px 17px}
+  #client-product-grid .ww-kit-freight{gap:9px;padding:9px}
+  #client-product-grid .ww-kit-stat{padding:10px 8px}
+  #client-product-grid .ww-kit-stat-label{gap:4px;font-size:9px}
+  #client-app #client-product-grid .ww-kit-stat-value{font-size:13px}
+}
+@media(prefers-reduced-motion:reduce){
+  #client-app #client-product-grid .ww-kit-card-v2,
+  #client-app #client-product-grid .ww-kit-cta{transition:none}
+}
