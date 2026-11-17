@@ -62,8 +62,7 @@ test('backend mantém controles de acesso, catálogo, associação e idempotênc
 test('inversor e SKU distinguem kits da mesma potência sem alterar os preços',()=>{
  const found=client.match(/function kitVariantLabel\(kit\)\{[\s\S]*?\n  \}/);
  assert.ok(found);
- const formatter=client.match(/function displaySku\(id\)\{[\s\S]*?
-  \}/);
+ const formatter=client.match(/function displaySku\(id\)\{[\s\S]*?\n  \}/);
  assert.ok(formatter);
  const label=vm.runInNewContext(formatter[0]+';('+found[0]+')');
  const a={kind:'kit',id:'FOTUS-4200-DEYE-3',payload:{inversor:'Deye 3 kW'},price:9036.08};
