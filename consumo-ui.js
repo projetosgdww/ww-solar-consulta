@@ -54,7 +54,7 @@
   $('ww-consumo-note').textContent=isMonthly
     ?'Pode substituir o consumo mensal pelo indicado na etiqueta do seu modelo.'
     :isCycle?'O consumo depende do programa de lavagem e do equipamento.'
-    :'A potência indicada é de um modelo de exemplo, não de todos os aparelhos desta categoria.';
+    :item.manual?'Sem modelo confirmado: informe a potência indicada na etiqueta ou no manual.':'Valor de um modelo de exemplo, não de todos os aparelhos desta categoria.';
   validate();
  }
  function render(){
@@ -89,7 +89,7 @@
   const message=['WW Solar — Estimativa de consumo mensal','',
    ...rows.map(x=>x.label+' ('+x.quantity+' un.): '+core.format(x.kwh)+' kWh/mês'),
    '', 'Total estimado: '+core.format(core.total(rows))+' kWh/mês',
-   'Referências médias históricas e estimativas; confira etiquetas ou manuais do equipamento.'].join('\n');
+   'Cálculo orientativo baseado em modelos identificados quando disponíveis; confira etiquetas e condições reais de uso.'].join('\n');
   try{await navigator.clipboard.writeText(message);$('ww-consumo-status').textContent='Resultado copiado.';}
   catch(_){$('ww-consumo-status').textContent='Não foi possível copiar automaticamente.';}
  });
