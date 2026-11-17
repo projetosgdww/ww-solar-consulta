@@ -499,3 +499,97 @@ body .header{position:sticky;top:0;z-index:80}
 #client-product-grid .ww-kit-detail-specs dd{margin:0;font-weight:700;overflow-wrap:anywhere;color:#193b45}
 #client-product-grid .ww-kit-detail-note{font-size:10px;color:#53716d;line-height:1.6;margin-top:9px}
 #client-product-grid .ww-kit-add{width:100%;justify-content:center;min-height:42px;margin-top:13px;border-radius:9px;font-size:11px}
+
+
+/* WW Solar — projetos Grupo B em cards, mesmo padrão visual dos kits DEV.
+   Escopo exclusivo da seção #projetos; não altera carrinho nem cards solares. */
+#projetos .client-projects-card{
+  background:#FFFFFF;border:1px solid #e4e9dc;border-radius:23px;
+  box-shadow:0 16px 42px rgba(8,39,58,.07);padding:clamp(18px,3vw,30px);
+}
+#projetos .client-projects-head>span{
+  background:#81F002;color:#183400;border:1px solid #63bc00;
+  font-weight:850;border-radius:999px;padding:8px 12px;
+}
+#projetos .client-projects-grid{
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  column-gap:16px;row-gap:16px;margin:22px 0;
+}
+#projetos .client-projects-grid>.ww-project-tier-v2{
+  position:relative;isolation:isolate;overflow:hidden;
+  display:flex;flex-direction:column;align-items:stretch;min-width:0;min-height:245px;
+  padding:19px 18px 17px;border:1px solid #e4e9dc;border-radius:18px;
+  background:#FFFFFF;box-shadow:0 10px 24px rgba(8,39,58,.055);
+  color:#0a293e;gap:0;
+  transition:border-color .2s ease,transform .2s ease,box-shadow .2s ease;
+}
+#projetos .client-projects-grid>.ww-project-tier-v2:before{
+  content:"";position:absolute;inset:0 0 auto;height:4px;
+  background:linear-gradient(90deg,#D73700 0%,#FA4100 55%,#FF8A4D 100%);
+}
+#projetos .client-projects-grid>.ww-project-tier-v2:hover{
+  border-color:#b6de91;box-shadow:0 14px 31px rgba(8,39,58,.11);transform:translateY(-2px);
+}
+#projetos .ww-project-tier-top{
+  display:flex;align-items:center;justify-content:space-between;gap:8px;min-width:0;
+  margin:3px 0 16px;
+}
+#projetos .ww-project-chip{
+  background:#fff0e9;color:#ba3906;border-radius:6px;
+  padding:5px 8px;font-size:9px;line-height:1.25;letter-spacing:.06em;
+  font-weight:900;white-space:nowrap;
+}
+#projetos .ww-project-optional{
+  background:#81F002;color:#183400;border:1px solid #63bc00;
+  padding:5px 8px;border-radius:20px;
+  font-size:9px;font-weight:800;line-height:1.25;text-align:center;
+}
+#projetos .client-projects-grid>.ww-project-tier-v2>.ww-project-tier-range{
+  display:block;grid-area:auto;line-height:1.27;
+  font-size:clamp(15px,1.6vw,19px);font-weight:850;letter-spacing:-.025em;
+  color:#0a293e;overflow-wrap:anywhere;
+}
+#projetos .ww-project-tier-sku{
+  font-size:10px;font-weight:600;margin-top:7px;color:#7c8ea2;
+}
+#projetos .ww-project-tier-price{
+  display:flex;flex-direction:column;gap:4px;
+  margin-top:17px;padding-top:13px;border-top:1px solid #e5ece4;
+}
+#projetos .ww-project-tier-price small{font-size:10px;color:#748a9d}
+#projetos .ww-project-tier-price strong{
+  font-size:clamp(21px,2.3vw,28px);font-weight:900;line-height:1.2;
+  letter-spacing:-.045em;color:#082b43;font-variant-numeric:tabular-nums;
+}
+#projetos .ww-project-tier-note{
+  font-size:10px;line-height:1.4;color:#658078;margin:8px 0 0;
+}
+#projetos .client-projects-grid .ww-project-tier-action{
+  grid-area:auto;display:flex;align-items:center;justify-content:center;
+  justify-self:stretch;width:100%;min-height:43px;margin-top:auto;
+  padding:11px 12px;border-radius:10px;border:1px solid #FA4100;
+  background:#FA4100;color:#17241a;font:inherit;font-size:12px;font-weight:850;
+  box-shadow:0 6px 14px rgba(250,65,0,.18);
+  white-space:normal;line-height:1.25;text-align:center;
+}
+#projetos .client-projects-grid .ww-project-tier-action:hover:not(:disabled){
+  background:#ff6631;color:#17241a;border-color:#ff6631;
+  box-shadow:0 8px 17px rgba(250,65,0,.25);
+}
+#projetos .client-projects-grid .ww-project-tier-action:focus-visible{
+  outline:3px solid #81F002;outline-offset:3px;
+}
+#projetos .client-projects-grid .ww-project-tier-action:disabled{
+  opacity:.62;cursor:not-allowed;box-shadow:none;
+}
+#projetos .client-projects-important{
+  border:1px solid #d5e8b9;background:#f6ffe9;
+  border-radius:11px;color:#35482b;
+}
+@media(max-width:700px){
+  #projetos .client-projects-grid{grid-template-columns:1fr;gap:13px}
+  #projetos .client-projects-grid>.ww-project-tier-v2{min-height:230px;padding:18px 16px 15px}
+}
+@media(prefers-reduced-motion:reduce){
+  #projetos .client-projects-grid>.ww-project-tier-v2{transition:none}
+}
