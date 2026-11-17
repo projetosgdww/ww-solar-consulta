@@ -26,7 +26,7 @@ function clearCredentials(){
 function showPanel(which){
  if(!ready)return;
  clearCredentials();
- for(const name of ['clients','orders','kits']){
+ for(const name of ['clients','orders','kits','composer']){
    $('admin-'+name+'-panel').hidden=which!==name;
    $('admin-tab-'+name).classList.toggle('active',which===name);
    $('admin-tab-'+name).setAttribute('aria-pressed',String(which===name));
@@ -34,6 +34,7 @@ function showPanel(which){
  if(which==='clients')void loadClients();
  if(which==='orders')void loadOrders();
  if(which==='kits')void loadKitPreviews();
+ if(which==='composer')void loadCompositionCatalog();
 }
 async function init(){
  if(!/^https:\/\/[a-z0-9-]+\.supabase\.co$/.test(cfg.supabaseUrl||'')
@@ -310,6 +311,115 @@ function renderKitPreviews(){
    card.append(internal);target.append(card);
  }
 }
+// Apenas composição no administrador: custos privados com RLS. Sem INSERT/UPDATE.
+let composerCatalog=[],composerLines=[{sku:'',quantity:1}],composerLoaded=false,composerLoading=false;
+const composeStatus=m=>{$('admin-compose-status').textContent=m;};
+const composeCore=()=>window.WWSolarAdminComposition;
+const composeTotal=()=>{
+ const core=composeCore();
+ if(!core)return;
+ const calculated=core.composeRows(composerLines,composerCatalog);
+ $('admin-compose-total').textContent=core.money(calculated.totalCents);
+ $('admin-compose-power').textContent=calculated.panels
+   ?calculated.panels+' módulo(s) · '+(calculated.powerWp/1000).toLocaleString('pt-BR',{maximumFractionDigits:3})+' kWp'
+   :'';
+ const displayed=$('admin-compose-rows').querySelectorAll('tr');
+ calculated.rows.forEach((row,i)=>{
+  const tr=displayed[i];if(!tr)return;
+  const item=tr.querySelector('[data-compose-unit]');
+  const total=tr.querySelector('[data-compose-subtotal]');
+  if(item)item.textContent=row.product?core.money(row.product.unitCostCents):'—';
+  if(total)total.textContent=row.product&&row.quantity?core.money(row.subtotalCents):'—';
+ });
+};
+const composeCell=(tr,className,text)=>{
+ const td=element('td',text,className);tr.append(td);return td;
+};
+function renderComposition(){
+ const core=composeCore();if(!core)return;
+ const tbody=$('admin-compose-rows');tbody.replaceChildren();
+ const categories=new Map();
+ for(const item of composerCatalog){
+  if(!categories.has(item.category))categories.set(item.category,[]);
+  categories.get(item.category).push(item);
+ }
+ composerLines.forEach((line,i)=>{
+  const p=composerCatalog.find(x=>x.sku===line.sku)||null;
+  const tr=document.createElement('tr');
+  composeCell(tr,'admin-compose-code',p?.sku||'—');
+  composeCell(tr,'',p?.category||'—');
+  const productCell=composeCell(tr,'');
+  const select=element('select');select.setAttribute('aria-label','Equipamento da linha '+(i+1));
+  const placeholder=element('option','Selecione um equipamento...');placeholder.value='';select.append(placeholder);
+  for(const [category,items] of categories){
+    const group=element('optgroup');group.label=category;
+    for(const product of items){
+      const option=element('option',product.title);option.value=product.sku;
+      if(line.sku===product.sku)option.selected=true;
+      group.append(option);
+    }
+    select.append(group);
+  }
+  select.value=p?p.sku:'';
+  select.addEventListener('change',()=>{
+    composerLines[i].sku=select.value;
+    if(!core.asQuantity(composerLines[i].quantity))composerLines[i].quantity=1;
+    renderComposition();
+  });
+  productCell.append(select);
+  const qtyCell=composeCell(tr,'');
+  const qty=element('input');qty.type='number';qty.min='1';qty.max='999';qty.step='1';
+  qty.value=String(core.asQuantity(line.quantity)||1);qty.inputMode='numeric';
+  qty.setAttribute('aria-label','Quantidade da linha '+(i+1));
+  qty.addEventListener('input',()=>{
+    composerLines[i].quantity=core.asQuantity(qty.value);
+    composeTotal();
+  });
+  qty.addEventListener('blur',()=>{
+    if(!core.asQuantity(qty.value)){composerLines[i].quantity=1;qty.value='1';composeTotal();}
+  });
+  qtyCell.append(qty);
+  const unit=composeCell(tr,'admin-compose-unit','—');unit.dataset.composeUnit='';
+  const sub=composeCell(tr,'admin-compose-line','—');sub.dataset.composeSubtotal='';
+  const removeCell=composeCell(tr,'');
+  const remove=element('button','×','admin-compose-remove');remove.type='button';
+  remove.title='Remover item';remove.setAttribute('aria-label','Remover linha '+(i+1));
+  remove.addEventListener('click',()=>{
+    composerLines.splice(i,1);
+    if(!composerLines.length)composerLines.push({sku:'',quantity:1});
+    renderComposition();
+  });
+  removeCell.append(remove);tbody.append(tr);
+ });
+ composeTotal();
+}
+async function loadCompositionCatalog(force=false){
+ if(!ready||!db||!composeCore())return;
+ if(composerLoading)return;
+ if(composerLoaded&&!force){renderComposition();return;}
+ composerLoading=true;
+ composeStatus('Consultando os custos privados cadastrados...');
+ try{
+  // Esta consulta só retorna linhas do administrador autenticado (RLS owner_id + app_metadata).
+  const {data,error}=await db.from('wwsolar_builder_costs')
+    .select('sku,title,category,unit_cost_cents,module_wp,source_date')
+    .order('title',{ascending:true}).limit(100);
+  if(error)throw error;
+  const list=composeCore().normalizeCatalog(data);
+  if(!list.length)throw Error('Nenhum custo disponível para este acesso administrativo.');
+  composerCatalog=list;composerLoaded=true;
+  $('admin-compose-workspace').hidden=false;
+  const dates=[...new Set(list.map(x=>x.sourceDate).filter(Boolean))].sort();
+  const stamp=dates.length===1?new Date(dates[0]+'T12:00:00').toLocaleDateString('pt-BR')
+    :'datas de origem diversas';
+  composeStatus(list.length+' equipamentos disponíveis · valores de custo cadastrados ('+stamp+').');
+  renderComposition();
+ }catch(_){
+  if(!composerLoaded)$('admin-compose-workspace').hidden=true;
+  composeStatus('Não foi possível consultar os custos privados. Confirme a conta administrativa e sua conexão.');
+ }finally{composerLoading=false;}
+}
+
 $('admin-dev-form').addEventListener('submit',ev=>{ev.preventDefault();void sendAction('create');});
 $('admin-dev-rotate').addEventListener('click',()=>void sendAction('rotate'));
 $('admin-dev-copy').addEventListener('click',async()=>{
@@ -321,6 +431,11 @@ $('admin-dev-clear').addEventListener('click',()=>{clearCredentials();status('Cr
 $('admin-tab-clients').addEventListener('click',()=>showPanel('clients'));
 $('admin-tab-orders').addEventListener('click',()=>showPanel('orders'));
 $('admin-tab-kits').addEventListener('click',()=>showPanel('kits'));
+$('admin-tab-composer').addEventListener('click',()=>showPanel('composer'));
+$('admin-compose-refresh').addEventListener('click',()=>void loadCompositionCatalog(true));
+$('admin-compose-add').addEventListener('click',()=>{if(composerLines.length>=80){composeStatus('Limite de 80 linhas atingido.');return;}composerLines.push({sku:'',quantity:1});renderComposition();$('admin-compose-rows').querySelector('tr:last-child select')?.focus();});
+$('admin-compose-clear').addEventListener('click',()=>{if(composerLines.some(x=>x.sku)&&!window.confirm('Limpar esta composição?'))return;composerLines=[{sku:'',quantity:1}];renderComposition();composeStatus('Composição limpa. Custos cadastrados preservados.');});
+$('admin-compose-copy').addEventListener('click',async()=>{const txt=composeCore()?.summary(composerLines,composerCatalog);if(!txt){composeStatus('Selecione ao menos um equipamento antes de copiar.');return;}try{await navigator.clipboard.writeText(txt);composeStatus('Composição copiada. Você pode enviar o resumo para revisão.');}catch(_){composeStatus('Não foi possível copiar automaticamente neste navegador.');}});
 $('admin-refresh-kits').addEventListener('click',()=>void loadKitPreviews());
 
 $('admin-kit-status-filter').addEventListener('change',renderKitPreviews);
