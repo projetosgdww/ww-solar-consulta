@@ -69,3 +69,27 @@ test('condicionadores de ar referenciam modelos 2025 e potência elétrica em ca
  }
  assert.match(js,/Ar-condicionado inverter varia/);
 });
+
+test('sugestão utiliza catálogo real com geração igual ou superior, sem inventar produto',()=>{
+ const catalog=require('../cliente-core.js');
+ const kits=[
+  {id:'KIT-300',kind:'kit',active:true,approved:true,price:4300,title:'Kit 300',payload:{potenciaKwp:2.4}},
+  {id:'KIT-450',kind:'kit',active:true,approved:true,price:6200,title:'Kit 450',payload:{potenciaKwp:3.6}},
+  {id:'KIT-INATIVO',kind:'kit',active:false,approved:true,price:100,title:'Inativo',payload:{potenciaKwp:3}},
+ ];
+ assert.equal(catalog.recommendedKit(kits,385)?.id,'KIT-450');
+ assert.equal(catalog.recommendedKit(kits,900),null);
+ assert.equal(catalog.estimatedGeneration(kits[1]),460.8);
+ const app=fs.readFileSync('cliente-dev.js','utf8');
+ assert.match(app,/wwsolar:consumo-recommend/);
+ assert.match(app,/C\.recommendedKit\(products,target\)/);
+ assert.match(app,/wwsolar:consumo-open-kit/);
+ assert.match(app,/setTarget\(Math\.max\(300,Math\.min\(2200,kwh\)\)\)/);
+ assert.match(js,/wwsolar:consumo-result/);
+ assert.match(js,/wwsolar:consumo-open-kit/);
+ assert.match(html,/id="ww-consumo-suggestion"/);
+ assert.match(html,/id="ww-consumo-find-kit"/);
+ assert.match(html,/Prévia comercial/);
+ assert.match(js,/https:\/\/wa\.me\/5585992723637/);
+ assert.doesNotMatch(js,/\.insert\(|\.update\(|\.upsert\(|wwsolar-quote/);
+});
