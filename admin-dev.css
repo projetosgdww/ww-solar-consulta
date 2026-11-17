@@ -54,3 +54,61 @@
 /* Associação auditável entre cada projeto elétrico e seu kit. */
 .admin-order-item-description{display:flex;flex-direction:column;gap:4px;min-width:0;flex:1}
 .admin-linked-project-hint{font-size:11px;line-height:1.5;color:#37604f;overflow-wrap:anywhere}
+
+
+/* Composição simples no admin: somente seleção de peças, quantidades e valores.
+   Os custos são consultados sob RLS, nunca incorporados em arquivos estáticos. */
+.admin-compose-panel .admin-section-row h2 em{font-style:normal;color:#FA4100}
+.admin-compose-panel .admin-section-row p{max-width:740px;font-size:13px;line-height:1.6}
+.admin-compose-panel .section-label{margin:0 0 6px}
+.admin-compose-panel .client-status{font-size:12px;color:#527466;margin-bottom:12px}
+.admin-compose-table-scroll{width:100%;overflow-x:auto;overscroll-behavior-inline:contain;border:1px solid #e3ebe5;border-radius:14px}
+.admin-compose-table{width:100%;min-width:925px;border-collapse:collapse;table-layout:fixed;font-size:12px;color:#19332d}
+.admin-compose-table th{background:#f6f9f7;color:#214339;font-size:11px;letter-spacing:.025em;font-weight:800;text-align:left;padding:13px 11px;border-bottom:1px solid #e0e9e2}
+.admin-compose-table th:nth-child(1){width:130px}
+.admin-compose-table th:nth-child(2){width:140px}
+.admin-compose-table th:nth-child(3){width:auto}
+.admin-compose-table th:nth-child(4){width:80px}
+.admin-compose-table th:nth-child(5),.admin-compose-table th:nth-child(6){width:132px}
+.admin-compose-table th:nth-child(7){width:43px}
+.admin-compose-table td{padding:9px 11px;border-bottom:1px solid #edf2ee;vertical-align:middle;overflow-wrap:anywhere}
+.admin-compose-table tbody tr:last-child td{border-bottom:1px solid #e3ebe5}
+.admin-compose-table .admin-compose-code{font-size:11px;color:#507469;font-weight:700}
+.admin-compose-table select{
+ width:100%;max-width:100%;min-height:41px;padding:8px 9px;
+ background:white;border:1px solid #c9dcd0;border-radius:8px;
+ font:inherit;font-size:12px;color:#1d3a30;cursor:pointer;
+}
+.admin-compose-table input[type=number]{
+ width:100%;min-width:0;min-height:41px;border:1px solid #c9dcd0;
+ border-radius:8px;background:white;text-align:center;
+ color:#19332d;font:inherit;font-weight:750;
+}
+.admin-compose-table input:focus-visible,.admin-compose-table select:focus-visible{
+ outline:2px solid #81F002;outline-offset:2px;border-color:#529c18;
+}
+.admin-compose-table .admin-compose-unit,.admin-compose-table .admin-compose-line{
+ white-space:nowrap;text-align:right;font-variant-numeric:tabular-nums;
+}
+.admin-compose-table .admin-compose-line{font-weight:800}
+.admin-compose-table .admin-compose-remove{
+ width:31px;height:31px;border:0;border-radius:7px;background:transparent;
+ color:#a74c29;cursor:pointer;font-size:21px;line-height:1;
+}
+.admin-compose-table .admin-compose-remove:hover{background:#fff0e9;color:#FA4100}
+.admin-compose-table tfoot td{padding:17px 11px;font-size:14px;background:#f9fbf9;border:0}
+.admin-compose-table .admin-compose-total-label{text-align:right;font-weight:800;color:#1b3a2f}
+.admin-compose-table .admin-compose-total-value{text-align:right;font-size:18px;font-weight:900;color:#082b43;white-space:nowrap}
+.admin-compose-bottom{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;margin-top:16px}
+.admin-compose-actions{display:flex;flex-wrap:wrap;gap:9px}
+.admin-compose-actions .button{font-size:12px;min-height:41px;padding:9px 14px}
+.admin-compose-actions .button-accent{background:#FA4100;color:#191919;border-color:#FA4100}
+.admin-compose-actions .button-accent:hover{background:#ed3c00;color:#191919}
+.admin-compose-bottom .client-muted{font-size:12px;margin:0}
+.admin-compose-disclaimer{font-size:11px;line-height:1.55;color:#637d71;margin:14px 0 0}
+@media(max-width:720px){
+ .admin-compose-panel{padding:17px 12px}
+ .admin-compose-table{min-width:885px}
+ .admin-compose-bottom{align-items:flex-start;flex-direction:column}
+ .admin-compose-actions .button{flex:0 0 auto}
+}
