@@ -516,16 +516,32 @@
       }
       card.append(stats);
 
-      // Mantém as características técnicas do produto e as libera somente após login.
-      if(S.user){
-        const more=el('span',undefined,'sr-only');
-        more.textContent=[
-          x.placas?number(x.placas)+' módulos de '+number(x.moduloWp)+' Wp':'',
-          x.inversor?'Inversor: '+x.inversor:'',
-          x.tipoRede?'Tipo de ligação: '+x.tipoRede:''
-        ].filter(Boolean).join('. ');
-        card.append(more);
+      // Painel de detalhes: preserva a configuração e as condições técnicas
+      // sem alterar o modelo de apresentação do card fechado.
+      const detailPanel=el('div',undefined,'ww-kit-detail-panel');
+      detailPanel.id='ww-kit-detail-'+p.id;
+      detailPanel.hidden=true;
+      const detailTitle=el('strong','Configuração do kit','ww-kit-detail-title');
+      detailPanel.append(detailTitle);
+      const detailSpecs=el('dl',undefined,'ww-kit-detail-specs');
+      for(const [label,value] of [
+        ['Módulos',x.placas?number(x.placas)+' × '+number(x.moduloWp)+' Wp':'Conferir na cotação'],
+        ['Inversor',String(x.inversor||'Conferir na cotação')],
+        ['Tipo de ligação',String(x.tipoRede||'Conforme avaliação do local')],
+        ['Identificação técnica',kitVariantLabel(p)]
+      ]){
+        const item=el('div');
+        item.append(el('dt',label),el('dd',value));
+        detailSpecs.append(item);
       }
+      detailPanel.append(detailSpecs);
+      if(x.origemKit==='fotus_pronto'){
+        detailPanel.append(el('p',
+          'Kit pronto do fornecedor · Frete incluso para Canindé/CE. Prazo previsto: até 15 dias úteis, podendo acrescentar até 5 dias úteis após confirmação do pedido e da disponibilidade. Para outras cidades, frete sob consulta.',
+          'ww-kit-detail-note'));
+      }
+      const addButton=btn('Adicionar à cotação +',()=>add(p.id),'button button-accent ww-kit-add');
+      if(S.user)detailPanel.append(addButton);
 
       const commercial=el('div',undefined,'ww-kit-commercial');
       commercial.append(el('span','Valor dos equipamentos','ww-kit-price-label'));
@@ -536,12 +552,20 @@
       const hint=el('p',undefined,'ww-kit-login-hint');
       hint.append(wwKitIcon('info'),el('span','Consulte detalhes e condições após entrar.'));
       commercial.append(hint);
-      // Preserva integralmente a ação existente: login ou adicionar à cotação.
-      const action=btn('Ver Detalhes do Kit →',
-        ()=>S.user?add(p.id):requestLoginFor(p.id),'details-button ww-kit-cta');
-      action.setAttribute('aria-label',S.user?'Adicionar '+p.title+' à cotação':'Entrar para consultar detalhes de '+p.title);
+      // Ao clicar, mostrar detalhes do kit; o carrinho continua com add(p.id).
+      // Sem login, manter a autenticação original antes de permitir cotação.
+      const action=btn('Ver Detalhes do Kit →',()=>{
+        if(!S.user){requestLoginFor(p.id);return;}
+        const expanded=detailPanel.hidden;
+        detailPanel.hidden=!expanded;
+        action.setAttribute('aria-expanded',String(expanded));
+        action.textContent=expanded?'Ocultar detalhes do kit ↑':'Ver Detalhes do Kit →';
+      },'details-button ww-kit-cta');
+      action.setAttribute('aria-label',S.user?'Ver detalhes de '+p.title:'Entrar para consultar detalhes de '+p.title);
+      action.setAttribute('aria-expanded','false');
+      action.setAttribute('aria-controls',detailPanel.id);
       commercial.append(action);
-      card.append(commercial);
+      card.append(commercial,detailPanel);
       card.append(el('p',
         'Estimativa de geração. Equipamentos, compatibilidade e instalação sujeitos à validação técnica antes da contratação. A geração real varia conforme a localidade, as condições de instalação e as condições climáticas de cada mês.',
         'ww-kit-disclaimer'));
