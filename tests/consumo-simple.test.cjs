@@ -25,8 +25,8 @@ test('V1 fica no menu do catálogo, não exige login ou altera pedidos',()=>{
  assert.match(html,/href="#consumo"/);
  assert.match(html,/id="ww-consumo-form"/);
  assert.match(html,/id="ww-consumo-total"/);
- assert.match(html,/consumo-core\.js\?v=20261117-consumo-v1/);
- assert.match(html,/consumo-ui\.js\?v=20261117-consumo-v1/);
+ assert.match(html,/consumo-core\.js\?v=20261117-consumo-v2/);
+ assert.match(html,/consumo-ui\.js\?v=20261117-consumo-v2/);
  assert.match(js,/navigator\.clipboard\.writeText/);
  assert.doesNotMatch(js,/supabase|wwsolar_carts|localStorage|fetch\(/i);
  assert.match(css,/#consumo \.ww-consumo-card/);
