@@ -36,16 +36,44 @@
     "sourceUrl": "https://www.samsung.com/br/lifestyle-tvs/the-serif/ls01b-55-inch-the-serif-qled-4k-smart-tv-cloud-white-qn55ls01bagxzd/"
   },
   {
-    "id": "computador",
-    "label": "Computador",
+    "id": "notebook-comum",
+    "label": "Notebook comum",
     "mode": "watts",
-    "manual": true
+    "watts": 50,
+    "basis": "estimativa",
+    "note": "Valor fixo escolhido dentro da faixa informada (30–65 W); não é potência medida de um modelo."
   },
   {
-    "id": "computador-perifericos",
-    "label": "Computador com impressora",
+    "id": "notebook-gamer",
+    "label": "Notebook gamer",
     "mode": "watts",
-    "manual": true
+    "watts": 200,
+    "basis": "estimativa",
+    "note": "Valor fixo escolhido dentro da faixa informada (130–300 W); não é potência medida de um modelo."
+  },
+  {
+    "id": "pc-escritorio",
+    "label": "PC de escritório",
+    "mode": "watts",
+    "watts": 225,
+    "basis": "estimativa",
+    "note": "Valor fixo escolhido dentro da faixa informada (150–300 W); não é potência medida de um modelo."
+  },
+  {
+    "id": "pc-gamer",
+    "label": "PC gamer intermediário",
+    "mode": "watts",
+    "watts": 550,
+    "basis": "estimativa",
+    "note": "Valor fixo escolhido dentro da faixa informada (450–650 W); não é potência medida de um modelo."
+  },
+  {
+    "id": "pc-extremo",
+    "label": "PC extremo",
+    "mode": "watts",
+    "watts": 950,
+    "basis": "estimativa",
+    "note": "Valor fixo escolhido dentro da faixa informada (750–1200 W); não é potência medida de um modelo."
   },
   {
     "id": "monitor",
@@ -54,14 +82,6 @@
     "watts": 25,
     "model": "Samsung Essential S3 24 polegadas (máximo)",
     "sourceUrl": "https://www.samsung.com/br/monitors/full-hd-1080p/essential-monitor-s3-s32gf-24-inch-fhd-ips-120hz-ls24f320galmzd/"
-  },
-  {
-    "id": "notebook",
-    "label": "Notebook",
-    "mode": "watts",
-    "watts": 65,
-    "model": "Lenovo IdeaPad Slim 3i (potência do adaptador, não consumo médio)",
-    "sourceUrl": "https://www.lenovo.com/br/pt/p/laptops/ideapad/ideapad-s-series/lenovo-ideapad-slim-3i-gen-11-15-inch-intel/83wa001jbo"
   },
   {
     "id": "lampada",
@@ -81,7 +101,7 @@
   },
   {
     "id": "airfryer",
-    "label": "Air fryer / fritadeira sem óleo",
+    "label": "Air fryer",
     "mode": "watts",
     "watts": 1500,
     "model": "Electrolux EAF170",
@@ -102,10 +122,48 @@
     "manual": true
   },
   {
-    "id": "arcondicionado",
-    "label": "Ar-condicionado",
+    "id": "ar-9000",
+    "label": "Ar-condicionado Split 9.000 BTU/h",
     "mode": "watts",
-    "manual": true
+    "watts": 780,
+    "basis": "inmetro",
+    "model": "AGRATTO ZICST9QF-02",
+    "source": "Inmetro PBE · 31/12/2025, páginas 1 e 67: potência consumida a 35 °C, carga total (780 W)",
+    "sourceUrl": "https://pbe.inmetro.gov.br/",
+    "variable": true
+  },
+  {
+    "id": "ar-12000",
+    "label": "Ar-condicionado Split 12.000 BTU/h",
+    "mode": "watts",
+    "watts": 1172,
+    "basis": "inmetro",
+    "model": "AGRATTO LCST12QF-02I",
+    "source": "Inmetro PBE · 31/12/2025, páginas 1 e 67: potência consumida a 35 °C, carga total (1.172 W)",
+    "sourceUrl": "https://pbe.inmetro.gov.br/",
+    "variable": true
+  },
+  {
+    "id": "ar-18000",
+    "label": "Ar-condicionado Split 18.000 BTU/h",
+    "mode": "watts",
+    "watts": 1691,
+    "basis": "inmetro",
+    "model": "AGRATTO LCS18F - 02I",
+    "source": "Inmetro PBE · 31/12/2025, páginas 2 e 68: potência consumida a 35 °C, carga total (1.691 W)",
+    "sourceUrl": "https://pbe.inmetro.gov.br/",
+    "variable": true
+  },
+  {
+    "id": "ar-24000",
+    "label": "Ar-condicionado Split 24.000 BTU/h",
+    "mode": "watts",
+    "watts": 2197,
+    "basis": "inmetro",
+    "model": "AGRATTO ZICST24QF-02",
+    "source": "Inmetro PBE · 31/12/2025, páginas 1 e 67: potência consumida a 35 °C, carga total (2.197 W)",
+    "sourceUrl": "https://pbe.inmetro.gov.br/",
+    "variable": true
   },
   {
     "id": "geladeira",
