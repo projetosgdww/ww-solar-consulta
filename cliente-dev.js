@@ -1007,6 +1007,38 @@
       status('A operação não pôde ser concluída ou confirmada. Consulte o histórico antes de tentar de novo.');
     }finally{S.checkoutPending=false;updateClock();}
   }
+  // Ponte somente-leitura: calculadora compara consumo com kits públicos autorizados.
+  // Não acessa custos, nem cria pedidos, nem altera os preços da vitrine.
+  document.addEventListener('wwsolar:consumo-recommend',event=>{
+    const target=Number(event.detail?.kwh);
+    if(!Number.isFinite(target)||target<=0)return;
+    const products=available();
+    const kit=C.recommendedKit(products,target);
+    const max=Math.max(0,...products.filter(p=>p.kind==='kit')
+      .map(p=>C.estimatedGeneration(p)).filter(n=>Number.isFinite(n)&&n>0));
+    document.dispatchEvent(new CustomEvent('wwsolar:consumo-result',{detail:{
+      target,maximum:max,
+      kit:kit?{
+        id:kit.id,title:kit.title,price:kit.price,
+        generation:C.estimatedGeneration(kit),
+        kwp:C.kitKwp(kit)
+      }:null
+    }}));
+  });
+  document.addEventListener('wwsolar:consumo-open-kit',event=>{
+    const id=String(event.detail?.id||'');
+    const kwh=Number(event.detail?.kwh);
+    if(!/^[A-Za-z0-9-]{1,100}$/.test(id)||!Number.isFinite(kwh)||kwh<=0)return;
+    const item=available().find(p=>p.id===id&&p.kind==='kit');
+    if(!item||C.estimatedGeneration(item)<kwh)return;
+    // Reutiliza os filtros de kits existentes, sem selecionar automaticamente compras.
+    S.query='';$('client-search').value='';
+    setTarget(Math.max(300,Math.min(2200,kwh)));
+    setKind('kit');
+    const card=Array.from(document.querySelectorAll('#client-product-grid [data-product-id]'))
+      .find(node=>node.dataset.productId===id);
+    (card||$('catalogo'))?.scrollIntoView({behavior:'smooth',block:'start'});
+  });
   $('client-login-form').addEventListener('submit',login);
   $('client-forgot-password').addEventListener('click',()=>void requestReset());
   $('client-password-setup-form').addEventListener('submit',event=>void savePersonalPassword(event));
