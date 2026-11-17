@@ -3,7 +3,7 @@
 (()=>{
  'use strict';
  if(!('serviceWorker' in navigator)||!window.isSecureContext)return;
- const CURRENT='20261117-pwa-auto-update-v1';
+ const CURRENT=document.querySelector('meta[name="wwsolar-release"]')?.content||'';
  const CHECK_URL='./pwa-release.json';
  const storageKey='wwsolar-pwa-last-reload-target';
  let checking=false;
