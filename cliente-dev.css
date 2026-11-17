@@ -644,3 +644,46 @@ body .header{position:sticky;top:0;z-index:80}
   #projetos .ww-project-notes{padding-top:16px;gap:16px}
   #projetos .ww-project-note{grid-template-columns:20px minmax(0,1fr);column-gap:10px}
 }
+
+
+/* Natal WW Solar (DEV): Papai Noel espiando suavemente atrás do banner.
+   Visual decorativo, sem eventos, sem alteração de altura/layout nem clique. */
+#client-app .client-welcome{position:relative;isolation:isolate}
+#client-app .ww-natal-santa{
+  position:absolute;right:clamp(6px,6.5vw,90px);bottom:-16px;
+  width:108px;height:128px;z-index:1;pointer-events:none;
+  user-select:none;transform:translateY(100px);
+  animation:ww-santa-peek 11s ease-in-out 1.5s infinite;
+}
+#client-app .ww-natal-santa-art{
+  display:block;width:100%;height:100%;overflow:visible;
+  filter:drop-shadow(0 4px 5px rgba(30,45,30,.13));
+}
+#client-app .ww-natal-wave{
+  animation:ww-santa-wave 11s ease-in-out 1.5s infinite;
+}
+#client-app>.hero{position:relative;z-index:2}
+@keyframes ww-santa-peek{
+  0%,13%,84%,100%{transform:translateY(100px)}
+  24%,72%{transform:translateY(0)}
+  48%,53%{transform:translateY(4px)}
+}
+@keyframes ww-santa-wave{
+  0%,28%,65%,100%{transform:rotate(0)}
+  32%,38%,44%,50%,56%{transform:rotate(-16deg)}
+  35%,41%,47%,53%{transform:rotate(8deg)}
+}
+@media(max-width:640px){
+  #client-app .ww-natal-santa{
+    right:0;bottom:-14px;width:61px;height:72px;
+  }
+}
+@media(max-width:380px){
+  #client-app .ww-natal-santa{width:48px;height:58px;right:0}
+}
+@media(prefers-reduced-motion:reduce){
+  #client-app .ww-natal-santa{
+    animation:none;transform:translateY(15px);
+  }
+  #client-app .ww-natal-wave{animation:none}
+}
