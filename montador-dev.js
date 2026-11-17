@@ -226,6 +226,9 @@ async function loadData(){
  status('Dados carregados. Preços de custo cadastrados: '+costs.length+'. Rascunhos salvos: '+drafts.length+'.');
 }
 function renderDrafts(){
+ const batchButton=$('builder-export-batch');
+ batchButton.textContent='Exportar lote ('+drafts.length+') em JSON';
+ batchButton.disabled=!ready||!drafts.length;
  const list=$('builder-drafts-list');list.replaceChildren();
  if(!drafts.length){list.append(el('p','Nenhum rascunho deste fornecedor ainda.','builder-help'));return;}
  for(const d of drafts){
@@ -295,6 +298,69 @@ function exportDraft(){
    status('Arquivo de rascunho exportado. Nenhum kit publicado.');
  }catch(e){status('Revise os valores antes de exportar.');}
 }
+// Exporta todos os kits persistidos do fornecedor, nunca a composição ainda não salva.
+async function exportSavedBatch(){
+ if(!ready||!user){status('Entre com a conta administrativa para exportar.');return;}
+ const button=$('builder-export-batch');
+ button.disabled=true;
+ try{
+   const saved=[];const pageSize=100;
+   for(let offset=0;offset<2000;offset+=pageSize){
+     const {data,error}=await db.from('wwsolar_builder_drafts')
+       .select('id,supplier,title,notes,lines,total_cost_cents,freight_cents,markup_percent,status,created_at,updated_at')
+       .eq('owner_id',user.id).eq('supplier',supplier)
+       .order('created_at',{ascending:true}).order('id',{ascending:true})
+       .range(offset,offset+pageSize-1);
+     if(error)throw Error('Não foi possível consultar os rascunhos salvos para exportação.');
+     const page=Array.isArray(data)?data:[];
+     saved.push(...page);
+     if(page.length<pageSize)break;
+     if(saved.length>=2000)throw Error('O lote ultrapassou o limite de 2.000 rascunhos. Não foi gerado arquivo incompleto.');
+   }
+   if(!saved.length){status('Ainda não há rascunhos salvos deste fornecedor para exportar.');return;}
+   const kits=saved.map(d=>{
+     if(d.status!=='rascunho')throw Error('Existe um registro com situação inesperada no lote: '+String(d.id).slice(0,8));
+     const calc=C.calculate(d.lines,Number(d.freight_cents),Number(d.markup_percent));
+     if(!calc.lines.length||calc.parts_cents!==Number(d.total_cost_cents))
+       throw Error('Há um rascunho com custo divergente: '+String(d.id).slice(0,8)+'. Nenhum arquivo foi gerado.');
+     return {
+       id_rascunho:d.id,referencia:'KIT-'+String(d.id).slice(0,8).toUpperCase(),
+       titulo:d.title,fornecedor:d.supplier,status:'rascunho_nao_publicado',
+       observacoes:d.notes||'',criado_em:d.created_at,atualizado_em:d.updated_at,
+       itens:calc.lines,
+       custo_pecas_centavos:calc.parts_cents,
+       frete_e_despesas_centavos:calc.freight_cents,
+       custo_total_centavos:calc.base_cents,
+       margem_bruta_percentual:calc.margin_percent,
+       margem_bruta_valor_centavos:calc.margin_cents,
+       stringboxes_sem_margem_centavos:calc.pass_through_cents,
+       preco_sugerido_centavos:calc.total_cents,
+       potencia_fv_wp:calc.dc_wp,
+       potencia_inversores_w:calc.ac_w,
+       geracao_mensal_estimada_kwh:calc.monthly_kwh,
+       aviso_tecnico:C.technicalAlert(calc)
+     };
+   });
+   const exportadoEm=new Date().toISOString();
+   const payload={
+     formato:'wwsolar-montador-lote-v1',ambiente:'DEV',
+     situacao:'rascunhos_privados_nao_publicados',fornecedor:supplier,
+     exportado_em:exportadoEm,total_kits:kits.length,
+     calculo:'Margem bruta: (custo das pecas + despesas - stringboxes) / (1 - margem / 100) + stringboxes a preco de custo. Arredondamento para centavos.',
+     observacao:'Exportação de snapshots salvos. Alterações não salvas não são incluídas. Revisar compatibilidade técnica e preços antes da publicação.',
+     kits
+   };
+   const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
+   const u=URL.createObjectURL(blob);
+   const a=document.createElement('a');
+   a.href=u;
+   a.download='wwsolar-lote-'+kits.length+'-kits-'+exportadoEm.slice(0,10)+'.json';
+   a.click();
+   setTimeout(()=>URL.revokeObjectURL(u),1000);
+   status(kits.length+' rascunho(s) exportado(s) em um único JSON. Nada foi publicado. Envie este arquivo para revisão.');
+ }catch(e){status(e.message||'Não foi possível exportar o lote.');}
+ finally{button.disabled=!drafts.length;}
+}
 async function changeSupplier(){
  const next=normalizeSupplier($('builder-supplier').value);
  if(!next){$('builder-supplier').value=supplier;return;}
@@ -329,6 +395,7 @@ $('builder-duplicate').addEventListener('click',()=>{
  status('Cópia pronta para salvar como novo rascunho.');});
 $('builder-reload').addEventListener('click',()=>void loadDraftsOnly());
 $('builder-export').addEventListener('click',exportDraft);
+$('builder-export-batch').addEventListener('click',()=>void exportSavedBatch());
 $('builder-print').addEventListener('click',()=>window.print());
 $('builder-supplier').addEventListener('change',()=>void changeSupplier());
 for(const id of ['builder-freight','builder-markup'])$(id).addEventListener('input',renderLines);
