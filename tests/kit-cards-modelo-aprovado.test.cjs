@@ -65,15 +65,20 @@ test('média e preço do kit de referência sem modificar cálculos originais',(
 });
 test('estilos seguem o card aprovado e permanecem isolados do restante do site',()=>{
  assert.match(css,/#client-app #client-product-grid \.ww-kit-card-v2/);
- assert.match(css,/\.ww-kit-card-v2:before\{[\s\S]*?background:#DB3A00;/);
+ assert.match(css,/\.ww-kit-card-v2:before\{[\s\S]*?linear-gradient\(90deg,#D73700 0%,#FA4100 55%,#FF8A4D 100%\)/);
  assert.match(css,/#client-app #client-product-grid \.ww-kit-quote/);
+ assert.match(css,/background:#81F002;color:#183400/);
+ assert.match(css,/background:#FFFFFF;border:1px solid #e4e9dc/);
+ assert.match(css,/background:#f3ffe8/);
+ assert.match(css,/background:#ff6631;color:#17241a/);
+ assert.match(css,/color:#FA4100;font-size:14px/);
  assert.match(css,/#client-product-grid \.ww-kit-stats/);
  assert.match(css,/grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/);
  assert.match(css,/#client-product-grid \.ww-kit-price/);
  assert.match(css,/#client-app #client-product-grid \.ww-kit-cta/);
- assert.match(css,/background:#009c7c;color:#fff/);
+ assert.match(css,/background:#FA4100;color:#17241a/);
  assert.match(css,/@media\(max-width:360px\)/);
  assert.match(css, /prefers-reduced-motion:reduce/);
- assert.match(html,/cliente-dev\.css\?v=20261117-cards-laranja-v2/);
+ assert.match(html,/cliente-dev\.css\?v=20261117-cards-paleta-v3/);
  assert.match(html,/cliente-dev\.js\?v=20261117-cards-modelo-v2/);
 });
