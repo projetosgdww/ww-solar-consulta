@@ -309,6 +309,11 @@
   const kwh=monthly*quantity;
   return Number.isFinite(kwh)&&kwh<=1000000?kwh:null;
  }
+ function calculateCycles(input){
+  const cycleKwh=Number(input?.cycleKwh),quantity=Number(input?.quantity),cyclesPerWeek=Number(input?.cyclesPerWeek);
+  if(!Number.isFinite(cycleKwh)||cycleKwh<=0||cycleKwh>10000||!Number.isSafeInteger(quantity)||quantity<1||quantity>100||!Number.isSafeInteger(cyclesPerWeek)||cyclesPerWeek<1||cyclesPerWeek>35)return null;
+  return cycleKwh*quantity*cyclesPerWeek*30/7;
+ }
  function total(rows){return (Array.isArray(rows)?rows:[]).reduce((sum,row)=>sum+(Number(row?.kwh)||0),0);}
- return Object.freeze({appliances,format,calculate,calculateMonthly,total,SOURCE_MME,SOURCE_PBE});
+ return Object.freeze({appliances,format,calculate,calculateMonthly,calculateCycles,total});
 });
