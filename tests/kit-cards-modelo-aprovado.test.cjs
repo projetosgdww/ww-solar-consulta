@@ -38,7 +38,9 @@ test('modelo aprovado tem faixas visualmente separadas e ícones vetoriais',()=>
 test('preço e ações originais de login e carrinho são preservados',()=>{
  assert.match(card,/euro\(p\.price\)/);
  assert.match(card,/Ver Detalhes do Kit →/);
- assert.match(card,/\(\)=>S\.user\?add\(p\.id\):requestLoginFor\(p\.id\)/);
+ assert.match(card,/if\(!S\.user\)\{requestLoginFor\(p\.id\);return;\}/);
+ assert.match(card,/btn\('Adicionar à cotação \+',\(\)=>add\(p\.id\)/);
+ assert.match(card,/detailPanel\.hidden=!expanded/);
  assert.match(js,/function add\(id\)/);
  assert.match(js,/function requestLoginFor\(id\)/);
  assert.match(js,/function checkout\(\)/);
