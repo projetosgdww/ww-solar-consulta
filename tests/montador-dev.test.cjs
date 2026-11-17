@@ -193,3 +193,47 @@ test('interface explica margem sobre a venda em vez de acréscimo sobre custo',(
  assert.ok(js.includes('margem_bruta_percentual:c.margin_percent'));
  assert.ok(!js.includes('acrescimo_percentual:c.markup_percent'));
 });
+
+test('botões distintos exportam o kit aberto ou o lote de kits salvos',()=>{
+ assert.ok(html.includes('id="builder-export"'));
+ assert.ok(html.includes('Exportar kit aberto (JSON)'));
+ assert.ok(html.includes('id="builder-export-batch"'));
+ assert.ok(html.includes('Exportar lote (0) em JSON'));
+ assert.ok(html.includes('Somente os kits já salvos entram no lote.'));
+ assert.ok(js.includes("builder-export-batch').addEventListener('click',()=>void exportSavedBatch())"));
+ assert.ok(js.includes("'Exportar lote ('+drafts.length+') em JSON'"));
+});
+test('exportação em lote lê todos os rascunhos atuais com RLS sem incluir alterações não salvas',()=>{
+ const start=js.indexOf('async function exportSavedBatch(){');
+ const end=js.indexOf('async function changeSupplier(){',start);
+ assert.ok(start>=0&&end>start);
+ const chunk=js.slice(start,end);
+ assert.ok(chunk.includes("if(!ready||!user)"));
+ assert.ok(chunk.includes("db.from('wwsolar_builder_drafts')"));
+ assert.ok(chunk.includes(".eq('owner_id',user.id).eq('supplier',supplier)"));
+ assert.ok(chunk.includes(".range(offset,offset+pageSize-1)"));
+ assert.ok(chunk.includes("if(saved.length>=2000)throw Error("));
+ assert.ok(chunk.includes("if(!saved.length)"));
+ assert.ok(chunk.includes("if(d.status!=='rascunho')"));
+ assert.ok(chunk.includes("calc.parts_cents!==Number(d.total_cost_cents)"));
+ assert.ok(chunk.includes("C.calculate(d.lines,Number(d.freight_cents),Number(d.markup_percent))"));
+ assert.ok(chunk.includes("margem_bruta_percentual:calc.margin_percent"));
+ assert.ok(chunk.includes("preco_sugerido_centavos:calc.total_cents"));
+ assert.ok(chunk.includes("itens:calc.lines"));
+ assert.ok(chunk.includes("total_kits:kits.length"));
+ assert.ok(chunk.includes("kits\n"));
+ assert.ok(chunk.includes("wwsolar-lote-"));
+ assert.ok(!chunk.includes("db.from('wwsolar_catalog')"));
+ assert.ok(!chunk.includes('.update('));
+ assert.ok(!chunk.includes('.insert('));
+});
+test('exportação em lote calcula preço por margem em snapshots e mantém stringbox sem margem',()=>{
+ const a={sku:'MOD-625',title:'MÓDULO 625W',category:'modulos',qty:4,unit_cost_cents:62500,module_wp:625,inverter_w:0};
+ const b={sku:'STRING-BOX',title:'STRINGBOX OPCIONAL',category:'stringbox',qty:1,unit_cost_cents:46001,module_wp:0,inverter_w:0};
+ const c=C.calculate([a,b],0,25);
+ assert.equal(c.parts_cents,296001);
+ assert.equal(c.pass_through_cents,46001);
+ assert.equal(c.total_cents,379334);
+ assert.equal(c.margin_cents,83333);
+ assert.equal(c.monthly_kwh,320);
+});
