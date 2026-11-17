@@ -11,11 +11,11 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="WW Solar">
-<link rel="stylesheet" href="./styles.css?v=20261114-legal-v1"><link rel="stylesheet" href="./cliente-dev.css?v=20261117-santa-peek-v1"><link rel="stylesheet" href="./palette-wwsolar.css?v=20261117-cta-escuro-v2">
+<link rel="stylesheet" href="./styles.css?v=20261114-legal-v1"><link rel="stylesheet" href="./cliente-dev.css?v=20261117-natal-scene-v2"><link rel="stylesheet" href="./palette-wwsolar.css?v=20261117-cta-escuro-v2">
 </head>
 <body>
 <a class="skip-link" href="#client-main">Ir para o conteúdo</a>
-<header class="header"><div class="shell header-inner">
+<header class="header"><span class="ww-natal-stars" aria-hidden="true"></span><div class="shell header-inner">
 <a class="brand" href="./index.html" aria-label="WW Solar, início"><span class="brand-symbol" aria-hidden="true"><svg viewBox="0 0 44 44" fill="none"><circle cx="22" cy="22" r="12" stroke="currentColor" stroke-width="4"/><path d="M22 2v7M22 35v7M2 22h7M35 22h7M8 8l5 5M31 31l5 5M36 8l-5 5M13 31l-5 5" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/></svg></span><span class="brand-copy"><strong>WW<span>SOLAR</span></strong><small>CATÁLOGO FOTOVOLTAICO</small></span></a>
 <nav class="nav" id="client-nav" aria-label="Navegação do catálogo" hidden><a href="#simulador" id="client-nav-simulate">Simular</a><a href="#catalogo" id="client-kits-link">Ver kits</a><a href="#projetos" id="client-projects-link">Projetos</a></nav>
 <div class="client-header-actions"><button id="client-login-open" class="client-account-link client-signin" type="button" hidden>Entrar ↗</button><a id="client-admin-link" class="client-account-link" href="./admin-dev.html" hidden>Admin</a><button id="client-logout" class="client-account-link client-exit" type="button" hidden aria-label="Sair da conta">Sair ↗</button></div>
@@ -64,35 +64,10 @@
 <p class="client-public-preview-banner" id="client-preview-disclaimer" hidden role="status">Prévia DEV da vitrine pública · preços e informações da captura de 16/11/2026, sujeitos à confirmação. O catálogo oficial não foi alterado.</p>
 <div class="shell client-welcome" id="client-welcome">
  <div><h2 class="client-greeting">Olá, bem-vindo.</h2><p id="client-identity" class="client-muted"></p></div>
- <!-- Decoração sazonal exclusivamente visual: espiando por trás do banner. -->
- <div class="ww-natal-santa" aria-hidden="true">
-  <svg class="ww-natal-santa-art" viewBox="0 0 110 130" xmlns="http://www.w3.org/2000/svg" focusable="false">
-   <defs>
-    <linearGradient id="ww-santa-red" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#FA4100"/><stop offset="1" stop-color="#b62b19"/></linearGradient>
-   </defs>
-   <g class="ww-natal-body">
-    <path d="M23 104q-2-25 20-34h25q22 9 20 34v26H23z" fill="url(#ww-santa-red)" stroke="#8d2719" stroke-width="2"/>
-    <path d="M50 79h11v51H50z" fill="#fff4e4"/>
-    <rect x="40" y="108" width="31" height="9" rx="4" fill="#382f2b"/>
-    <rect x="51" y="107" width="10" height="11" rx="2" fill="#ffd56e" stroke="#bb8d2c" stroke-width="1.5"/>
-    <path d="M20 94q-8 8-1 16" fill="none" stroke="#d9301b" stroke-width="13" stroke-linecap="round"/>
-    <ellipse cx="18" cy="110" rx="10" ry="8" fill="#fff4e4" stroke="#ddcfbc" stroke-width="1.6"/>
-    <g class="ww-natal-wave" style="transform-origin:86px 88px">
-     <path d="M84 97q11-6 14-21" fill="none" stroke="#d9301b" stroke-width="12" stroke-linecap="round"/>
-     <path d="M96 75q-10-14-7-20m7 20q4-18 8-19m-8 19q11-12 12-9" fill="none" stroke="#fff1de" stroke-width="5.5" stroke-linecap="round"/>
-     <ellipse cx="96" cy="76" rx="8" ry="7" fill="#fff4e4" stroke="#e2cfb7" stroke-width="1"/>
-    </g>
-    <ellipse cx="55" cy="58" rx="30" ry="31" fill="#ffddb5" stroke="#dfb892" stroke-width="2"/>
-    <path d="M26 65q-4 20 15 34q15 10 30-1q19-12 14-33q-7 10-18 8q-15 13-28 0q-8 1-13-8" fill="#fffdf7" stroke="#e8e3d9" stroke-width="2"/>
-    <path d="M42 81q13 11 26 0" fill="none" stroke="#e2ddd3" stroke-width="3" stroke-linecap="round"/>
-    <path d="M38 55q4-4 8 0m18 0q4-4 8 0" fill="none" stroke="#694c3b" stroke-width="3" stroke-linecap="round"/>
-    <ellipse cx="55" cy="66" rx="7" ry="5.5" fill="#efb4a0"/>
-    <circle cx="36" cy="64" r="4" fill="#edaa98" opacity=".7"/><circle cx="75" cy="64" r="4" fill="#edaa98" opacity=".7"/>
-    <path d="M18 46Q25 0 63 11q24 6 27 33q-17-8-36-7q-18 0-36 9" fill="url(#ww-santa-red)" stroke="#96261b" stroke-width="2"/>
-    <path d="M18 41q37-13 72-1" fill="none" stroke="#fffaf0" stroke-width="13" stroke-linecap="round"/>
-    <circle cx="18" cy="46" r="11" fill="#fffaf0" stroke="#ede7db" stroke-width="1.7"/>
-   </g>
-  </svg>
+ <!-- Natal WW Solar: composição decorativa inspirada na referência, sem interação. -->
+ <div class="ww-natal-composition" aria-hidden="true">
+  <img class="ww-natal-garland" src="./natal-wwsolar-garland.svg" alt="" draggable="false" decoding="async">
+  <img class="ww-natal-scene" src="./natal-wwsolar-scene.svg" alt="" draggable="false" decoding="async">
  </div>
 </div>
 <section class="hero">
