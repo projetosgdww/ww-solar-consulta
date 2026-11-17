@@ -15,11 +15,12 @@ test('potência média não é apresentada como fato; dados reais estão vincula
  assert.equal(C.appliances.find(x=>x.id==='airfryer').watts,1500);
  for(const x of C.appliances){
   if(x.manual){assert.equal(x.watts,undefined);assert.equal(x.monthlyKwh,undefined);}
+  else if(x.basis==='estimativa'){assert.ok(x.watts>0);assert.ok(x.note);assert.equal(x.model,undefined);}
   else {assert.ok(x.model);assert.match(x.sourceUrl,/^https:\/\//);}
  }
 });
 test('mantém itens das imagens e os da V1 com duplicações mescladas',()=>{
- const must=['churrasqueira','chuveiro','computador','enceradeira','espremedor','exhaustor','ferro','fogao','forno','microondas','freezer','frigobar','geladeira','lavadora','liquidificador','lampada','monitor','multiprocessador','notebook','panela','prancha','sanduicheira','secador','televisao','ventilador','videogame','som','arcondicionado','aspirador','batedeira','bomba','cafeteira','airfryer','outro'];
+ const must=['churrasqueira','chuveiro','pc-escritorio','pc-gamer','pc-extremo','notebook-comum','notebook-gamer','enceradeira','espremedor','exhaustor','ferro','fogao','forno','microondas','freezer','frigobar','geladeira','lavadora','liquidificador','lampada','monitor','multiprocessador','panela','prancha','sanduicheira','secador','televisao','ventilador','videogame','som','ar-9000','ar-12000','ar-18000','ar-24000','aspirador','batedeira','bomba','cafeteira','airfryer','outro'];
  for(const id of must)assert.ok(C.appliances.some(x=>x.id===id),id);
 });
 test('cálculos distintos para Watts, kWh por mês e kWh por ciclo',()=>{
@@ -41,4 +42,30 @@ test('interface não inventa potência; sem login e sem alterar carrinho',()=>{
  assert.doesNotMatch(html,/tabela histórica do MME/);
  assert.doesNotMatch(js,/supabase|wwsolar_carts|localStorage|fetch\(/i);
  assert.match(build,/'consumo-core\.js','consumo-ui\.js'/);
+});
+
+test('PCs e notebooks têm wattagem fixa editável sem intervalos exibidos',()=>{
+ const expected={'notebook-comum':50,'notebook-gamer':200,'pc-escritorio':225,'pc-gamer':550,'pc-extremo':950};
+ for(const [id,watts] of Object.entries(expected)){
+  const item=C.appliances.find(x=>x.id===id);
+  assert.equal(item.watts,watts);assert.equal(item.basis,'estimativa');
+  assert.equal(item.mode,'watts');
+ }
+ assert.ok(!C.appliances.some(x=>x.id==='computador-perifericos'));
+ assert.equal(C.appliances.find(x=>x.id==='airfryer').label,'Air fryer');
+});
+test('condicionadores de ar referenciam modelos 2025 e potência elétrica em carga total',()=>{
+ const models=[
+ ['ar-9000',780,'ZICST9QF-02'],
+ ['ar-12000',1172,'LCST12QF-02I'],
+ ['ar-18000',1691,'LCS18F'],
+ ['ar-24000',2197,'ZICST24QF-02']
+ ];
+ for(const [id,watts,model] of models){
+  const item=C.appliances.find(x=>x.id===id);
+  assert.equal(item.watts,watts);assert.match(item.model,new RegExp(model));
+  assert.equal(item.basis,'inmetro');assert.equal(item.variable,true);
+  assert.match(item.source,/31\/12\/2025/);assert.match(item.source,/carga total/);
+ }
+ assert.match(js,/Ar-condicionado inverter varia/);
 });
