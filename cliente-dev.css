@@ -644,3 +644,37 @@ body .header{position:sticky;top:0;z-index:80}
   #projetos .ww-project-notes{padding-top:16px;gap:16px}
   #projetos .ww-project-note{grid-template-columns:20px minmax(0,1fr);column-gap:10px}
 }
+
+
+/* Calculadora de consumo V1 — DEV: isolada em #consumo e responsiva. */
+#consumo{scroll-margin-top:110px}
+#consumo .section-title p{max-width:770px}
+#consumo .ww-consumo-card{display:grid;grid-template-columns:minmax(0,1fr) minmax(270px,.85fr);gap:24px;align-items:start;background:#fff;border:1px solid #dce8df;border-radius:20px;padding:clamp(17px,3vw,32px);box-shadow:0 12px 33px rgba(20,40,34,.05)}
+#consumo .ww-consumo-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px}
+#consumo .ww-consumo-full{grid-column:1/-1}
+#consumo .ww-consumo-field{display:flex;flex-direction:column;gap:7px;font-size:12px;font-weight:800;color:#234638;min-width:0}
+#consumo .ww-consumo-field input,#consumo .ww-consumo-field select{width:100%;min-width:0;min-height:45px;padding:9px 12px;border:1px solid #cbdcd2;border-radius:10px;color:#163d34;font:inherit;font-size:14px;background:#f8fbf9}
+#consumo .ww-consumo-field :is(input,select):focus-visible{outline:2px solid #81F002;outline-offset:2px}
+#consumo .ww-consumo-current{padding:17px;border-radius:12px;background:#f0fae9;display:flex;flex-direction:column;gap:7px}
+#consumo .ww-consumo-current span{font-size:12px;color:#52705e}
+#consumo .ww-consumo-current strong{font-size:clamp(20px,3vw,27px);color:#102e25;font-variant-numeric:tabular-nums}
+#consumo .ww-consumo-form>.button{background:#FA4100;color:#17241a;border-color:#FA4100;min-height:45px}
+#consumo .ww-consumo-summary{border:1px solid #e2eae1;border-radius:15px;padding:20px;background:#fbfcfa;min-width:0}
+#consumo .ww-consumo-summary-head{display:flex;align-items:center;justify-content:space-between;gap:8px}
+#consumo .ww-consumo-summary-head strong{font-size:17px;color:#0d2e29}
+#consumo .ww-consumo-summary-head small{font-size:11px;color:#71837a}
+#consumo .ww-consumo-summary>.client-muted{font-size:12px;margin:15px 0}
+#consumo .ww-consumo-list{list-style:none;padding:0;margin:14px 0}
+#consumo .ww-consumo-item{display:flex;justify-content:space-between;gap:10px;align-items:center;border-bottom:1px solid #e0e9e2;padding:10px 0}
+#consumo .ww-consumo-item>div{display:flex;flex-direction:column;gap:4px;min-width:0}
+#consumo .ww-consumo-item-name{font-size:12px;font-weight:800;color:#214338;overflow-wrap:anywhere}
+#consumo .ww-consumo-item-desc{font-size:11px;color:#647c71}
+#consumo .ww-consumo-remove{border:0;background:none;color:#b13f11;font:inherit;font-size:11px;font-weight:800;cursor:pointer}
+#consumo .ww-consumo-grand{padding:16px 0;border-top:1px solid #dbe7dd;display:flex;flex-direction:column;gap:5px}
+#consumo .ww-consumo-grand span{font-size:12px;color:#587569}
+#consumo .ww-consumo-grand strong{font-size:clamp(21px,3vw,28px);color:#103a2d;font-variant-numeric:tabular-nums}
+#consumo .ww-consumo-actions{display:flex;flex-wrap:wrap;gap:9px;margin-top:18px}
+#consumo .ww-consumo-actions>.button{font-size:12px;padding:9px 13px}
+#consumo .ww-consumo-note{font-size:11px;line-height:1.65;color:#6e847b;margin:15px 0 0}
+@media(max-width:760px){#consumo .ww-consumo-card{grid-template-columns:1fr;gap:15px}#consumo{scroll-margin-top:160px}}
+@media(max-width:360px){#consumo .ww-consumo-form{gap:10px}#consumo .ww-consumo-field input,#consumo .ww-consumo-field select{padding:8px;font-size:13px}}
