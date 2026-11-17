@@ -142,6 +142,9 @@
    <div id="ww-consumo-monthly-row" class="ww-consumo-full" hidden>
     <p class="ww-consumo-guide">Para este aparelho, usamos o consumo mensal de referência, pois ele não consome sua potência nominal durante todas as 24 horas.</p>
    </div>
+   <label id="ww-consumo-cycle-row" class="ww-consumo-field ww-consumo-full" hidden>Quantas lavagens você faz por semana?
+    <input id="ww-consumo-cycles" type="number" min="1" max="35" value="3" step="1" inputmode="numeric">
+   </label>
    <details id="ww-consumo-manual" class="ww-consumo-manual ww-consumo-full">
     <summary id="ww-consumo-manual-label">Alterar potência do meu aparelho (W)</summary>
     <label class="ww-consumo-field" id="ww-consumo-watts-row">Potência elétrica (W)
@@ -149,6 +152,9 @@
     </label>
     <label class="ww-consumo-field" id="ww-consumo-kwh-row">Consumo na etiqueta (kWh/mês)
      <input id="ww-consumo-monthly" type="number" min="0.1" max="100000" step="any" value="30" inputmode="decimal">
+    </label>
+    <label class="ww-consumo-field" id="ww-consumo-cycle-kwh-row" hidden>Consumo da lavadora (kWh por ciclo)
+     <input id="ww-consumo-cycle-kwh" type="number" min="0.01" max="1000" step="any" value="0.43" inputmode="decimal">
     </label>
    </details>
    <p id="ww-consumo-warning" class="ww-consumo-warning ww-consumo-full" hidden></p>
@@ -167,7 +173,7 @@
    <p id="ww-consumo-status" role="status" class="client-muted"></p>
   </div>
  </div>
- <p class="ww-consumo-note">Referências médias de uma <a href="https://www.mme.gov.br/luzparatodos/downloads/Solucoes_Energeticas_para_a_Amazonia_Biomassa.pdf" target="_blank" rel="noopener noreferrer">tabela histórica do MME/Eletrobras-Procel</a>, não valores exatos dos aparelhos vendidos hoje. Para refrigeradores e ar-condicionado, consulte também o <a href="https://pbe.inmetro.gov.br/" target="_blank" rel="noopener noreferrer">PBE do Inmetro</a> e a etiqueta do modelo. Estimativas não garantem consumo real.</p>
+ <p class="ww-consumo-note">Os valores iniciais vêm de modelos reais identificados nas fichas dos fabricantes. Não são a potência exata de todos os aparelhos. Se a potência ou o consumo não estiverem verificados, informe os dados do seu equipamento. Refrigeradores, freezers e lavadoras utilizam consumo mensal ou por ciclo. Consulte também o <a href="https://pbe.inmetro.gov.br/" target="_blank" rel="noopener noreferrer">PBE do Inmetro</a>. Resultados orientativos, sujeitos às condições de uso.</p>
 </section>
 <section class="catalogue-section" id="catalogo" aria-labelledby="catalogo-title">
       <div class="shell">
@@ -288,7 +294,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0/dist/umd/supabase.min.js" defer></script>
 <script src="./cliente-core.js?v=20261116-quote-snapshot-v4" defer></script>
 <script src="./cliente-dev.js?v=20261117-pwa-auto-update-v1" defer></script>
-<script src="./consumo-core.js?v=20261117-consumo-v2" defer></script>
-<script src="./consumo-ui.js?v=20261117-consumo-v2" defer></script>
+<script src="./consumo-core.js?v=20261117-consumo-v3" defer></script>
+<script src="./consumo-ui.js?v=20261117-consumo-v3" defer></script>
 <script src="./cliente-pwa.js?v=20261117-pwa-auto-update-v1" defer></script>
 </body></html>
