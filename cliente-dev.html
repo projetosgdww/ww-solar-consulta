@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="WW Solar">
-<link rel="stylesheet" href="./styles.css?v=20261114-legal-v1"><link rel="stylesheet" href="./cliente-dev.css?v=20261117-cards-paleta-v3"><link rel="stylesheet" href="./palette-wwsolar.css?v=20261117-cta-escuro-v2">
+<link rel="stylesheet" href="./styles.css?v=20261114-legal-v1"><link rel="stylesheet" href="./cliente-dev.css?v=20261117-project-cards-v1"><link rel="stylesheet" href="./palette-wwsolar.css?v=20261117-cta-escuro-v2">
 </head>
 <body>
 <a class="skip-link" href="#client-main">Ir para o conteúdo</a>
@@ -124,13 +124,62 @@
  <div class="client-projects-card">
   <div class="client-projects-head"><div><strong>Valores de projetos · Grupo B</strong><small>Até 60 kW de potência fotovoltaica instalada</small></div><span>Serviço opcional</span></div>
   <div class="client-projects-grid" id="client-projects-grid">
-   <div class="client-projects-tier"><span>Até 3 kW</span><strong>R$ 300,00</strong><button type="button" class="client-project-add" data-project-id="PRJ-B-003" disabled aria-label="Adicionar projeto de Até 3 kW ao carrinho">Adicionar +</button></div>
-   <div class="client-projects-tier"><span>Acima de 3 e abaixo de 10 kW</span><strong>R$ 400,00</strong><button type="button" class="client-project-add" data-project-id="PRJ-B-010" disabled aria-label="Adicionar projeto de Acima de 3 e abaixo de 10 kW ao carrinho">Adicionar +</button></div>
-   <div class="client-projects-tier"><span>De 10 a menos de 20 kW</span><strong>R$ 500,00</strong><button type="button" class="client-project-add" data-project-id="PRJ-B-020" disabled aria-label="Adicionar projeto de De 10 a menos de 20 kW ao carrinho">Adicionar +</button></div>
-   <div class="client-projects-tier"><span>De 20 a menos de 30 kW</span><strong>R$ 600,00</strong><button type="button" class="client-project-add" data-project-id="PRJ-B-030" disabled aria-label="Adicionar projeto de De 20 a menos de 30 kW ao carrinho">Adicionar +</button></div>
-   <div class="client-projects-tier"><span>De 30 a menos de 40 kW</span><strong>R$ 700,00</strong><button type="button" class="client-project-add" data-project-id="PRJ-B-040" disabled aria-label="Adicionar projeto de De 30 a menos de 40 kW ao carrinho">Adicionar +</button></div>
-   <div class="client-projects-tier"><span>De 40 a menos de 50 kW</span><strong>R$ 800,00</strong><button type="button" class="client-project-add" data-project-id="PRJ-B-050" disabled aria-label="Adicionar projeto de De 40 a menos de 50 kW ao carrinho">Adicionar +</button></div>
-   <div class="client-projects-tier"><span>De 50 a 60 kW</span><strong>R$ 900,00</strong><button type="button" class="client-project-add" data-project-id="PRJ-B-060" disabled aria-label="Adicionar projeto de De 50 a 60 kW ao carrinho">Adicionar +</button></div>
+   <div class="client-projects-tier ww-project-tier-v2" data-project-sku="PRJ-B-003">
+    <div class="ww-project-tier-top"><span class="ww-project-chip">PROJETO ELÉTRICO</span><span class="ww-project-optional">SERVIÇO OPCIONAL</span></div>
+    <span class="ww-project-tier-range">Até 3 kW</span>
+    <small class="ww-project-tier-sku">Grupo B · PRJ-B-003</small>
+    <div class="ww-project-tier-price"><small>Valor do projeto</small><strong>R$ 300,00</strong></div>
+    <p class="ww-project-tier-note">TRT não inclusa · paga pelo contratante</p>
+    <button type="button" class="client-project-add ww-project-tier-action" data-project-id="PRJ-B-003" disabled aria-label="Adicionar projeto de Até 3 kW ao carrinho">Adicionar +</button>
+   </div>
+   <div class="client-projects-tier ww-project-tier-v2" data-project-sku="PRJ-B-010">
+    <div class="ww-project-tier-top"><span class="ww-project-chip">PROJETO ELÉTRICO</span><span class="ww-project-optional">SERVIÇO OPCIONAL</span></div>
+    <span class="ww-project-tier-range">Acima de 3 e abaixo de 10 kW</span>
+    <small class="ww-project-tier-sku">Grupo B · PRJ-B-010</small>
+    <div class="ww-project-tier-price"><small>Valor do projeto</small><strong>R$ 400,00</strong></div>
+    <p class="ww-project-tier-note">TRT não inclusa · paga pelo contratante</p>
+    <button type="button" class="client-project-add ww-project-tier-action" data-project-id="PRJ-B-010" disabled aria-label="Adicionar projeto de Acima de 3 e abaixo de 10 kW ao carrinho">Adicionar +</button>
+   </div>
+   <div class="client-projects-tier ww-project-tier-v2" data-project-sku="PRJ-B-020">
+    <div class="ww-project-tier-top"><span class="ww-project-chip">PROJETO ELÉTRICO</span><span class="ww-project-optional">SERVIÇO OPCIONAL</span></div>
+    <span class="ww-project-tier-range">De 10 a menos de 20 kW</span>
+    <small class="ww-project-tier-sku">Grupo B · PRJ-B-020</small>
+    <div class="ww-project-tier-price"><small>Valor do projeto</small><strong>R$ 500,00</strong></div>
+    <p class="ww-project-tier-note">TRT não inclusa · paga pelo contratante</p>
+    <button type="button" class="client-project-add ww-project-tier-action" data-project-id="PRJ-B-020" disabled aria-label="Adicionar projeto de De 10 a menos de 20 kW ao carrinho">Adicionar +</button>
+   </div>
+   <div class="client-projects-tier ww-project-tier-v2" data-project-sku="PRJ-B-030">
+    <div class="ww-project-tier-top"><span class="ww-project-chip">PROJETO ELÉTRICO</span><span class="ww-project-optional">SERVIÇO OPCIONAL</span></div>
+    <span class="ww-project-tier-range">De 20 a menos de 30 kW</span>
+    <small class="ww-project-tier-sku">Grupo B · PRJ-B-030</small>
+    <div class="ww-project-tier-price"><small>Valor do projeto</small><strong>R$ 600,00</strong></div>
+    <p class="ww-project-tier-note">TRT não inclusa · paga pelo contratante</p>
+    <button type="button" class="client-project-add ww-project-tier-action" data-project-id="PRJ-B-030" disabled aria-label="Adicionar projeto de De 20 a menos de 30 kW ao carrinho">Adicionar +</button>
+   </div>
+   <div class="client-projects-tier ww-project-tier-v2" data-project-sku="PRJ-B-040">
+    <div class="ww-project-tier-top"><span class="ww-project-chip">PROJETO ELÉTRICO</span><span class="ww-project-optional">SERVIÇO OPCIONAL</span></div>
+    <span class="ww-project-tier-range">De 30 a menos de 40 kW</span>
+    <small class="ww-project-tier-sku">Grupo B · PRJ-B-040</small>
+    <div class="ww-project-tier-price"><small>Valor do projeto</small><strong>R$ 700,00</strong></div>
+    <p class="ww-project-tier-note">TRT não inclusa · paga pelo contratante</p>
+    <button type="button" class="client-project-add ww-project-tier-action" data-project-id="PRJ-B-040" disabled aria-label="Adicionar projeto de De 30 a menos de 40 kW ao carrinho">Adicionar +</button>
+   </div>
+   <div class="client-projects-tier ww-project-tier-v2" data-project-sku="PRJ-B-050">
+    <div class="ww-project-tier-top"><span class="ww-project-chip">PROJETO ELÉTRICO</span><span class="ww-project-optional">SERVIÇO OPCIONAL</span></div>
+    <span class="ww-project-tier-range">De 40 a menos de 50 kW</span>
+    <small class="ww-project-tier-sku">Grupo B · PRJ-B-050</small>
+    <div class="ww-project-tier-price"><small>Valor do projeto</small><strong>R$ 800,00</strong></div>
+    <p class="ww-project-tier-note">TRT não inclusa · paga pelo contratante</p>
+    <button type="button" class="client-project-add ww-project-tier-action" data-project-id="PRJ-B-050" disabled aria-label="Adicionar projeto de De 40 a menos de 50 kW ao carrinho">Adicionar +</button>
+   </div>
+   <div class="client-projects-tier ww-project-tier-v2" data-project-sku="PRJ-B-060">
+    <div class="ww-project-tier-top"><span class="ww-project-chip">PROJETO ELÉTRICO</span><span class="ww-project-optional">SERVIÇO OPCIONAL</span></div>
+    <span class="ww-project-tier-range">De 50 a 60 kW</span>
+    <small class="ww-project-tier-sku">Grupo B · PRJ-B-060</small>
+    <div class="ww-project-tier-price"><small>Valor do projeto</small><strong>R$ 900,00</strong></div>
+    <p class="ww-project-tier-note">TRT não inclusa · paga pelo contratante</p>
+    <button type="button" class="client-project-add ww-project-tier-action" data-project-id="PRJ-B-060" disabled aria-label="Adicionar projeto de De 50 a 60 kW ao carrinho">Adicionar +</button>
+   </div>
   </div>
   <p class="client-muted client-projects-hint" id="client-projects-hint">Entre na sua conta para incluir somente o projeto no carrinho, ou escolha um kit com projeto opcional.</p>
   <p class="client-projects-important"><strong>Importante:</strong> a Taxa de Responsabilidade Técnica (TRT) <strong>não está inclusa</strong> e deverá ser paga pelo contratante.</p>
