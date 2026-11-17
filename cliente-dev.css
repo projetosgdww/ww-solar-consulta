@@ -484,3 +484,18 @@ body .header{position:sticky;top:0;z-index:80}
   #client-app #client-product-grid .ww-kit-card-v2,
   #client-app #client-product-grid .ww-kit-cta{transition:none}
 }
+
+
+/* Detalhes progressivos, sem alterar a geometria aprovada quando fechado. */
+#client-product-grid .ww-kit-detail-panel{
+  background:#f6fbf9;border:1px solid #d5e8df;border-radius:12px;
+  padding:13px;margin-top:12px;
+}
+#client-product-grid .ww-kit-detail-panel[hidden]{display:none!important}
+#client-product-grid .ww-kit-detail-title{display:block;font-size:12px;color:#0b3242;margin-bottom:8px}
+#client-product-grid .ww-kit-detail-specs{margin:0;display:grid;gap:6px}
+#client-product-grid .ww-kit-detail-specs>div{display:grid;grid-template-columns:90px minmax(0,1fr);gap:8px;font-size:10px}
+#client-product-grid .ww-kit-detail-specs dt{color:#657e88}
+#client-product-grid .ww-kit-detail-specs dd{margin:0;font-weight:700;overflow-wrap:anywhere;color:#193b45}
+#client-product-grid .ww-kit-detail-note{font-size:10px;color:#53716d;line-height:1.6;margin-top:9px}
+#client-product-grid .ww-kit-add{width:100%;justify-content:center;min-height:42px;margin-top:13px;border-radius:9px;font-size:11px}
