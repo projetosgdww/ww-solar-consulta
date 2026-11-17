@@ -16,8 +16,8 @@
 .section-label,.eyebrow{color:#c33700}
 .client-recommendation,.sim-info{background:#f2f9e8}
 .button-accent,.client-product .button-accent{background:#FA4100;color:#191919}
-/* Somente CTA principal da abertura: texto e seta brancos. */
-.hero-actions a.button-accent,.hero-actions a.button-accent:hover{color:#fff}
+/* CTA principal igual ao botão Explorar opções: texto e seta escuros no laranja. */
+.hero-actions a.button-accent,.hero-actions a.button-accent:hover{color:#191919}
 .button-accent:hover{background:#ed3d00}
 .button-dark{background:#172123;color:#fff}
 .button-dark:hover{background:#283d35}
