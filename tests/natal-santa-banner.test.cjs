@@ -1,0 +1,44 @@
+'use strict';
+const test=require('node:test');
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const html=fs.readFileSync('cliente-dev.html','utf8');
+const css=fs.readFileSync('cliente-dev.css','utf8');
+const js=fs.readFileSync('cliente-dev.js','utf8');
+test('Papai Noel aparece somente como decoração na faixa de boas-vindas',()=>{
+ const start=html.indexOf('<div class="shell client-welcome"');
+ const end=html.indexOf('<section class="hero">',start);
+ assert.ok(start>=0&&end>start);
+ const banner=html.slice(start,end);
+ assert.match(banner,/Olá, bem-vindo\./);
+ assert.match(banner,/id="client-identity"/);
+ assert.match(banner,/class="ww-natal-santa" aria-hidden="true"/);
+ assert.match(banner,/class="ww-natal-santa-art"/);
+ assert.match(banner,/viewBox="0 0 110 130"/);
+ assert.match(banner,/class="ww-natal-wave"/);
+ assert.ok(!banner.includes('onclick='));
+ assert.ok(!banner.includes('href='));
+ assert.equal((html.match(/class="ww-natal-santa"/g)||[]).length,1);
+});
+test('Animação não altera layout nem controla o catálogo',()=>{
+ assert.match(css,/#client-app \.client-welcome\{position:relative;isolation:isolate\}/);
+ assert.match(css,/#client-app \.ww-natal-santa\{/);
+ assert.match(css,/position:absolute;right:clamp\(/);
+ assert.match(css,/pointer-events:none/);
+ assert.match(css,/animation:ww-santa-peek 11s/);
+ assert.match(css,/@keyframes ww-santa-wave/);
+ assert.match(css,/#client-app>\.hero\{position:relative;z-index:2\}/);
+ assert.match(css,/@media\(max-width:640px\)/);
+ assert.match(css,/@media\(prefers-reduced-motion:reduce\)/);
+ assert.match(css,/animation:none;transform:translateY\(15px\)/);
+ assert.match(html,/cliente-dev\.css\?v=20261117-santa-peek-v1/);
+ assert.ok(!js.includes('ww-natal-santa'));
+});
+test('Saudação e ações comerciais existentes continuam intocadas',()=>{
+ assert.match(html,/id="client-identity"/);
+ assert.match(html,/id="client-login-open"/);
+ assert.match(html,/id="client-cart-top"/);
+ assert.match(html,/id="client-product-grid"/);
+ assert.match(html,/id="client-projects-grid"/);
+ assert.match(html,/id="client-drawer-checkout"/);
+});
