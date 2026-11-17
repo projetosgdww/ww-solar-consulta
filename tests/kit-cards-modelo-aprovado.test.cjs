@@ -65,7 +65,7 @@ test('média e preço do kit de referência sem modificar cálculos originais',(
 });
 test('estilos seguem o card aprovado e permanecem isolados do restante do site',()=>{
  assert.match(css,/#client-app #client-product-grid \.ww-kit-card-v2/);
- assert.match(css,/linear-gradient\(90deg,#123b4c/);
+ assert.match(css,/\.ww-kit-card-v2:before\{[\s\S]*?background:#DB3A00;/);
  assert.match(css,/#client-app #client-product-grid \.ww-kit-quote/);
  assert.match(css,/#client-product-grid \.ww-kit-stats/);
  assert.match(css,/grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/);
