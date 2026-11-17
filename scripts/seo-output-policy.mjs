@@ -18,11 +18,12 @@ export function publicCatalogHtml(source,branch){
 }
 export function seoHeaders(branch){
   const base='/*\n  X-Content-Type-Options: nosniff\n  Referrer-Policy: strict-origin-when-cross-origin\n  Permissions-Policy: camera=(), microphone=(), geolocation=()\n\n/*.html\n  Cache-Control: no-store\n\n/sw.js\n  Cache-Control: no-cache\n\n/manifest.webmanifest\n  Cache-Control: no-cache\n';
+  const assets='\n/*.js\n  Cache-Control: no-store\n\n/*.css\n  Cache-Control: no-store\n\n/pwa-release.json\n  Cache-Control: no-store\n';
   const hidden=['/admin.html','/admin-dev.html','/cliente-dev.html','/404.html']
     .map(path=>path+'\n  X-Robots-Tag: noindex, nofollow\n').join('\n');
   const preview='https://ww-solar.pages.dev/*\n  X-Robots-Tag: noindex, nofollow\n\nhttps://:version.ww-solar.pages.dev/*\n  X-Robots-Tag: noindex, nofollow\n';
-  if(isOfficialSeoRelease(branch))return base+'\n'+preview+'\n'+hidden;
-  return base+'\n/*\n  X-Robots-Tag: noindex, nofollow\n\n'+hidden;
+  if(isOfficialSeoRelease(branch))return base+assets+'\n'+preview+'\n'+hidden;
+  return base+assets+'\n/*\n  X-Robots-Tag: noindex, nofollow\n\n'+hidden;
 }
 export function seoDiscoveryFiles(branch){
   if(!isOfficialSeoRelease(branch))return {};
