@@ -121,25 +121,39 @@
 <section class="main-section shell ww-consumo-section" id="consumo" aria-labelledby="ww-consumo-title">
  <div class="section-title"><div><div class="section-label">SIMULAÇÃO / CONSUMO DE ENERGIA</div>
  <h2 id="ww-consumo-title">Quanto seus equipamentos consomem?</h2>
- <p>Selecione um equipamento, informe o uso e veja uma estimativa mensal de consumo.</p></div></div>
+ <p>Escolha o aparelho e diga quanto tempo usa. A potência de referência já vem preenchida.</p></div></div>
  <div class="ww-consumo-card">
   <form id="ww-consumo-form" class="ww-consumo-form">
-   <label class="ww-consumo-field ww-consumo-full">Equipamento
+   <label class="ww-consumo-field ww-consumo-full">Qual equipamento você utiliza?
     <select id="ww-consumo-appliance" aria-label="Selecione um equipamento"></select>
    </label>
-   <label class="ww-consumo-field">Potência elétrica (W)
-    <input id="ww-consumo-watts" type="number" min="1" max="100000" step="any" value="100" inputmode="decimal" required>
-   </label>
-   <label class="ww-consumo-field">Quantidade
+   <p class="ww-consumo-source ww-consumo-full">Referência: <span id="ww-consumo-source">Potência média histórica</span></p>
+   <label class="ww-consumo-field ww-consumo-full">Quantidade de aparelhos
     <input id="ww-consumo-quantity" type="number" min="1" max="100" step="1" value="1" inputmode="numeric" required>
    </label>
-   <label class="ww-consumo-field">Horas por dia
-    <input id="ww-consumo-hours" type="number" min="0.1" max="24" step="any" value="5" inputmode="decimal" required>
-   </label>
-   <label class="ww-consumo-field">Dias por semana
-    <select id="ww-consumo-days"><option value="1">1 dia</option><option value="2">2 dias</option><option value="3">3 dias</option><option value="4">4 dias</option><option value="5">5 dias</option><option value="6">6 dias</option><option value="7" selected>7 dias</option></select>
-   </label>
-   <div class="ww-consumo-current ww-consumo-full"><span>Consumo estimado deste equipamento</span><strong id="ww-consumo-current" aria-live="polite">—</strong></div>
+   <div id="ww-consumo-time-rows" class="ww-consumo-time-rows ww-consumo-full">
+    <label class="ww-consumo-field">Horas por dia
+     <input id="ww-consumo-hours" type="number" min="0.1" max="24" step="any" value="5" inputmode="decimal">
+    </label>
+    <label class="ww-consumo-field">Dias por semana
+     <select id="ww-consumo-days"><option value="1">1 dia</option><option value="2">2 dias</option><option value="3">3 dias</option><option value="4">4 dias</option><option value="5">5 dias</option><option value="6">6 dias</option><option value="7" selected>7 dias</option></select>
+    </label>
+   </div>
+   <div id="ww-consumo-monthly-row" class="ww-consumo-full" hidden>
+    <p class="ww-consumo-guide">Para este aparelho, usamos o consumo mensal de referência, pois ele não consome sua potência nominal durante todas as 24 horas.</p>
+   </div>
+   <details id="ww-consumo-manual" class="ww-consumo-manual ww-consumo-full">
+    <summary id="ww-consumo-manual-label">Alterar potência do meu aparelho (W)</summary>
+    <label class="ww-consumo-field" id="ww-consumo-watts-row">Potência elétrica (W)
+     <input id="ww-consumo-watts" type="number" min="1" max="100000" step="any" value="65" inputmode="decimal">
+    </label>
+    <label class="ww-consumo-field" id="ww-consumo-kwh-row">Consumo na etiqueta (kWh/mês)
+     <input id="ww-consumo-monthly" type="number" min="0.1" max="100000" step="any" value="30" inputmode="decimal">
+    </label>
+   </details>
+   <p id="ww-consumo-warning" class="ww-consumo-warning ww-consumo-full" hidden></p>
+   <p class="ww-consumo-hint ww-consumo-full" id="ww-consumo-note">Consulte etiqueta ou manual para maior precisão.</p>
+   <div class="ww-consumo-current ww-consumo-full"><span>Consumo mensal estimado</span><strong id="ww-consumo-current" aria-live="polite">—</strong></div>
    <button id="ww-consumo-add" type="submit" class="button button-accent ww-consumo-full">+ Adicionar equipamento</button>
   </form>
   <div class="ww-consumo-summary">
@@ -153,7 +167,7 @@
    <p id="ww-consumo-status" role="status" class="client-muted"></p>
   </div>
  </div>
- <p class="ww-consumo-note">Potências iniciais ilustrativas e ajustáveis, não retiradas de uma tabela oficial. Cálculo aproximado: potência × quantidade × horas/dia × dias/semana × 30/7 ÷ 1.000. Geladeira, freezer e ar-condicionado têm consumo variável; prefira dados de kWh da etiqueta do equipamento. O resultado não substitui uma análise técnica.</p>
+ <p class="ww-consumo-note">Referências médias de uma <a href="https://www.mme.gov.br/luzparatodos/downloads/Solucoes_Energeticas_para_a_Amazonia_Biomassa.pdf" target="_blank" rel="noopener noreferrer">tabela histórica do MME/Eletrobras-Procel</a>, não valores exatos dos aparelhos vendidos hoje. Para refrigeradores e ar-condicionado, consulte também o <a href="https://pbe.inmetro.gov.br/" target="_blank" rel="noopener noreferrer">PBE do Inmetro</a> e a etiqueta do modelo. Estimativas não garantem consumo real.</p>
 </section>
 <section class="catalogue-section" id="catalogo" aria-labelledby="catalogo-title">
       <div class="shell">
@@ -274,7 +288,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0/dist/umd/supabase.min.js" defer></script>
 <script src="./cliente-core.js?v=20261116-quote-snapshot-v4" defer></script>
 <script src="./cliente-dev.js?v=20261117-pwa-auto-update-v1" defer></script>
-<script src="./consumo-core.js?v=20261117-consumo-v1" defer></script>
-<script src="./consumo-ui.js?v=20261117-consumo-v1" defer></script>
+<script src="./consumo-core.js?v=20261117-consumo-v2" defer></script>
+<script src="./consumo-ui.js?v=20261117-consumo-v2" defer></script>
 <script src="./cliente-pwa.js?v=20261117-pwa-auto-update-v1" defer></script>
 </body></html>
