@@ -4,16 +4,18 @@ import { execFileSync } from 'node:child_process';
 import { publicCatalogHtml, seoHeaders, seoDiscoveryFiles } from './seo-output-policy.mjs';
 
 // A geração por kWp e o filtro de kits devem passar nos testes antes do deploy.
-execFileSync(process.execPath,['--test','tests/cliente-core.test.cjs','tests/kit-line-commercial-v2.test.cjs','tests/kit-line-eight-review.test.cjs','tests/password-setup.test.cjs','tests/fotus-kits-presentation.test.cjs','tests/projects-standalone.test.cjs','tests/single-cart-panel.test.cjs','tests/project-options-all-kits.test.cjs','tests/header-navigation-right.test.cjs','tests/brand-icon-color.test.cjs','tests/grouped-cart-project.test.cjs','tests/access-whatsapp-login.test.cjs','tests/public-vitrine-preview.test.cjs','tests/quote-project-associations.test.cjs','tests/checkout-commercial-readiness.test.cjs','tests/catalog-only-kits.test.cjs','tests/kit-cards-modelo-aprovado.test.cjs','tests/project-cards-visual.test.cjs','tests/seo-indexacao-local.test.cjs','tests/admin-composition-simple.test.cjs','tests/r2-condicoes-comerciais.test.cjs','tests/pwa-auto-update.test.cjs'],{stdio:'inherit'});
+execFileSync(process.execPath,['--test','tests/cliente-core.test.cjs','tests/kit-line-commercial-v2.test.cjs','tests/kit-line-eight-review.test.cjs','tests/password-setup.test.cjs','tests/fotus-kits-presentation.test.cjs','tests/projects-standalone.test.cjs','tests/single-cart-panel.test.cjs','tests/project-options-all-kits.test.cjs','tests/header-navigation-right.test.cjs','tests/brand-icon-color.test.cjs','tests/grouped-cart-project.test.cjs','tests/access-whatsapp-login.test.cjs','tests/public-vitrine-preview.test.cjs','tests/quote-project-associations.test.cjs','tests/checkout-commercial-readiness.test.cjs','tests/catalog-only-kits.test.cjs','tests/kit-cards-modelo-aprovado.test.cjs','tests/project-cards-visual.test.cjs','tests/seo-indexacao-local.test.cjs','tests/admin-composition-simple.test.cjs','tests/r2-condicoes-comerciais.test.cjs','tests/pwa-auto-update.test.cjs','tests/consumo-simple.test.cjs'],{stdio:'inherit'});
 
 execFileSync(process.execPath,['--check','cliente-dev.js'],{stdio:'inherit'});
 execFileSync(process.execPath,['--check','admin-dev.js'],{stdio:'inherit'});
 execFileSync(process.execPath,['--check','admin-composition-core.js'],{stdio:'inherit'});
+execFileSync(process.execPath,['--check','consumo-core.js'],{stdio:'inherit'});
+execFileSync(process.execPath,['--check','consumo-ui.js'],{stdio:'inherit'});
 const root=process.cwd();
 const out=resolve(root,'dist-cliente-dev');
 const allowed=[
   'cliente-dev.html','cliente-dev.js','cliente-dev.css','palette-wwsolar.css','cliente-dev-config.js','cliente-pwa.js',
-  'cliente-core.js','kit-line-commercial-v2.js','kit-line-eight-review.js','manifest.webmanifest','sw.js','pwa-release.json','privacidade.html','termos.html','legal.css','admin-dev.html','admin-dev.js','admin-dev.css','admin-composition-core.js','styles.css','favicon.svg'
+  'cliente-core.js','consumo-core.js','consumo-ui.js','kit-line-commercial-v2.js','kit-line-eight-review.js','manifest.webmanifest','sw.js','pwa-release.json','privacidade.html','termos.html','legal.css','admin-dev.html','admin-dev.js','admin-dev.css','admin-composition-core.js','styles.css','favicon.svg'
 ];
 await rm(out,{recursive:true,force:true});
 await mkdir(out,{recursive:true});
