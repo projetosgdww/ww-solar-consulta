@@ -25,10 +25,19 @@
   function available(){return S.catalog.filter(p=>p.active===true&&p.approved===true&&Number(p.price)>0&&quotableProduct(p));}
   // O mesmo título/geração pode corresponder a inversores de fabricantes ou potências diferentes.
   // O SKU é a fonte da identidade comercial da composição selecionada.
+  // Só o rótulo público muda: ID canônico permanece nos pedidos e na base.
+  function displaySku(id){
+    const match=/^FOTUS-(\d+)-([A-Z0-9]+)-([0-9]+(?:P[0-9]+)?(?:X[0-9]+)?)$/.exec(String(id||''));
+    if(!match)return String(id||'');
+    const [,panelWp,rawBrand,rawPower]=match;
+    const brand=rawBrand==='TSUN'?'TSUNESS':rawBrand;
+    const power=rawPower.replace(/X(\d+)$/,(_,n)=>'X'+n).replace(/P/g,',');
+    return brand+'-'+power+'KW-'+panelWp;
+  }
   function kitVariantLabel(kit){
     if(!kit||kit.kind!=='kit')return '';
     const inverter=typeof kit.payload?.inversor==='string'?kit.payload.inversor.trim():'';
-    return (inverter?'Inversor: '+inverter+' · ':'')+'SKU: '+kit.id;
+    return (inverter?'Inversor: '+inverter+' · ':'')+'SKU: '+displaySku(kit.id);
   }
   async function authorized(user){
     if(user?.app_metadata?.wwsolar_role==='admin')return true;
@@ -485,14 +494,14 @@
       const advertised=Number.isFinite(band)&&band>0?band:Math.round(monthly||0);
       const card=el('article',undefined,'kit-card ww-kit-card-v2');
       card.dataset.productId=p.id;
-      card.setAttribute('aria-label',p.title+' · SKU: '+p.id);
+      card.setAttribute('aria-label',p.title+' · SKU: '+displaySku(p.id));
       const top=el('div',undefined,'kit-top ww-kit-head');
       top.append(el('span','KIT SOLAR','kit-id ww-kit-chip'));
       top.append(el('span','· Cotação a confirmar','kit-status ww-kit-quote'));
       card.append(top);
       card.append(el('h3','Kit Solar '+decimal(kwp)+' kWp','ww-kit-title'));
       card.append(el('p','Kit solar '+number(advertised)+' kWh/mês','ww-kit-generation'));
-      card.append(el('p','SKU: '+p.id,'ww-kit-sku'));
+      card.append(el('p','SKU: '+displaySku(p.id),'ww-kit-sku'));
 
       const freight=el('div',undefined,'ww-kit-freight');
       const freightIcon=el('span',undefined,'ww-kit-freight-icon');
