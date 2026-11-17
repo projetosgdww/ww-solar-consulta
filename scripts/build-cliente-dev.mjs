@@ -1,6 +1,7 @@
 import { cp, mkdir, rm, writeFile, stat, readFile } from 'node:fs/promises';
 import { resolve, join } from 'node:path';
 import { execFileSync } from 'node:child_process';
+import { publicCatalogHtml, seoHeaders, seoDiscoveryFiles } from './seo-output-policy.mjs';
 
 // A geração por kWp e o filtro de kits devem passar nos testes antes do deploy.
 execFileSync(process.execPath,['--test','tests/cliente-core.test.cjs','tests/kit-line-commercial-v2.test.cjs','tests/kit-line-eight-review.test.cjs','tests/password-setup.test.cjs','tests/fotus-kits-presentation.test.cjs','tests/projects-standalone.test.cjs','tests/single-cart-panel.test.cjs','tests/project-options-all-kits.test.cjs','tests/header-navigation-right.test.cjs','tests/brand-icon-color.test.cjs','tests/brand-lime-icon.test.cjs','tests/grouped-cart-project.test.cjs','tests/access-whatsapp-login.test.cjs','tests/public-vitrine-preview.test.cjs','tests/quote-project-associations.test.cjs','tests/checkout-commercial-readiness.test.cjs','tests/catalog-only-kits.test.cjs','tests/kit-cards-modelo-aprovado.test.cjs','tests/project-cards-visual.test.cjs'],{stdio:'inherit'});
@@ -30,17 +31,12 @@ if(process.env.CF_PAGES_BRANCH==='feat/vitrine-publica-controlada-v1'){
 }
 execFileSync(process.execPath,['scripts/generate-wwsolar-icons.mjs'],{stdio:'inherit'});
 // URLs comerciais limpas sem mudar IDs internos, scripts ou estilos já homologados.
-// Prévia continua noindex; liberação de indexação ocorre somente no build da
-// branch oficial. Nunca remova noindex no JS do cliente: o Google pode não renderizar.
-const isOfficialProduction=process.env.CF_PAGES_BRANCH === 'release/wwsolar-pecas-v1';
+// O HTML do cliente permanece noindex em qualquer preview. Somente o
+// build da branch oficial remove o bloqueio, sem mexer na autenticação.
+const branch=process.env.CF_PAGES_BRANCH;
 const sourceCustomer=(await readFile(join(out,'cliente-dev.html'),'utf8'))
   .replaceAll('./admin-dev.html','./admin.html');
-const robotsNoindex='<meta name="robots" content="noindex,nofollow">';
-if(sourceCustomer.split(robotsNoindex).length!==2)throw Error('Meta robots de segurança ausente no HTML fonte');
-if(!sourceCustomer.includes('<link rel="canonical" href="https://catalogo.wwplatform.com.br/">'))throw Error('Canonical do catálogo ausente');
-const customer=isOfficialProduction
-  ?sourceCustomer.replace(robotsNoindex,'<meta name="robots" content="index,follow">')
-  :sourceCustomer;
+const customer=publicCatalogHtml(sourceCustomer,branch);
 const admin=(await readFile(join(out,'admin-dev.html'),'utf8'))
   .replaceAll('./cliente-dev.html','./cliente.html')
   .replace('Acesso restrito · DEV','Acesso restrito');
@@ -55,27 +51,10 @@ await writeFile(join(out,'cliente-dev.html'),redirect('./cliente.html'));
 await writeFile(join(out,'admin-dev.html'),redirect('./admin.html'));
 await writeFile(join(out,'404.html'),
   '<!doctype html><html lang="pt-BR"><head><meta charset="UTF-8"><meta name="robots" content="noindex,nofollow"><title>Página não encontrada</title></head><body><h1>Página não encontrada</h1><p><a href="/">Abrir WW Solar</a></p></body></html>\\n');
-// Aplicar robôs por AMBIENTE E HOST. O catálogo oficial pode ser indexado,
-// mas todo preview/pages.dev e o painel administrativo permanecem noindex.
-// Cloudflare acumula valores iguais do _headers: não use noindex global na release.
-const securityHeaders='/*\n  X-Content-Type-Options: nosniff\n  Referrer-Policy: strict-origin-when-cross-origin\n  Permissions-Policy: camera=(), microphone=(), geolocation=()\n\n/*.html\n  Cache-Control: no-store\n\n/sw.js\n  Cache-Control: no-cache\n\n/manifest.webmanifest\n  Cache-Control: no-cache\n';
-const privatePaths=['/admin.html','/admin-dev.html','/cliente-dev.html','/404.html'];
-const privateHeaders=privatePaths.map(path=>path+'\n  X-Robots-Tag: noindex, nofollow\n').join('\n');
-const previewHosts='https://ww-solar.pages.dev/*\n  X-Robots-Tag: noindex, nofollow\n\nhttps://:version.ww-solar.pages.dev/*\n  X-Robots-Tag: noindex, nofollow\n';
-const previewGlobal='/*\n  X-Robots-Tag: noindex, nofollow\n';
-await writeFile(join(out,'_headers'),
-  securityHeaders+'\n'+(isOfficialProduction
-    ?previewHosts+'\n'+privateHeaders
-    :previewGlobal+'\n'+privateHeaders));
-// Apenas a release gera URLs públicas de descoberta. O painel não aparece no mapa.
-if(isOfficialProduction){
-  await writeFile(join(out,'robots.txt'),
-    'User-agent: *\nAllow: /\nSitemap: https://catalogo.wwplatform.com.br/sitemap.xml\n');
-  await writeFile(join(out,'sitemap.xml'),
-    '<?xml version="1.0" encoding="UTF-8"?>\n'+
-    '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'+
-    '  <url><loc>https://catalogo.wwplatform.com.br/</loc></url>\n'+
-    '</urlset>\n');
+// Política de robôs é testada para releases e previews; nenhum snapshot
+// interno, preço de fornecedor, painel privado ou kit não aprovado é exposto.
+await writeFile(join(out,'_headers'),seoHeaders(branch));
+for(const [file,body] of Object.entries(seoDiscoveryFiles(branch))){
+  await writeFile(join(out,file),body);
 }
-
 console.log('Build V1 isolado concluído; nenhum catálogo JSON nem arquivo do site público foi copiado.');
