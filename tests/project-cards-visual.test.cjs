@@ -50,21 +50,23 @@ test('seleção e preço seguem a integração original do catálogo',()=>{
 });
 
 
-test('rodapé segue referencia em duas colunas, com informacoes e atendimento',()=>{
- assert.match(section,/class="ww-project-footer-v3"/);
- assert.match(section,/INFORMAÇÕES IMPORTANTES/);
- assert.match(section,/SOLICITAÇÃO E ATENDIMENTO/);
- assert.equal((section.match(/class="ww-project-footer-block/g)||[]).length,2);
- assert.match(css,/#projetos \.ww-project-footer-v3\{/);
- assert.match(css,/grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/);
- assert.match(css,/#projetos \.ww-project-footer-heading-orange\{background:#FA4100\}/);
- assert.match(css,/#projetos \.ww-project-footer-heading-green\{background:#1F543F\}/);
- assert.match(css,/@media\(max-width:740px\)/);
- assert.match(css,/#projetos \.ww-project-footer-v3\{grid-template-columns:1fr/);
+test('informações finais seguem referência discreta em três linhas numeradas',()=>{
+ assert.match(section,/class="ww-project-notes"/);
+ assert.equal((section.match(/class="ww-project-note"/g)||[]).length,3);
+ for(const number of ['01','02','03'])assert.ok(section.includes('>'+number+'</span>'));
+ for(const title of ['TRT não inclusa','Grupo A e potências acima de 60 kW','Solicitação e atendimento'])
+   assert.ok(section.includes('>'+title+'</strong>'),title);
+ assert.doesNotMatch(section,/ww-project-footer-heading|ww-project-footer-block|INFORMAÇÕES IMPORTANTES/);
+ assert.match(css,/#projetos \.ww-project-notes\{/);
+ assert.match(css,/grid-template-columns:minmax\(0,1fr\)/);
+ assert.match(css,/#projetos \.ww-project-note-title\{/);
+ assert.match(css,/#projetos \.ww-project-notes \.client-projects-important/);
+ assert.doesNotMatch(css,/ww-project-footer-heading-orange|ww-project-footer-heading-green/);
+ assert.match(css,/@media\(max-width:700px\)/);
 });
 test('rodapé preserva avisos, estado do acesso e WhatsApp sem duplicar elementos',()=>{
  for(const content of [
-   'a Taxa de Responsabilidade Técnica (TRT)',
+   'A Taxa de Responsabilidade Técnica (TRT)',
    'não está inclusa',
    'deverá ser paga pelo contratante',
    'Para instalações enquadradas no Grupo A ou acima de 60 kW',
@@ -78,5 +80,5 @@ test('rodapé preserva avisos, estado do acesso e WhatsApp sem duplicar elemento
  assert.match(js,/function renderStandaloneProjects\(/);
  assert.match(js,/const hint=\$\('client-projects-hint'\)/);
  assert.match(section,/target="_blank" rel="noopener noreferrer"/);
- assert.match(section,/class="button button-outline ww-project-contact"/);
+ assert.match(section,/class="ww-project-contact"/);
 });
