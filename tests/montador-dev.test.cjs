@@ -12,12 +12,12 @@ const kit=[
  {sku:'MOD-620',title:'MODULO 620W',category:'modulos',qty:5,unit_cost_cents:25000,module_wp:620,inverter_w:0},
  {sku:'INV-3',title:'INVERSOR DEYE 3KW',category:'inversores',qty:1,unit_cost_cents:150000,module_wp:0,inverter_w:3000}
 ];
-test('custo, potência, geração e acréscimo de 25% são determinísticos',()=>{
+test('custo, potência e margem bruta 25% calculada por custo dividido por 0,75',()=>{
  const c=C.calculate(kit,30000,25);
  assert.equal(c.parts_cents,275000);
  assert.equal(c.base_cents,305000);
- assert.equal(c.markup_cents,76250);
- assert.equal(c.total_cents,381250);
+ assert.equal(c.margin_cents,101667);
+ assert.equal(c.total_cents,406667);
  assert.equal(c.dc_wp,3100);
  assert.equal(c.ac_w,3000);
  assert.equal(c.monthly_kwh,397);
@@ -27,7 +27,7 @@ test('cálculo preserva custo unitário e snapshot sem mutar linhas de entrada',
  const original=JSON.stringify(kit);
  const c=C.calculate(kit,0,25);
  assert.equal(c.parts_cents,275000);
- assert.equal(c.total_cents,343750);
+ assert.equal(c.total_cents,366667);
  assert.equal(JSON.stringify(kit),original);
 });
 test('extrai potência dos módulos e inversores sem inferir dados inexistentes',()=>{
@@ -45,6 +45,8 @@ test('impede quantidades, totais e custos absurdos',()=>{
  assert.equal(C.parseBRL('Infinity'),null);
  assert.throws(()=>C.calculate(kit,-1,25));
  assert.throws(()=>C.calculate(kit,0,301));
+ assert.throws(()=>C.calculate(kit,0,100));
+ assert.throws(()=>C.calculate(kit,0,101));
 });
 test('alerta técnico é somente triagem, não aprovação elétrica',()=>{
  const alert=C.technicalAlert(C.calculate(kit));
@@ -96,16 +98,16 @@ test('exportação de rascunho não equivale a publicação',()=>{
  assert.ok(!js.includes('published:true'));
 });
 
-test('string boxes entram pelo valor original do PDF, sem margem de 25%',()=>{
+test('string boxes entram pelo preço do PDF, excluídas da margem de 25%',()=>{
  const box={sku:'SOO-49672',title:'STRING CLAMPER SB 1000V 32A 1E/1S',category:'stringbox',qty:1,unit_cost_cents:46001,module_wp:0,inverter_w:0};
  const kitPlus=C.calculate([...kit,box],30000,25);
  assert.equal(kitPlus.parts_cents,321001);
  assert.equal(kitPlus.pass_through_cents,46001);
- assert.equal(kitPlus.markup_cents,76250);
- assert.equal(kitPlus.total_cents,427251);
+ assert.equal(kitPlus.margin_cents,101667);
+ assert.equal(kitPlus.total_cents,452668);
  const onlyBox=C.calculate([box],0,25);
  assert.equal(onlyBox.total_cents,46001);
- assert.equal(onlyBox.markup_cents,0);
+ assert.equal(onlyBox.margin_cents,0);
 });
 test('37 equipamentos Soollar são abastecidos exclusivamente da tabela privada',()=>{
  assert.ok(js.includes("supplier='Soollar'"));
@@ -164,4 +166,30 @@ test('quantidades salvas sincronizam ao reabrir, duplicar, remover ou começar o
  assert.ok(js.includes("renderLines();renderParts();status('Rascunho carregado."));
  assert.ok(js.includes("if(!Number.isSafeInteger(value)||value<1||value>99)"));
  assert.ok(js.includes("if(!Number.isSafeInteger(quantity)||quantity<1||quantity>99)"));
+});
+
+test('custo dividido por 0,75 não equivale a custo acrescido de 25%',()=>{
+ const p=C.calculate([{...kit[0],qty:4,unit_cost_cents:62500}],0,25);
+ assert.equal(p.base_cents,250000);
+ assert.equal(p.total_cents,333333);
+ assert.equal(p.margin_cents,83333);
+ assert.notEqual(p.total_cents,312500);
+ const freight=C.calculate([{...kit[0],qty:4,unit_cost_cents:62500}],10000,25);
+ assert.equal(freight.total_cents,346667);
+});
+test('conector MC4 é componente regular de custo com pacote de 2 pares',()=>{
+ const mc4={sku:'SOO-440111',title:'CONECTOR SOLAR MC4 MACHO E FÊMEA COM 2 PARES',category:'componentes',qty:1,unit_cost_cents:1000,module_wp:0,inverter_w:0};
+ const c=C.calculate([mc4],0,25);
+ assert.equal(c.parts_cents,1000);
+ assert.equal(c.total_cents,1333);
+ assert.equal(c.margin_cents,333);
+ assert.equal(c.pass_through_cents,0);
+});
+test('interface explica margem sobre a venda em vez de acréscimo sobre custo',()=>{
+ assert.ok(html.includes('Margem bruta desejada sobre o preço de venda (%)'));
+ assert.ok(html.includes('÷ 0,75'));
+ assert.ok(html.includes('max="99.99"'));
+ assert.ok(html.includes('Margem bruta estimada (R$)'));
+ assert.ok(js.includes('margem_bruta_percentual:c.margin_percent'));
+ assert.ok(!js.includes('acrescimo_percentual:c.markup_percent'));
 });
