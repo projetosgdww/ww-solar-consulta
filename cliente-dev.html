@@ -169,6 +169,19 @@
     <ul id="ww-consumo-list" class="ww-consumo-list"></ul>
     <div class="ww-consumo-grand"><span>Consumo mensal total</span><strong id="ww-consumo-total">0,0 kWh/mês</strong></div>
    </div>
+   <div class="ww-consumo-recommend" id="ww-consumo-recommend">
+    <button type="button" class="button button-accent ww-consumo-find-kit" id="ww-consumo-find-kit" disabled>Encontrar meu kit solar ↗</button>
+    <div id="ww-consumo-suggestion" class="ww-consumo-suggestion" hidden aria-live="polite">
+     <span class="ww-consumo-suggestion-eyebrow">SUGESTÃO INICIAL DE KIT</span>
+     <strong id="ww-consumo-suggestion-title"></strong>
+     <span id="ww-consumo-suggestion-stats"></span>
+     <strong id="ww-consumo-suggestion-price"></strong>
+     <p id="ww-consumo-suggestion-explanation"></p>
+     <button type="button" class="button button-accent" id="ww-consumo-open-kit" hidden>Ver kit no catálogo ↗</button>
+     <a id="ww-consumo-custom-link" class="button button-outline" target="_blank" rel="noopener noreferrer" hidden>Solicitar kit personalizado ↗</a>
+    </div>
+    <small class="ww-consumo-disclaimer">Prévia comercial: o consumo simulado pode não incluir todos os aparelhos, outros consumos da residência e diferenças de geração. A escolha definitiva exige avaliação técnica; frete sob consulta, sem instalação ou projeto incluídos.</small>
+   </div>
    <div class="ww-consumo-actions"><button type="button" id="ww-consumo-copy" class="button button-outline" disabled>Copiar resultado</button><button type="button" id="ww-consumo-clear" class="button button-outline">Limpar</button></div>
    <p id="ww-consumo-status" role="status" class="client-muted"></p>
   </div>
