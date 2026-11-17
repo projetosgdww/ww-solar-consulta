@@ -498,8 +498,8 @@
       const freightIcon=el('span',undefined,'ww-kit-freight-icon');
       freightIcon.append(wwKitIcon('truck'));
       const freightText=el('div',undefined,'ww-kit-freight-copy');
-      freightText.append(el('strong',x.freteInclusoParaCaninde?'Frete incluso para Canindé/CE':'Frete sob consulta'));
-      freightText.append(el('small',x.freteInclusoParaCaninde?'Outras cidades sob consulta':'Confirme condições de entrega no atendimento'));
+      freightText.append(el('strong','Frete sob consulta'));
+      freightText.append(el('small','Confirme condições de entrega no atendimento'));
       freight.append(freightIcon,freightText);
       card.append(freight);
 
@@ -537,7 +537,7 @@
       detailPanel.append(detailSpecs);
       if(x.origemKit==='fotus_pronto'){
         detailPanel.append(el('p',
-          'Kit pronto do fornecedor · Frete incluso para Canindé/CE. Prazo previsto: até 15 dias úteis, podendo acrescentar até 5 dias úteis após confirmação do pedido e da disponibilidade. Para outras cidades, frete sob consulta.',
+          'Kit pronto do fornecedor · Venda somente dos equipamentos; projeto elétrico e instalação não inclusos. Frete sob consulta para todas as cidades, inclusive Canindé/CE. Prazo previsto: até 15 dias úteis, podendo acrescentar até 5 dias úteis após confirmação do pedido e da disponibilidade.',
           'ww-kit-detail-note'));
       }
       const addButton=btn('Adicionar à cotação +',()=>add(p.id),'button button-accent ww-kit-add');
@@ -567,7 +567,7 @@
       commercial.append(action);
       card.append(commercial,detailPanel);
       card.append(el('p',
-        'Estimativa de geração. Equipamentos, compatibilidade e instalação sujeitos à validação técnica antes da contratação. A geração real varia conforme a localidade, as condições de instalação e as condições climáticas de cada mês.',
+        'Venda exclusiva dos equipamentos fotovoltaicos. Projeto elétrico e instalação não inclusos. Preços, disponibilidade e frete sujeitos à cotação e confirmação comercial. A geração real varia conforme a localidade, as condições de instalação e as condições climáticas de cada mês.',
         'ww-kit-disclaimer'));
       grid.append(card);
     }
