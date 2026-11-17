@@ -689,3 +689,18 @@ body .header{position:sticky;top:0;z-index:80}
 #consumo .ww-consumo-warning{font-size:12px;line-height:1.6;color:#865219;background:#fff7eb;border:1px solid #f3dfc5;padding:9px 12px;border-radius:9px;margin:0}
 #consumo .ww-consumo-note a{color:#9e431c;text-decoration:underline;text-underline-offset:2px}
 @media(max-width:380px){#consumo .ww-consumo-time-rows{gap:9px}}
+
+
+/* Consumo: sugestão comercial isolada da vitrine e do carrinho. */
+#consumo .ww-consumo-recommend{margin:18px 0 4px;display:grid;gap:11px}
+#consumo .ww-consumo-find-kit{width:100%;min-height:46px;background:#FA4100;color:#17241a;border-color:#FA4100}
+#consumo .ww-consumo-disclaimer{font-size:11px;line-height:1.6;color:#647b71}
+#consumo .ww-consumo-suggestion{display:flex;flex-direction:column;gap:9px;background:#f2faed;border:1px solid #cce8bb;border-radius:13px;padding:16px}
+#consumo .ww-consumo-suggestion[hidden]{display:none!important}
+#consumo .ww-consumo-suggestion-eyebrow{font-size:10px;letter-spacing:.06em;font-weight:900;color:#467023}
+#consumo #ww-consumo-suggestion-title{font-size:17px;line-height:1.35;color:#173c2b}
+#consumo #ww-consumo-suggestion-stats{font-size:12px;line-height:1.5;color:#456655}
+#consumo #ww-consumo-suggestion-price{font-size:17px;color:#123c2b}
+#consumo #ww-consumo-suggestion-explanation{font-size:11px;line-height:1.6;color:#597165;margin:0}
+#consumo .ww-consumo-suggestion .button{width:100%;min-height:42px;text-align:center;display:inline-flex;align-items:center;justify-content:center}
+#consumo .ww-consumo-suggestion .button[hidden]{display:none!important}
