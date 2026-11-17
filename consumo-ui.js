@@ -33,6 +33,7 @@
   monthlyRow.hidden=!isMonthly;timeRows.hidden=isMonthly;
   $('ww-consumo-manual-label').textContent=isMonthly?'Alterar consumo da etiqueta (kWh/mês)':'Alterar potência do meu aparelho (W)';
   $('ww-consumo-watts-row').hidden=isMonthly;
+  $('ww-consumo-kwh-row').hidden=!isMonthly;
   $('ww-consumo-note').textContent=isMonthly
    ?'Para este aparelho, usamos referência de consumo mensal, não potência constante × 24 horas. Se souber o kWh/mês da etiqueta do seu modelo, informe em “Alterar consumo”.'
    :item.variable
