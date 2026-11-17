@@ -15,7 +15,7 @@ test('cards de kits usam somente dados reais e identidade por SKU',()=>{
  assert.match(card,/const monthly=C\.estimatedGeneration\(p\)/);
  assert.match(card,/const band=Number\(x\.faixaGeracaoKwh\)/);
  assert.match(card,/card\.dataset\.productId=p\.id/);
- assert.match(card,/SKU: '\+p\.id/);
+ assert.match(card,/SKU: '\+displaySku\(p\.id\)/);
  assert.match(card,/Kit Solar '\+decimal\(kwp\)\+' kWp'/);
  assert.match(card,/Kit solar '\+number\(advertised\)\+' kWh\/mês'/);
  assert.doesNotMatch(card,/Geração média de '\+number\(advertised\)/);
