@@ -65,6 +65,45 @@
     :item.manual?'Sem modelo confirmado: informe a potência indicada na etiqueta ou no manual.':item.basis==='inmetro'?'Potência elétrica em carga total de modelo PBE; pode variar no uso real.':'A potência indicada é um valor de referência ajustável, não universal.';
   validate();
  }
+ let recommended=null;
+ function clearSuggestion(){
+  recommended=null;
+  $('ww-consumo-suggestion').hidden=true;
+  $('ww-consumo-open-kit').hidden=true;
+  $('ww-consumo-custom-link').hidden=true;
+ }
+ document.addEventListener('wwsolar:consumo-result',event=>{
+  const target=Number(event.detail?.target);
+  if(!Number.isFinite(target)||Math.abs(target-core.total(rows))>0.000001||target<=0)return;
+  const kit=event.detail?.kit;
+  recommended=kit?{id:kit.id,kwh:target}:null;
+  $('ww-consumo-suggestion').hidden=false;
+  $('ww-consumo-open-kit').hidden=!kit;
+  $('ww-consumo-custom-link').hidden=Boolean(kit);
+  if(kit){
+   const gen=Number(kit.generation),kwp=Number(kit.kwp);
+   $('ww-consumo-suggestion-title').textContent=String(kit.title);
+   $('ww-consumo-suggestion-stats').textContent='Geração estimada: '+core.format(gen)+' kWh/mês · '+core.format(kwp)+' kWp';
+   $('ww-consumo-suggestion-price').textContent='Equipamentos: '+new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(Number(kit.price));
+   $('ww-consumo-suggestion-explanation').textContent='Consumo informado: '+core.format(target)+' kWh/mês. Geração superior em '+core.format(gen-target)+' kWh/mês. Não representa dimensionamento definitivo nem compensação integral da conta.';
+  }else{
+   $('ww-consumo-suggestion-title').textContent='Nenhum kit disponível atende ao consumo estimado';
+   $('ww-consumo-suggestion-stats').textContent='Consumo informado: '+core.format(target)+' kWh/mês';
+   $('ww-consumo-suggestion-price').textContent='';
+   $('ww-consumo-suggestion-explanation').textContent='Podemos preparar uma cotação personalizada para essa necessidade.';
+   const msg='Olá! Minha simulação de equipamentos na WW Solar indicou '+core.format(target)+' kWh/mês. Gostaria de cotar um kit solar personalizado. Sei que a estimativa necessita avaliação técnica e que o frete é sob consulta.';
+   $('ww-consumo-custom-link').href='https://wa.me/5585992723637?text='+encodeURIComponent(msg);
+  }
+ });
+ $('ww-consumo-find-kit').addEventListener('click',()=>{
+  const total=core.total(rows);
+  if(!Number.isFinite(total)||total<=0)return;
+  document.dispatchEvent(new CustomEvent('wwsolar:consumo-recommend',{detail:{kwh:total}}));
+ });
+ $('ww-consumo-open-kit').addEventListener('click',()=>{
+  if(!recommended)return;
+  document.dispatchEvent(new CustomEvent('wwsolar:consumo-open-kit',{detail:recommended}));
+ });
  function render(){
   const list=$('ww-consumo-list');list.replaceChildren();
   rows.forEach(row=>{
@@ -81,6 +120,8 @@
   $('ww-consumo-empty').hidden=rows.length!==0;
   $('ww-consumo-results').hidden=rows.length===0;
   $('ww-consumo-copy').disabled=rows.length===0;
+  $('ww-consumo-find-kit').disabled=rows.length===0;
+  clearSuggestion();
   validate();
  }
  choice.addEventListener('change',selectItem);
