@@ -29,12 +29,12 @@ test('modelo aprovado tem faixas visualmente separadas e ícones vetoriais',()=>
  ])assert.ok(card.includes(name),name);
  for(const name of ['truck','power','chart','info'])
    assert.ok(js.includes("wwKitIcon('"+name+"')")||js.includes("icon:'"+name+"'"),name);
- assert.match(card,/Frete incluso para Canindé\/CE/);
- assert.match(card,/Outras cidades sob consulta/);
+ assert.match(card,/Frete sob consulta/);
+ assert.match(card,/Confirme condições de entrega no atendimento/);
  assert.match(card,/POTÊNCIA INSTALADA/);
  assert.match(card,/MÉDIA MENSAL/);
  assert.match(card,/Consulte detalhes e condições após entrar\./);
- assert.match(card,/Estimativa de geração\. Equipamentos, compatibilidade e instalação sujeitos à validação técnica/);
+ assert.match(card,/Venda exclusiva dos equipamentos fotovoltaicos\. Projeto elétrico e instalação não inclusos/);
  assert.match(card,/condições climáticas de cada mês\./);
 });
 test('preço e ações originais de login e carrinho são preservados',()=>{
