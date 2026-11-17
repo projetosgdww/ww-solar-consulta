@@ -80,5 +80,5 @@ test('estilos seguem o card aprovado e permanecem isolados do restante do site',
  assert.match(css,/@media\(max-width:360px\)/);
  assert.match(css, /prefers-reduced-motion:reduce/);
  assert.match(html,/cliente-dev\.css\?v=20261117-project-notes-v3/);
- assert.match(html,/cliente-dev\.js\?v=20261117-cards-modelo-v2/);
+ assert.match(html,/cliente-dev\.js\?v=20261117-pwa-auto-update-v1/);
 });
