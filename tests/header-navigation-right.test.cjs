@@ -28,12 +28,12 @@ test('cliente conserva links e botão Sair, sem alterar fluxo comercial',()=>{
  assert.match(html,/cliente-dev\.js\?v=20261116-kits-only-v1/);
 });
 
-test('CTA principal Simular meu sistema fica branco sem afetar os outros botões',()=>{
+test('CTA principal Simular meu sistema usa texto escuro igual a Explorar opções',()=>{
  const html=read('cliente-dev.html');
  const palette=read('palette-wwsolar.css');
  assert.match(html,/class="button button-accent" href="#simulador">Simular meu sistema/);
- assert.match(html,/palette-wwsolar\.css\?v=20261117-cta-branco-v1/);
- assert.match(palette,/\.hero-actions a\.button-accent,\.hero-actions a\.button-accent:hover\{color:#fff\}/);
+ assert.match(html,/palette-wwsolar\.css\?v=20261117-cta-escuro-v2/);
+ assert.match(palette,/\.hero-actions a\.button-accent,\.hero-actions a\.button-accent:hover\{color:#191919\}/);
  assert.match(palette,/\.button-accent,\.client-product \.button-accent\{background:#FA4100;color:#191919\}/);
 });
 test('aviso sobre geração apresenta só as variações de localidade, instalação e clima',()=>{
