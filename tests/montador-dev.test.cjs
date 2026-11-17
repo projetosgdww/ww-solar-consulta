@@ -83,10 +83,11 @@ test('montador nunca escreve no catálogo comercial e preserva composição hist
  assert.ok(js.includes('total_cost_cents:values.parts_cents'));
  assert.ok(js.includes('currentId=null'));
 });
-test('montador é publicado só na branch DEV e aparece no painel admin',()=>{
+test('montador DEV preservado sem atalho no painel admin',()=>{
  assert.ok(build.includes("CF_PAGES_BRANCH==='feat/wwsolar-montador-kits-dev-v1'"));
  assert.ok(build.includes("await writeFile(join(out,'montador.html'),builder)"));
- assert.ok(admin.includes('href="./montador.html"'));
+ assert.ok(!admin.includes('href="./montador.html"'));
+ assert.ok(!admin.includes('admin-builder-link'));
  assert.ok(html.includes('id="builder-parts-list"'));
  assert.ok(html.includes('id="builder-lines"'));
  assert.ok(html.includes('id="builder-drafts-list"'));
