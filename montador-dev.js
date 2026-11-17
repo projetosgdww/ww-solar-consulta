@@ -19,9 +19,9 @@ const partsFromCosts=()=>costs.map(c=>({id:c.sku,title:c.title,payload:{categori
 function parseInput(id){return C.parseBRL($(id).value);}
 function draftSnapshot(){
  const freight=parseInput('builder-freight');
- const markup=Number($('builder-markup').value);
+ const margin=Number($('builder-markup').value);
  if(freight===null)throw Error('Informe despesas válidas.');
- return C.calculate(lines,freight,markup);
+ return C.calculate(lines,freight,margin);
 }
 function itemCategory(p){return String(p.payload?.categoria||'outros').toLowerCase();}
  // Classificação visual, sem alterar os preços nem criar produtos duplicados.
@@ -198,14 +198,14 @@ function renderLines(){
    const c=draftSnapshot();
    $('builder-cost-total').textContent=C.money(c.parts_cents);
    $('builder-base-total').textContent=C.money(c.base_cents);
-   $('builder-profit').textContent=C.money(c.markup_cents);
+   $('builder-profit').textContent=C.money(c.margin_cents);
    $('builder-stringbox-pass').textContent=C.money(c.pass_through_cents);
    $('builder-final-price').textContent=C.money(c.total_cents);
    $('builder-power').textContent=(c.dc_wp/1000).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})+' kWp';
    $('builder-generation').textContent=c.monthly_kwh.toLocaleString('pt-BR')+' kWh/mês';
    $('builder-inverter-power').textContent=c.ac_w? (c.ac_w/1000).toLocaleString('pt-BR')+' kW':'—';
    $('builder-technical').textContent=C.technicalAlert(c);
- }catch(e){$('builder-technical').textContent='Verifique frete, acréscimo e quantidades: valores inválidos.';}
+ }catch(e){$('builder-technical').textContent='Verifique frete, margem (menor que 100%) e quantidades: valores inválidos.';}
 }
 function newDraft(ask=true){
  if(ask&&lines.length&&!window.confirm('Iniciar um novo rascunho? Alterações não salvas serão descartadas.'))return;
@@ -286,7 +286,7 @@ function exportDraft(){
    const data={format:'wwsolar-montador-v1',status:'rascunho_nao_publicado',
      fornecedor:supplier,titulo:$('builder-title').value.trim()||'Kit sem nome',
      observacoes:$('builder-notes').value.trim(),itens:c.lines,custo_pecas_centavos:c.parts_cents,
-     frete_centavos:c.freight_cents,acrescimo_percentual:c.markup_percent,preco_sugerido_centavos:c.total_cents,
+     frete_centavos:c.freight_cents,margem_bruta_percentual:c.margin_percent,regra_preco:'custo_com_despesas_dividido_por_um_menos_margem',preco_sugerido_centavos:c.total_cents,
      potencia_fv_wp:c.dc_wp,geracao_mensal_estimada_kwh:c.monthly_kwh,exportado_em:new Date().toISOString()};
    const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
    const u=URL.createObjectURL(blob),a=document.createElement('a');
