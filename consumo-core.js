@@ -1,8 +1,6 @@
-/* WW Solar — V2: referências históricas documentadas, não potência exata de cada modelo.
-   Fonte de referência: MME, Soluções Energéticas para a Amazônia, Tabela 8.2
-   (potências médias adaptadas de Eletrobras/Procel, publicação antiga).
-   Para refrigeradores/freezers: referência histórica de kWh/mês, sem converter
-   potência nominal em funcionamento contínuo; confirmar ENCE/Inmetro do modelo. */
+/* WW Solar — Catálogo de equipamentos V3: dados de modelos identificados em fichas de fabricantes.
+   Os valores não são médias universais nem substituem a etiqueta do aparelho.
+   Sem referência confirmada: valor não é preenchido automaticamente. */
 (function(root,factory){
  const api=factory();
  if(typeof module==='object'&&module.exports)module.exports=api;
@@ -19,13 +17,15 @@
     "mode": "watts",
     "watts": 140,
     "model": "Mondial VT-40-B",
-    "sourceUrl": "https://parceiros.mondial.com.br/ventilador-de-mesa-mondial-turbo-vt-40-b/p"
+    "sourceUrl": "https://www.mondial.com.br/ventilador-de-mesa-mondial-turbo-vt-40-b/p"
   },
   {
     "id": "ventilador-teto",
     "label": "Ventilador de teto",
     "mode": "watts",
-    "manual": true
+    "watts": 131,
+    "model": "Britânia Cancun BVT01B (131 W)",
+    "sourceUrl": "https://www.britania.com.br/ventilador-britania-teto-cancun-bvt01b-126w/p"
   },
   {
     "id": "televisao",
@@ -69,13 +69,15 @@
     "mode": "watts",
     "watts": 9,
     "model": "Positivo Casa Inteligente Smart Lâmpada Wi-Fi",
-    "sourceUrl": "https://www.positivocasainteligente.com.br/area-do-cliente/produtos-e-conexao"
+    "sourceUrl": "https://www.positivocasainteligente.com.br/smart-lampada"
   },
   {
     "id": "microondas",
     "label": "Forno micro-ondas",
     "mode": "watts",
-    "manual": true
+    "watts": 1400,
+    "model": "Brastemp BM146AE (potência informada na ficha)",
+    "sourceUrl": "https://www.brastemp.com.br/micro-ondas-brastemp-de-embutir-32-litros-preto-com-18-receitas-pre-programadas-e-design-sofisticado-bm146ae/p"
   },
   {
     "id": "airfryer",
@@ -149,7 +151,7 @@
     "mode": "watts",
     "watts": 550,
     "model": "Mondial C-30 18X",
-    "sourceUrl": "https://www.mondial.com.br/eletroportateis/eletroportateis-para-cozinha/cafeteira"
+    "sourceUrl": "https://www.mondial.com.br/cafeteira-eletrica-dolce-arome-mondial-preto-inox-550w-c-30-18x-1/p"
   },
   {
     "id": "ferro",
@@ -204,8 +206,8 @@
     "label": "Espremedor de frutas",
     "mode": "watts",
     "watts": 250,
-    "model": "Mondial Turbo Premium (referência de linha)",
-    "sourceUrl": "https://www.mondial.com.br/portateis/cozinha/centrifuga"
+    "model": "Mondial E-10 Turbo Premium 250 W",
+    "sourceUrl": "https://www.mondial.com.br/extrator-de-sucos-mondial-turbo-premium-e-10/p"
   },
   {
     "id": "churrasqueira",
@@ -213,7 +215,7 @@
     "mode": "watts",
     "watts": 1800,
     "model": "Mondial CH-09-BI",
-    "sourceUrl": "https://www.mondial.com.br/eletroportateis/eletroportateis-para-cozinha/churrasqueira-eletrica"
+    "sourceUrl": "https://www.mondial.com.br/churrasqueira-elet--ch-09-bi-127v-60hz/p"
   },
   {
     "id": "aspirador",
@@ -243,7 +245,9 @@
     "id": "exhaustor",
     "label": "Exaustor de fogão",
     "mode": "watts",
-    "manual": true
+    "watts": 250,
+    "model": "Mondial coifa/exaustor CF60-01 250 W",
+    "sourceUrl": "https://www.mondial.com.br/coifa-de-parede-mondial-cf60-01/p"
   },
   {
     "id": "enceradeira",
@@ -289,7 +293,7 @@
     "mode": "watts",
     "watts": 1800,
     "model": "Mondial FRN-60-BI",
-    "sourceUrl": "https://www.mondial.com.br/eletroportateis/eletroportateis-para-cozinha/forno-eletrico"
+    "sourceUrl": "https://www.mondial.com.br/forno-eletrico-mondial-family-grill-60-litros-preto-inox-frn-60-bi/p"
   }
 ].map(item=>Object.freeze(item)));
  const format=value=>new Intl.NumberFormat('pt-BR',{minimumFractionDigits:1,maximumFractionDigits:1}).format(value);
