@@ -376,7 +376,7 @@ body .header{position:sticky;top:0;z-index:80}
 }
 #client-app #client-product-grid .ww-kit-card-v2:before{
   content:"";position:absolute;inset:0 0 auto;height:4px;
-  background:linear-gradient(90deg,#123b4c 0%,#0b7583 48%,#25d6a2 100%);
+  background:#DB3A00;
 }
 #client-app #client-product-grid .ww-kit-card-v2:hover{
   border-color:#a9e3d1;box-shadow:0 20px 48px rgba(8,39,58,.14);transform:translateY(-2px);
