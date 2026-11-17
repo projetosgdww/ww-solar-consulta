@@ -41,11 +41,11 @@
    }
    return out;
  }
- function calculate(lines,freightCents=0,markupPercent=25){
+ function calculate(lines,freightCents=0,marginPercent=25){
    const clean=normalizedLines(lines);
    const freight=integer(freightCents,0,CENTS_LIMIT);
-   const markup=Number(markupPercent);
-   if(!clean||freight===null||!Number.isFinite(markup)||markup<0||markup>300)throw Error('invalid_builder_amount');
+   const margin=Number(marginPercent);
+   if(!clean||freight===null||!Number.isFinite(margin)||margin<0||margin>=100)throw Error('invalid_builder_amount');
    let parts=0,passThrough=0,dcWp=0,acW=0,modules=0,inverters=0;
    for(const row of clean){
      const sub=row.qty*row.unit_cost_cents;
@@ -59,13 +59,16 @@
    }
    const base=parts+freight;
    if(!Number.isSafeInteger(base)||base>CENTS_LIMIT)throw Error('amount_out_of_range');
-   // String boxes são opcionais e repassadas exatamente ao custo de PDF.
-   const markupCents=Math.round((base-passThrough)*markup/100);
-   const total=base+markupCents;
+   // Margem bruta sobre o preço final: preço = (custo + frete - string boxes) / (1 - margem).
+   // String boxes são opcionais e repassadas pelo custo exato do PDF, sem margem.
+   const pricedBase=base-passThrough;
+   const pricedTotal=Math.round(pricedBase/(1-margin/100));
+   const marginCents=pricedTotal-pricedBase;
+   const total=pricedTotal+passThrough;
    if(!Number.isSafeInteger(total)||total>CENTS_LIMIT)throw Error('amount_out_of_range');
    const dcAcRatio=acW>0?Math.round(dcWp/acW*100)/100:null;
-   return {lines:clean,parts_cents:parts,freight_cents:freight,base_cents:base,markup_percent:markup,total_cents:total,
-     markup_cents:markupCents,pass_through_cents:passThrough,dc_wp:dcWp,ac_w:acW,modules,inverters,
+   return {lines:clean,parts_cents:parts,freight_cents:freight,base_cents:base,margin_percent:margin,markup_percent:margin,total_cents:total,
+     margin_cents:marginCents,markup_cents:marginCents,pass_through_cents:passThrough,dc_wp:dcWp,ac_w:acW,modules,inverters,
      monthly_kwh:Math.round(dcWp/1000*128),dc_ac_ratio:dcAcRatio};
  }
  function technicalAlert(calc){
