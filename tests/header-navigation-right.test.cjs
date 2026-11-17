@@ -25,7 +25,7 @@ test('cliente conserva links e botão Sair, sem alterar fluxo comercial',()=>{
    assert.ok(html.includes('id="'+id+'"'),id);
  }
  assert.match(html,/cliente-dev\.css\?v=20261117-project-notes-v3/);
- assert.match(html,/cliente-dev\.js\?v=20261117-cards-modelo-v2/);
+ assert.match(html,/cliente-dev\.js\?v=20261117-pwa-auto-update-v1/);
 });
 
 test('CTA principal Simular meu sistema usa texto escuro igual a Explorar opções',()=>{
