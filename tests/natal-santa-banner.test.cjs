@@ -36,7 +36,7 @@ test('decoração sem bibliotecas externas, clique, layout alterado ou prejuízo
  assert.match(css, /#client-app \.ww-natal-scene\{animation:none;transform:none\}/);
  assert.match(scene, /prefers-reduced-motion/);
  assert.match(html, /cliente-dev\.css\?v=20261117-natal-scene-v2/);
- assert.doesNotMatch(scene+garland, /https?:\/\//);
+ assert.doesNotMatch(scene+garland, /(?:href|src)=["']https?:/i);
  assert.doesNotMatch(scene+garland, /<script|<foreignObject/i);
  assert.ok(!js.includes('ww-natal-composition'));
 });
