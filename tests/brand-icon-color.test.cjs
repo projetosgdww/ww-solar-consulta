@@ -11,7 +11,7 @@ test('gerador dos três ícones PWA aplica a mesma cor, com cache renovado',()=>
  const generator=read('scripts/generate-wwsolar-icons.mjs'),sw=read('sw.js');
  assert.match(generator,/\[129,240,2,255\]/);
  assert.doesNotMatch(generator,/\[255,192,53,255\]/);
- assert.match(sw,/wwsolar-public-icons-v2/);
+ assert.match(sw,/wwsolar-public-icons-v3/);
  for(const filename of ['ww-solar-192.png','ww-solar-512.png','apple-touch-icon.png']){
   assert.ok(generator.includes(filename),filename);
   assert.ok(sw.includes(filename),filename);
