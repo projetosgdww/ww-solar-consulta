@@ -48,3 +48,35 @@ test('seleção e preço seguem a integração original do catálogo',()=>{
  assert.match(section,/5585991170375/);
  assert.equal(core.PROJECT_TIERS.length,7);
 });
+
+
+test('rodapé segue referencia em duas colunas, com informacoes e atendimento',()=>{
+ assert.match(section,/class="ww-project-footer-v3"/);
+ assert.match(section,/INFORMAÇÕES IMPORTANTES/);
+ assert.match(section,/SOLICITAÇÃO E ATENDIMENTO/);
+ assert.equal((section.match(/class="ww-project-footer-block/g)||[]).length,2);
+ assert.match(css,/#projetos \.ww-project-footer-v3\{/);
+ assert.match(css,/grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/);
+ assert.match(css,/#projetos \.ww-project-footer-heading-orange\{background:#FA4100\}/);
+ assert.match(css,/#projetos \.ww-project-footer-heading-green\{background:#1F543F\}/);
+ assert.match(css,/@media\(max-width:740px\)/);
+ assert.match(css,/#projetos \.ww-project-footer-v3\{grid-template-columns:1fr/);
+});
+test('rodapé preserva avisos, estado do acesso e WhatsApp sem duplicar elementos',()=>{
+ for(const content of [
+   'a Taxa de Responsabilidade Técnica (TRT)',
+   'não está inclusa',
+   'deverá ser paga pelo contratante',
+   'Para instalações enquadradas no Grupo A ou acima de 60 kW',
+   'O enquadramento é confirmado na análise da unidade consumidora.',
+   'Entre na sua conta para incluir somente o projeto no carrinho',
+   'Falar sobre projetos · (85) 99117-0375 ↗'
+ ])assert.ok(section.includes(content),content);
+ assert.equal((section.match(/id="client-projects-hint"/g)||[]).length,1);
+ assert.equal((section.match(/class="client-projects-important"/g)||[]).length,1);
+ assert.equal((section.match(/wa\.me\/5585991170375/g)||[]).length,1);
+ assert.match(js,/function renderStandaloneProjects\(/);
+ assert.match(js,/const hint=\$\('client-projects-hint'\)/);
+ assert.match(section,/target="_blank" rel="noopener noreferrer"/);
+ assert.match(section,/class="button button-outline ww-project-contact"/);
+});
