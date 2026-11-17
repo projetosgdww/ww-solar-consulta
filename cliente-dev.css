@@ -646,44 +646,67 @@ body .header{position:sticky;top:0;z-index:80}
 }
 
 
-/* Natal WW Solar (DEV): Papai Noel espiando suavemente atrás do banner.
-   Visual decorativo, sem eventos, sem alteração de altura/layout nem clique. */
-#client-app .client-welcome{position:relative;isolation:isolate}
-#client-app .ww-natal-santa{
-  position:absolute;right:clamp(6px,6.5vw,90px);bottom:-16px;
-  width:108px;height:128px;z-index:1;pointer-events:none;
-  user-select:none;transform:translateY(100px);
-  animation:ww-santa-peek 11s ease-in-out 1.5s infinite;
+/* Natal WW Solar — decoração de topo no estilo da referência (somente DEV).
+   Sem mudança da altura da faixa, sem alterar login, catálogo e carrinho. */
+.header .ww-natal-stars{
+  position:absolute;inset:0;z-index:0;pointer-events:none;
+  background-image:
+    radial-gradient(circle at center,rgba(255,255,255,.62) 0 .9px,transparent 1.7px),
+    radial-gradient(circle at center,rgba(255,255,255,.36) 0 .7px,transparent 1.4px),
+    radial-gradient(circle at center,rgba(181,218,179,.32) 0 1px,transparent 1.8px);
+  background-size:110px 56px,79px 63px,161px 77px;
+  background-position:16px 8px,47px 13px,82px 5px;
+  opacity:.75;animation:ww-natal-twinkle 9s ease-in-out infinite alternate;
 }
-#client-app .ww-natal-santa-art{
-  display:block;width:100%;height:100%;overflow:visible;
-  filter:drop-shadow(0 4px 5px rgba(30,45,30,.13));
+.header .header-inner{position:relative;z-index:1}
+#client-app .client-welcome{
+  position:relative;isolation:isolate;
 }
-#client-app .ww-natal-wave{
-  animation:ww-santa-wave 11s ease-in-out 1.5s infinite;
+#client-app .client-welcome>div:first-child{
+  position:relative;z-index:3;
+  padding-right:clamp(76px,19vw,255px);
 }
-#client-app>.hero{position:relative;z-index:2}
-@keyframes ww-santa-peek{
-  0%,13%,84%,100%{transform:translateY(100px)}
-  24%,72%{transform:translateY(0)}
-  48%,53%{transform:translateY(4px)}
+#client-app .ww-natal-composition{
+  position:absolute;inset:0;z-index:2;pointer-events:none;user-select:none;
 }
-@keyframes ww-santa-wave{
-  0%,28%,65%,100%{transform:rotate(0)}
-  32%,38%,44%,50%,56%{transform:rotate(-16deg)}
-  35%,41%,47%,53%{transform:rotate(8deg)}
+#client-app .ww-natal-garland{
+  position:absolute;left:0;right:0;top:-8px;
+  display:block;width:100%;height:67px;
+  object-fit:fill;opacity:.94;pointer-events:none;
 }
-@media(max-width:640px){
-  #client-app .ww-natal-santa{
-    right:0;bottom:-14px;width:61px;height:72px;
-  }
+#client-app .ww-natal-scene{
+  display:block;position:absolute;right:0;bottom:-4px;
+  width:clamp(194px,26vw,337px);height:auto;
+  max-width:42%;pointer-events:none;
+  filter:drop-shadow(0 3px 4px rgba(42,56,41,.12));
+  transform-origin:bottom right;
+  animation:ww-natal-arrive 12s ease-in-out 1s infinite;
+}
+#client-app>.hero{position:relative;z-index:3}
+@keyframes ww-natal-twinkle{
+  0%,100%{opacity:.55}
+  50%{opacity:.88}
+}
+@keyframes ww-natal-arrive{
+  0%,14%,86%,100%{transform:translateY(6px)}
+  24%,74%{transform:translateY(0)}
+  50%{transform:translateY(2px)}
+}
+@media(max-width:900px){
+  #client-app .ww-natal-scene{width:clamp(155px,27vw,244px)}
+  #client-app .ww-natal-garland{height:53px}
+  #client-app .client-welcome>div:first-child{padding-right:clamp(78px,22vw,185px)}
+}
+@media(max-width:620px){
+  #client-app .ww-natal-scene{width:clamp(89px,27vw,145px);bottom:0;right:-3px}
+  #client-app .ww-natal-garland{height:38px;top:-5px}
+  #client-app .client-welcome>div:first-child{padding-right:clamp(86px,27vw,140px)}
 }
 @media(max-width:380px){
-  #client-app .ww-natal-santa{width:48px;height:58px;right:0}
+  #client-app .ww-natal-scene{width:95px;right:-5px}
+  #client-app .client-welcome>div:first-child{padding-right:96px}
 }
 @media(prefers-reduced-motion:reduce){
-  #client-app .ww-natal-santa{
-    animation:none;transform:translateY(15px);
-  }
-  #client-app .ww-natal-wave{animation:none}
+  .header .ww-natal-stars{animation:none;opacity:.55}
+  #client-app .ww-natal-scene{animation:none;transform:none}
 }
