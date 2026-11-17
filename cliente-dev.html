@@ -11,11 +11,11 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="WW Solar">
-<link rel="stylesheet" href="./styles.css?v=20261114-legal-v1"><link rel="stylesheet" href="./cliente-dev.css?v=20261117-project-notes-v3"><link rel="stylesheet" href="./palette-wwsolar.css?v=20261117-cta-escuro-v2">
+<link rel="stylesheet" href="./styles.css?v=20261114-legal-v1"><link rel="stylesheet" href="./cliente-dev.css?v=20261117-natal-scene-v2"><link rel="stylesheet" href="./palette-wwsolar.css?v=20261117-cta-escuro-v2">
 </head>
 <body>
 <a class="skip-link" href="#client-main">Ir para o conteúdo</a>
-<header class="header"><div class="shell header-inner">
+<header class="header"><span class="ww-natal-stars" aria-hidden="true"></span><div class="shell header-inner">
 <a class="brand" href="./index.html" aria-label="WW Solar, início"><span class="brand-symbol" aria-hidden="true"><svg viewBox="0 0 44 44" fill="none"><circle cx="22" cy="22" r="12" stroke="currentColor" stroke-width="4"/><path d="M22 2v7M22 35v7M2 22h7M35 22h7M8 8l5 5M31 31l5 5M36 8l-5 5M13 31l-5 5" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/></svg></span><span class="brand-copy"><strong>WW<span>SOLAR</span></strong><small>CATÁLOGO FOTOVOLTAICO</small></span></a>
 <nav class="nav" id="client-nav" aria-label="Navegação do catálogo" hidden><a href="#simulador" id="client-nav-simulate">Simular</a><a href="#catalogo" id="client-kits-link">Ver kits</a><a href="#projetos" id="client-projects-link">Projetos</a></nav>
 <div class="client-header-actions"><button id="client-login-open" class="client-account-link client-signin" type="button" hidden>Entrar ↗</button><a id="client-admin-link" class="client-account-link" href="./admin-dev.html" hidden>Admin</a><button id="client-logout" class="client-account-link client-exit" type="button" hidden aria-label="Sair da conta">Sair ↗</button></div>
@@ -62,7 +62,14 @@
 </section></div>
 <section id="client-app" hidden>
 <p class="client-public-preview-banner" id="client-preview-disclaimer" hidden role="status">Prévia DEV da vitrine pública · preços e informações da captura de 16/11/2026, sujeitos à confirmação. O catálogo oficial não foi alterado.</p>
-<div class="shell client-welcome" id="client-welcome"><div><h2 class="client-greeting">Olá, bem-vindo.</h2><p id="client-identity" class="client-muted"></p></div></div>
+<div class="shell client-welcome" id="client-welcome">
+ <div><h2 class="client-greeting">Olá, bem-vindo.</h2><p id="client-identity" class="client-muted"></p></div>
+ <!-- Natal WW Solar: composição decorativa inspirada na referência, sem interação. -->
+ <div class="ww-natal-composition" aria-hidden="true">
+  <img class="ww-natal-garland" src="./natal-wwsolar-garland.svg" alt="" draggable="false" decoding="async">
+  <img class="ww-natal-scene" src="./natal-wwsolar-scene.svg" alt="" draggable="false" decoding="async">
+ </div>
+</div>
 <section class="hero">
       <div class="hero-grid shell">
         <div class="hero-copy">

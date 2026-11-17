@@ -35,7 +35,7 @@ test('cards de projetos usam paleta visual aprovada',()=>{
  assert.match(section,/SERVIÇO OPCIONAL/);
  assert.match(section,/Valor do projeto/);
  assert.match(section,/TRT não inclusa · paga pelo contratante/);
- assert.match(html,/cliente-dev\.css\?v=20261117-project-notes-v3/);
+ assert.match(html,/cliente-dev\.css\?v=20261117-natal-scene-v2/);
 });
 test('seleção e preço seguem a integração original do catálogo',()=>{
  assert.match(js,/button\.parentElement\?\.querySelector\('strong'\)/);
