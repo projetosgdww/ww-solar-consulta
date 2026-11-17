@@ -50,7 +50,7 @@ test('noindex em todos os pages.dev e painel, sem bloqueio global na release',as
  assert.ok(prod.includes('https://:version.ww-solar.pages.dev/*'));
  assert.ok(prod.includes('/admin.html\n  X-Robots-Tag: noindex, nofollow'));
  assert.ok(prod.includes('/cliente-dev.html\n  X-Robots-Tag: noindex, nofollow'));
- assert.ok(!prod.includes('/*\n  X-Robots-Tag: noindex, nofollow'));
+ assert.ok(!prod.split('\n').some((line,i,all)=>line==='/*'&&all[i+1]==='  X-Robots-Tag: noindex, nofollow'));
  assert.ok(dev.includes('/*\n  X-Robots-Tag: noindex, nofollow'));
  assert.match(prod,/X-Content-Type-Options: nosniff/);
  assert.match(prod,/Cache-Control: no-store/);
