@@ -432,6 +432,32 @@
       if(groups.has(category))wrap.append(mk(category,CATEGORY_LABELS[category],groups.get(category)));
     }
   }
+
+  // Ícones vetoriais fixos, sem dados do catálogo em HTML.
+  function wwKitIcon(type){
+    const ns='http://www.w3.org/2000/svg';
+    const icon=document.createElementNS(ns,'svg');
+    icon.setAttribute('viewBox','0 0 24 24');
+    icon.setAttribute('fill','none');
+    icon.setAttribute('stroke','currentColor');
+    icon.setAttribute('stroke-width','1.8');
+    icon.setAttribute('stroke-linecap','round');
+    icon.setAttribute('stroke-linejoin','round');
+    icon.setAttribute('aria-hidden','true');
+    const shapes={
+      truck:[['path',{d:'M2 6h12v11H2z'}],['path',{d:'M14 10h4l3 3v4h-7z'}],['circle',{cx:'6.5',cy:'18',r:'1.5'}],['circle',{cx:'17.5',cy:'18',r:'1.5'}]],
+      power:[['path',{d:'m13 2-9 11h7l-1 9 10-13h-7l0-7z'}]],
+      chart:[['rect',{x:'3',y:'13',width:'3',height:'7',rx:'1'}],['rect',{x:'9',y:'9',width:'3',height:'11',rx:'1'}],['rect',{x:'15',y:'5',width:'3',height:'15',rx:'1'}]],
+      info:[['circle',{cx:'12',cy:'12',r:'9'}],['path',{d:'M12 11v5M12 8h.01'}]]
+    };
+    for(const [tag,attrs] of (shapes[type]||[])){
+      const shape=document.createElementNS(ns,tag);
+      for(const [key,value] of Object.entries(attrs))shape.setAttribute(key,value);
+      icon.append(shape);
+    }
+    return icon;
+  }
+
   function renderProducts(){
     const q=S.query.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
     const products=C.matchingKits(available(),S.target)
