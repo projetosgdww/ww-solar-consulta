@@ -35,8 +35,12 @@ execFileSync(process.execPath,['scripts/generate-wwsolar-icons.mjs'],{stdio:'inh
 // O HTML do cliente permanece noindex em qualquer preview. Somente o
 // build da branch oficial remove o bloqueio, sem mexer na autenticação.
 const branch=process.env.CF_PAGES_BRANCH;
+const release=String(process.env.CF_PAGES_COMMIT_SHA||execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim());
+if(!/^[0-9a-f]{40}$/.test(release))throw Error('Versão do deploy ausente ou inválida');
+await writeFile(join(out,'pwa-release.json'),JSON.stringify({version:release})+'\n');
 const sourceCustomer=(await readFile(join(out,'cliente-dev.html'),'utf8'))
-  .replaceAll('./admin-dev.html','./admin.html');
+  .replaceAll('./admin-dev.html','./admin.html')
+  .replace('__WW_SOLAR_RELEASE__',release);
 const customer=publicCatalogHtml(sourceCustomer,branch);
 const admin=(await readFile(join(out,'admin-dev.html'),'utf8'))
   .replaceAll('./cliente-dev.html','./cliente.html')
