@@ -27,7 +27,7 @@
 <a class="skip-link" href="#client-main">Ir para o conteúdo</a>
 <header class="header"><div class="shell header-inner">
 <a class="brand" href="./index.html" aria-label="WW Solar, início"><span class="brand-symbol" aria-hidden="true"><svg viewBox="0 0 44 44" fill="none"><circle cx="22" cy="22" r="12" stroke="currentColor" stroke-width="4"/><path d="M22 2v7M22 35v7M2 22h7M35 22h7M8 8l5 5M31 31l5 5M36 8l-5 5M13 31l-5 5" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/></svg></span><span class="brand-copy"><strong>WW<span>SOLAR</span></strong><small>CATÁLOGO FOTOVOLTAICO</small></span></a>
-<nav class="nav" id="client-nav" aria-label="Navegação do catálogo" hidden><a href="#simulador" id="client-nav-simulate">Simular</a><a href="#catalogo" id="client-kits-link">Ver kits</a><a href="#projetos" id="client-projects-link">Projetos</a></nav>
+<nav class="nav" id="client-nav" aria-label="Navegação do catálogo" hidden><a href="#simulador" id="client-nav-simulate">Simular</a><a href="#catalogo" id="client-kits-link">Ver kits</a><a href="#projetos" id="client-projects-link">Projetos</a><a href="#consumo" id="client-consumo-link">Consumo</a></nav>
 <div class="client-header-actions"><button id="client-login-open" class="client-account-link client-signin" type="button" hidden>Entrar ↗</button><a id="client-admin-link" class="client-account-link" href="./admin-dev.html" hidden>Admin</a><button id="client-logout" class="client-account-link client-exit" type="button" hidden aria-label="Sair da conta">Sair ↗</button></div>
 <div id="client-cart-top" class="client-cart-top" hidden>
   <button id="client-cart-trigger" class="client-cart-trigger" type="button" aria-label="Abrir carrinho" aria-controls="client-cart-drawer" aria-expanded="false">
@@ -118,6 +118,43 @@
         </div>
       </div>
     </section>
+<section class="main-section shell ww-consumo-section" id="consumo" aria-labelledby="ww-consumo-title">
+ <div class="section-title"><div><div class="section-label">SIMULAÇÃO / CONSUMO DE ENERGIA</div>
+ <h2 id="ww-consumo-title">Quanto seus equipamentos consomem?</h2>
+ <p>Selecione um equipamento, informe o uso e veja uma estimativa mensal de consumo.</p></div></div>
+ <div class="ww-consumo-card">
+  <form id="ww-consumo-form" class="ww-consumo-form">
+   <label class="ww-consumo-field ww-consumo-full">Equipamento
+    <select id="ww-consumo-appliance" aria-label="Selecione um equipamento"></select>
+   </label>
+   <label class="ww-consumo-field">Potência elétrica (W)
+    <input id="ww-consumo-watts" type="number" min="1" max="100000" step="any" value="100" inputmode="decimal" required>
+   </label>
+   <label class="ww-consumo-field">Quantidade
+    <input id="ww-consumo-quantity" type="number" min="1" max="100" step="1" value="1" inputmode="numeric" required>
+   </label>
+   <label class="ww-consumo-field">Horas por dia
+    <input id="ww-consumo-hours" type="number" min="0.1" max="24" step="any" value="5" inputmode="decimal" required>
+   </label>
+   <label class="ww-consumo-field">Dias por semana
+    <select id="ww-consumo-days"><option value="1">1 dia</option><option value="2">2 dias</option><option value="3">3 dias</option><option value="4">4 dias</option><option value="5">5 dias</option><option value="6">6 dias</option><option value="7" selected>7 dias</option></select>
+   </label>
+   <div class="ww-consumo-current ww-consumo-full"><span>Consumo estimado deste equipamento</span><strong id="ww-consumo-current" aria-live="polite">—</strong></div>
+   <button id="ww-consumo-add" type="submit" class="button button-accent ww-consumo-full">+ Adicionar equipamento</button>
+  </form>
+  <div class="ww-consumo-summary">
+   <div class="ww-consumo-summary-head"><strong>Seu consumo estimado</strong><small id="ww-consumo-count">0 itens</small></div>
+   <p id="ww-consumo-empty" class="client-muted">Adicione equipamentos para calcular o consumo total.</p>
+   <div id="ww-consumo-results" hidden>
+    <ul id="ww-consumo-list" class="ww-consumo-list"></ul>
+    <div class="ww-consumo-grand"><span>Consumo mensal total</span><strong id="ww-consumo-total">0,0 kWh/mês</strong></div>
+   </div>
+   <div class="ww-consumo-actions"><button type="button" id="ww-consumo-copy" class="button button-outline" disabled>Copiar resultado</button><button type="button" id="ww-consumo-clear" class="button button-outline">Limpar</button></div>
+   <p id="ww-consumo-status" role="status" class="client-muted"></p>
+  </div>
+ </div>
+ <p class="ww-consumo-note">Potências iniciais ilustrativas e ajustáveis, não retiradas de uma tabela oficial. Cálculo aproximado: potência × quantidade × horas/dia × dias/semana × 30/7 ÷ 1.000. Geladeira, freezer e ar-condicionado têm consumo variável; prefira dados de kWh da etiqueta do equipamento. O resultado não substitui uma análise técnica.</p>
+</section>
 <section class="catalogue-section" id="catalogo" aria-labelledby="catalogo-title">
       <div class="shell">
         <div class="section-title catalogue-heading"><div><div class="section-label">02 / KITS GERADORES SOLARES</div><h2 id="catalogo-title">Escolha seu kit gerador.</h2><p>Catálogo dedicado aos kits geradores fotovoltaicos. A composição e o dimensionamento definitivo dependem das condições da instalação.</p></div><div class="catalogue-counter"><strong id="client-available-count">—</strong><small>kits geradores para cotação</small></div></div>
@@ -237,5 +274,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0/dist/umd/supabase.min.js" defer></script>
 <script src="./cliente-core.js?v=20261116-quote-snapshot-v4" defer></script>
 <script src="./cliente-dev.js?v=20261117-pwa-auto-update-v1" defer></script>
+<script src="./consumo-core.js?v=20261117-consumo-v1" defer></script>
+<script src="./consumo-ui.js?v=20261117-consumo-v1" defer></script>
 <script src="./cliente-pwa.js?v=20261117-pwa-auto-update-v1" defer></script>
 </body></html>
