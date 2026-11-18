@@ -533,10 +533,18 @@
       const detailTitle=el('strong','Configuração do kit','ww-kit-detail-title');
       detailPanel.append(detailTitle);
       const detailSpecs=el('dl',undefined,'ww-kit-detail-specs');
+      const moduleBrand=typeof x.moduloFabricante==='string'?x.moduloFabricante.trim():'';
+      const moduleSpecs=x.placas?number(x.placas)+' × '+number(x.moduloWp)+' Wp':'A confirmar';
+      const components=Array.isArray(x.componentesIncluidos)?x.componentesIncluidos.filter(v=>typeof v==='string').join(' ').toLowerCase():'';
+      const hasStructure=/(fixaç|fixac|telhado|trilho|perfil|estrutura)/.test(components);
+      const hasCables=/(cabo)/.test(components);
+      const includesDC=hasStructure&&hasCables;
       for(const [label,value] of [
-        ['Módulos',x.placas?number(x.placas)+' × '+number(x.moduloWp)+' Wp':'Conferir na cotação'],
+        ['Módulos',moduleSpecs+(moduleBrand?' · '+moduleBrand:' · marca a confirmar')],
         ['Inversor',String(x.inversor||'Conferir na cotação')],
         ['Tipo de ligação',String(x.tipoRede||'Conforme avaliação do local')],
+        ['Estrutura e cabos',includesDC?'Inclusos no kit':'Confirmar composição'],
+        ['Materiais CA','Não inclusos'],
         ['Identificação técnica',kitVariantLabel(p)]
       ]){
         const item=el('div');
