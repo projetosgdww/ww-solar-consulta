@@ -365,21 +365,30 @@ function renderComposition(){
   });
   categoryCell.append(categorySelect);
   const productCell=composeCell(tr,'');
-  const select=element('select');select.setAttribute('aria-label','Equipamento da linha '+(i+1));
-  const placeholder=element('option','Selecione um equipamento...');placeholder.value='';select.append(placeholder);
-  for(const product of (categorySelect.value?categories.get(categorySelect.value)||[]:composerCatalog)){
-    const option=element('option',product.title+' — '+core.money(product.unitCostCents));
-    option.value=product.sku;
-    select.append(option);
+  // O <select> nativo fecha ao alternar entre janelas. <details> mantém a
+  // lista aberta mesmo quando o navegador perde o foco, até o usuário fechá-la.
+  const productChooser=element('details',undefined,'admin-compose-product-chooser');
+  const productSummary=element('summary',p?p.title+' — '+core.money(p.unitCostCents):'Selecione um equipamento...');
+  productSummary.setAttribute('aria-label','Equipamento da linha '+(i+1));
+  productChooser.append(productSummary);
+  const productChoices=element('div',undefined,'admin-compose-product-choices');
+  productChoices.setAttribute('role','group');
+  productChoices.setAttribute('aria-label','Produtos disponíveis da linha '+(i+1));
+  const listedProducts=categorySelect.value?(categories.get(categorySelect.value)||[]):composerCatalog;
+  for(const product of listedProducts){
+    const option=element('button',product.title+' — '+core.money(product.unitCostCents),'admin-compose-product-option');
+    option.type='button';option.dataset.sku=product.sku;
+    option.setAttribute('aria-pressed',String(line.sku===product.sku));
+    option.addEventListener('click',()=>{
+      composerLines[i].sku=product.sku;
+      composerLines[i].category=categorySelect.value;
+      if(!core.asQuantity(composerLines[i].quantity))composerLines[i].quantity=1;
+      renderComposition();
+    });
+    productChoices.append(option);
   }
-  select.value=p?p.sku:'';
-  select.addEventListener('change',()=>{
-    composerLines[i].sku=select.value;
-    composerLines[i].category=categorySelect.value;
-    if(!core.asQuantity(composerLines[i].quantity))composerLines[i].quantity=1;
-    renderComposition();
-  });
-  productCell.append(select);
+  productChooser.append(productChoices);
+  productCell.append(productChooser);
   const qtyCell=composeCell(tr,'');
   const qty=element('input');qty.type='number';qty.min='1';qty.max='999';qty.step='1';
   qty.value=String(core.asQuantity(line.quantity)||1);qty.inputMode='numeric';
