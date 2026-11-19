@@ -354,7 +354,7 @@ function renderComposition(){
   for(const [category,items] of categories){
     const group=element('optgroup');group.label=category;
     for(const product of items){
-      const option=element('option',product.title);option.value=product.sku;
+      const option=element('option',product.title+' — '+core.money(product.unitCostCents));option.value=product.sku;
       if(line.sku===product.sku)option.selected=true;
       group.append(option);
     }
