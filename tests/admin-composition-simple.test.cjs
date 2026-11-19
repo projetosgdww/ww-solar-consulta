@@ -107,10 +107,22 @@ test('lista de produtos permanece aberta ao trocar de janela, sem select nativo'
  assert.match(adminJs,/element\('details',undefined,'admin-compose-product-chooser'\)/);
  assert.match(adminJs,/element\('summary',p\?p\.title/);
  assert.match(adminJs,/element\('div',undefined,'admin-compose-product-choices'\)/);
- assert.match(adminJs,/productChooser\.append\(productChoices\)/);
+ assert.match(adminJs,/productCell\.append\(productChooser,productChoices\)/);
  assert.doesNotMatch(adminJs,/productChooser\.addEventListener\('blur'/);
  assert.doesNotMatch(adminJs,/productChooser\.addEventListener\('focusout'/);
  assert.match(adminCss,/max-height:230px;overflow-y:auto/);
  assert.match(adminJs,/composerLines\[i\]\.sku=product\.sku/);
  assert.match(adminJs,/renderComposition\(\)/);
+});
+
+test('opções em popover flutuante não aumentam altura da linha',()=>{
+ assert.match(adminJs,/productChoices\.popover='manual'/);
+ assert.match(adminJs,/productChoices\.showPopover\(\)/);
+ assert.match(adminJs,/menu\.hidePopover\(\)/);
+ assert.match(adminJs,/event\.preventDefault\(\)/);
+ assert.match(adminJs,/getBoundingClientRect\(\)/);
+ assert.match(adminJs,/window\.addEventListener\('scroll',positionComposePopup,true\)/);
+ assert.match(adminCss,/\.admin-compose-product-choices\[popover\]\{/);
+ assert.match(adminCss,/position:fixed/);
+ assert.match(adminCss,/max-height:230px;overflow-y:auto/);
 });
