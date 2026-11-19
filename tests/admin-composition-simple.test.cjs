@@ -75,3 +75,11 @@ test('painel conserva seções anteriores e só acrescenta tabela simples para c
  assert.match(adminHtml, /admin-composition-core\.js\?v=20261117-composition-v1/);
  assert.match(build, /admin-composition-core\.js/);
 });
+
+test('lista de seleção administrativa exibe o custo ao lado de cada produto sem alterar SKU',()=>{
+ const adminJs=fs.readFileSync('admin-dev.js','utf8');
+ assert.match(adminJs,/element\('option',product\.title\+' — '\+core\.money\(product\.unitCostCents\)\)/);
+ assert.match(adminJs,/option\.value=product\.sku/);
+ assert.match(adminJs,/group\.append\(option\)/);
+ assert.equal(core.money(10000),'R$ 100,00');
+});
