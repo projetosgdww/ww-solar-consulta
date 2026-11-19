@@ -367,13 +367,12 @@ function renderComposition(){
   const productCell=composeCell(tr,'');
   const select=element('select');select.setAttribute('aria-label','Equipamento da linha '+(i+1));
   const placeholder=element('option','Selecione um equipamento...');placeholder.value='';select.append(placeholder);
-  for(const product of categories.get(categorySelect.value)||[]){
+  for(const product of (categorySelect.value?categories.get(categorySelect.value)||[]:composerCatalog)){
     const option=element('option',product.title+' — '+core.money(product.unitCostCents));
     option.value=product.sku;
     select.append(option);
   }
   select.value=p?p.sku:'';
-  select.disabled=!categorySelect.value;
   select.addEventListener('change',()=>{
     composerLines[i].sku=select.value;
     composerLines[i].category=categorySelect.value;
