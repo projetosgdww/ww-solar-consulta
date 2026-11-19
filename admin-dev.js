@@ -347,22 +347,36 @@ function renderComposition(){
   const p=composerCatalog.find(x=>x.sku===line.sku)||null;
   const tr=document.createElement('tr');
   composeCell(tr,'admin-compose-code',p?.sku||'—');
-  composeCell(tr,'',p?.category||'—');
+  const categoryCell=composeCell(tr,'');
+  const categorySelect=element('select');
+  categorySelect.setAttribute('aria-label','Categoria da linha '+(i+1));
+  const categoryPlaceholder=element('option','Selecione a categoria...');categoryPlaceholder.value='';
+  categorySelect.append(categoryPlaceholder);
+  for(const category of categories.keys()){
+    const option=element('option',category);option.value=category;
+    categorySelect.append(option);
+  }
+  const selectedCategory=p?.category||line.category||'';
+  categorySelect.value=categories.has(selectedCategory)?selectedCategory:'';
+  categorySelect.addEventListener('change',()=>{
+    composerLines[i].category=categorySelect.value;
+    composerLines[i].sku='';
+    renderComposition();
+  });
+  categoryCell.append(categorySelect);
   const productCell=composeCell(tr,'');
   const select=element('select');select.setAttribute('aria-label','Equipamento da linha '+(i+1));
   const placeholder=element('option','Selecione um equipamento...');placeholder.value='';select.append(placeholder);
-  for(const [category,items] of categories){
-    const group=element('optgroup');group.label=category;
-    for(const product of items){
-      const option=element('option',product.title+' — '+core.money(product.unitCostCents));option.value=product.sku;
-      if(line.sku===product.sku)option.selected=true;
-      group.append(option);
-    }
-    select.append(group);
+  for(const product of categories.get(categorySelect.value)||[]){
+    const option=element('option',product.title+' — '+core.money(product.unitCostCents));
+    option.value=product.sku;
+    select.append(option);
   }
   select.value=p?p.sku:'';
+  select.disabled=!categorySelect.value;
   select.addEventListener('change',()=>{
     composerLines[i].sku=select.value;
+    composerLines[i].category=categorySelect.value;
     if(!core.asQuantity(composerLines[i].quantity))composerLines[i].quantity=1;
     renderComposition();
   });
