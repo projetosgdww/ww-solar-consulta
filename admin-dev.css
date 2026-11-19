@@ -139,3 +139,12 @@
 .admin-compose-table .admin-compose-product-option:hover,
 .admin-compose-table .admin-compose-product-option[aria-pressed="true"]{background:#eef8e9}
 .admin-compose-table .admin-compose-product-option:last-child{border-bottom:0}
+
+
+/* Lista fora do fluxo da tabela: popover manual fixo, sem aumentar a página. */
+.admin-compose-table .admin-compose-product-choices[popover]{
+ position:fixed;inset:auto;margin:0;padding:0;box-sizing:border-box;
+ z-index:10000;box-shadow:0 8px 20px rgba(12,37,30,.16);
+ overflow-y:auto;overscroll-behavior:contain;
+}
+.admin-compose-table .admin-compose-product-choices[popover]:not(:popover-open){display:none}
