@@ -78,8 +78,8 @@ test('painel conserva seções anteriores e só acrescenta tabela simples para c
 
 test('lista de seleção administrativa exibe o custo ao lado de cada produto sem alterar SKU',()=>{
  const adminJs=fs.readFileSync('admin-dev.js','utf8');
- assert.match(adminJs,/element\('option',product\.title\+' — '\+core\.money\(product\.unitCostCents\)\)/);
- assert.match(adminJs,/option\.value=product\.sku/);
+ assert.match(adminJs,/element\('button',product\.title\+' — '\+core\.money\(product\.unitCostCents\)/);
+ assert.match(adminJs,/option\.dataset\.sku=product\.sku/);
  assert.match(adminJs,/select\.append\(option\)/);
  assert.equal(core.money(10000),'R$ 100,00');
 });
@@ -101,4 +101,16 @@ test('sem categoria exibe todos os produtos e mantém seletor habilitado',()=>{
  assert.match(adminJs,/categorySelect.value\?/);
  assert.match(adminJs,/:composerCatalog/);
  assert.doesNotMatch(adminJs,/select.disabled=!categorySelect.value/);
+});
+
+test('lista de produtos permanece aberta ao trocar de janela, sem select nativo',()=>{
+ assert.match(adminJs,/element\('details',undefined,'admin-compose-product-chooser'\)/);
+ assert.match(adminJs,/element\('summary',p\?p\.title/);
+ assert.match(adminJs,/element\('div',undefined,'admin-compose-product-choices'\)/);
+ assert.match(adminJs,/productChooser\.append\(productChoices\)/);
+ assert.doesNotMatch(adminJs,/productChooser\.addEventListener\('blur'/);
+ assert.doesNotMatch(adminJs,/productChooser\.addEventListener\('focusout'/);
+ assert.match(adminCss,/max-height:230px;overflow-y:auto/);
+ assert.match(adminJs,/composerLines\[i\]\.sku=product\.sku/);
+ assert.match(adminJs,/renderComposition\(\)/);
 });
