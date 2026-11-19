@@ -80,6 +80,22 @@ test('lista de seleção administrativa exibe o custo ao lado de cada produto se
  const adminJs=fs.readFileSync('admin-dev.js','utf8');
  assert.match(adminJs,/element\('option',product\.title\+' — '\+core\.money\(product\.unitCostCents\)\)/);
  assert.match(adminJs,/option\.value=product\.sku/);
- assert.match(adminJs,/group\.append\(option\)/);
+ assert.match(adminJs,/select\.append\(option\)/);
+ assert.match(adminJs,/categories\.get\(categorySelect\.value\)\|\|\[\]/);
  assert.equal(core.money(10000),'R$ 100,00');
+});
+
+test('seleção da categoria limita produtos, redefine SKU e preserva quantidades e preços',()=>{
+ assert.match(adminJs,/categorySelect\.setAttribute\('aria-label','Categoria da linha '/);
+ assert.match(adminJs,/categorySelect\.value=categories\.has\(selectedCategory\)\?selectedCategory:''/);
+ assert.match(adminJs,/composerLines\[i\]\.category=categorySelect\.value/);
+ assert.match(adminJs,/composerLines\[i\]\.sku=''/);
+ assert.match(adminJs,/for\(const product of categories\.get\(categorySelect\.value\)\|\|\[\]\)/);
+ assert.match(adminJs,/select\.disabled=!categorySelect\.value/);
+ assert.match(adminJs,/core\.money\(product\.unitCostCents\)/);
+ const first=core.composeRows([{sku:'SOO-97081',quantity:3}],items);
+ const changed=core.composeRows([{sku:'',quantity:3}],items);
+ assert.equal(first.totalCents,30000);
+ assert.equal(changed.totalCents,0);
+ assert.equal(core.composeRows([{sku:'SOO-665572',quantity:3}],items).totalCents,187500);
 });
