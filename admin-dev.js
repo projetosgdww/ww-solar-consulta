@@ -350,7 +350,7 @@ function positionComposePopup(){
  const rect=summary.getBoundingClientRect();
  const viewportW=document.documentElement.clientWidth;
  const viewportH=document.documentElement.clientHeight;
- const width=Math.min(rect.width,Math.max(120,viewportW-16));
+ const width=Math.min(Math.max(rect.width,720),Math.max(120,viewportW-16));
  const left=Math.max(8,Math.min(rect.left,viewportW-width-8));
  const roomBelow=viewportH-rect.bottom-8;
  const roomAbove=rect.top-8;
