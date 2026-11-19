@@ -80,7 +80,7 @@ test('lista de seleção administrativa exibe o custo ao lado de cada produto se
  const adminJs=fs.readFileSync('admin-dev.js','utf8');
  assert.match(adminJs,/element\('button',product\.title\+' — '\+core\.money\(product\.unitCostCents\)/);
  assert.match(adminJs,/option\.dataset\.sku=product\.sku/);
- assert.match(adminJs,/select\.append\(option\)/);
+ assert.match(adminJs,/productChoices\.append\(option\)/);
  assert.equal(core.money(10000),'R$ 100,00');
 });
 
