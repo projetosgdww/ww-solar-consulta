@@ -112,3 +112,30 @@
  .admin-compose-bottom{align-items:flex-start;flex-direction:column}
  .admin-compose-actions .button{flex:0 0 auto}
 }
+
+
+/* Lista persistente no montador: não recolhe quando a janela perde o foco. */
+.admin-compose-table .admin-compose-product-chooser{width:100%;min-width:0}
+.admin-compose-table .admin-compose-product-chooser>summary{
+ display:flex;align-items:center;justify-content:space-between;gap:8px;
+ width:100%;min-height:41px;padding:8px 10px;box-sizing:border-box;
+ border:1px solid #c9dcd0;border-radius:8px;background:#fff;
+ font:inherit;font-size:12px;color:#1d3a30;cursor:pointer;list-style:none;
+}
+.admin-compose-table .admin-compose-product-chooser>summary::-webkit-details-marker{display:none}
+.admin-compose-table .admin-compose-product-chooser>summary:after{content:'⌄';font-size:18px;flex:none}
+.admin-compose-table .admin-compose-product-chooser[open]>summary{border-color:#529c18;border-radius:8px 8px 0 0}
+.admin-compose-table .admin-compose-product-chooser>summary:focus-visible,
+.admin-compose-table .admin-compose-product-option:focus-visible{outline:2px solid #81F002;outline-offset:2px}
+.admin-compose-table .admin-compose-product-choices{
+ max-height:230px;overflow-y:auto;overscroll-behavior:contain;
+ background:white;border:1px solid #c9dcd0;border-top:0;border-radius:0 0 8px 8px;
+}
+.admin-compose-table .admin-compose-product-option{
+ display:block;width:100%;padding:9px 10px;border:0;border-bottom:1px solid #edf2ee;
+ background:white;color:#19332d;font:inherit;font-size:12px;
+ text-align:left;overflow-wrap:anywhere;cursor:pointer;
+}
+.admin-compose-table .admin-compose-product-option:hover,
+.admin-compose-table .admin-compose-product-option[aria-pressed="true"]{background:#eef8e9}
+.admin-compose-table .admin-compose-product-option:last-child{border-bottom:0}
