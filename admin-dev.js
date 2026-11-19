@@ -335,7 +335,36 @@ const composeTotal=()=>{
 const composeCell=(tr,className,text)=>{
  const td=element('td',text,className);tr.append(td);return td;
 };
+// Menu na camada superior do navegador: não aumenta a altura da tabela.
+let activeComposePopup=null;
+function closeComposePopup(){
+ if(!activeComposePopup)return;
+ const {chooser,menu}=activeComposePopup;
+ if(menu.matches(':popover-open'))menu.hidePopover();
+ chooser.open=false;
+ activeComposePopup=null;
+}
+function positionComposePopup(){
+ if(!activeComposePopup)return;
+ const {summary,menu}=activeComposePopup;
+ const rect=summary.getBoundingClientRect();
+ const viewportW=document.documentElement.clientWidth;
+ const viewportH=document.documentElement.clientHeight;
+ const width=Math.min(rect.width,Math.max(120,viewportW-16));
+ const left=Math.max(8,Math.min(rect.left,viewportW-width-8));
+ const roomBelow=viewportH-rect.bottom-8;
+ const roomAbove=rect.top-8;
+ const above=roomBelow<160&&roomAbove>roomBelow;
+ const height=Math.max(80,Math.min(230,above?roomAbove:roomBelow));
+ menu.style.left=left+'px';
+ menu.style.width=width+'px';
+ menu.style.maxHeight=height+'px';
+ menu.style.top=(above?Math.max(8,rect.top-height-2):rect.bottom+2)+'px';
+}
+window.addEventListener('scroll',positionComposePopup,true);
+window.addEventListener('resize',positionComposePopup);
 function renderComposition(){
+ closeComposePopup();
  const core=composeCore();if(!core)return;
  const tbody=$('admin-compose-rows');tbody.replaceChildren();
  const categories=new Map();
@@ -387,8 +416,18 @@ function renderComposition(){
     });
     productChoices.append(option);
   }
-  productChooser.append(productChoices);
-  productCell.append(productChooser);
+  // Popover manual permanece visível ao alternar janelas e não afeta o fluxo.
+  productChoices.popover='manual';
+  productSummary.addEventListener('click',event=>{
+    event.preventDefault();
+    if(activeComposePopup?.menu===productChoices){closeComposePopup();return;}
+    closeComposePopup();
+    productChooser.open=true;
+    activeComposePopup={chooser:productChooser,summary:productSummary,menu:productChoices};
+    productChoices.showPopover();
+    positionComposePopup();
+  });
+  productCell.append(productChooser,productChoices);
   const qtyCell=composeCell(tr,'');
   const qty=element('input');qty.type='number';qty.min='1';qty.max='999';qty.step='1';
   qty.value=String(core.asQuantity(line.quantity)||1);qty.inputMode='numeric';
