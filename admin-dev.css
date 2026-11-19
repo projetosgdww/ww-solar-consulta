@@ -148,3 +148,8 @@
  overflow-y:auto;overscroll-behavior:contain;
 }
 .admin-compose-table .admin-compose-product-choices[popover]:not(:popover-open){display:none}
+
+
+/* Preço e descrição ficam numa única linha; rolagem horizontal quando necessário. */
+.admin-compose-table .admin-compose-product-choices[popover]{overflow-x:auto}
+.admin-compose-table .admin-compose-product-option{white-space:nowrap;overflow-wrap:normal}
