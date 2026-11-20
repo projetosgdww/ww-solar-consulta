@@ -29,7 +29,8 @@ test('allowlist não exporta custos, dados de clientes nem payload interno',()=>
 });
 test('visitante possui carrinho local independente sem login',()=>{
  assert.match(js,/async function showPublicCatalog\(\)/);
- assert.match(js,/const GUEST_QUOTE_MODE=.*ww-solar-composicao-dev/);
+ assert.match(js,/const GUEST_QUOTE_MODE=cfg\.publicQuoteEnabled===true/);
+ assert.match(js,/ww-solar-composicao-dev/);
  assert.match(js,/const GUEST_CART_KEY=/);
  assert.match(js,/window\.localStorage\.getItem\(GUEST_CART_KEY\)/);
  assert.match(js,/window\.localStorage\.setItem\(GUEST_CART_KEY/);
@@ -48,6 +49,7 @@ test('migração preparada não concede SELECT sobre wwsolar_catalog a anon',()=
 
 test('RPC dinâmica substitui snapshot, com falha fechada fora do DEV',()=>{
  assert.ok(js.includes("S.db.rpc('wwsolar_public_catalog')"));
+ assert.ok(js.includes("S.db.rpc('wwsolar_public_catalog_v2')"));
  assert.ok(js.includes('if(!PREVIEW_HOST)throw error'));
  assert.ok(js.includes("source='snapshot'"));
  assert.ok(js.includes('client-returned-item'));
