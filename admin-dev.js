@@ -44,16 +44,60 @@ async function init(){
  db=window.supabase.createClient(cfg.supabaseUrl,cfg.publishableKey);
  const {data,error}=await db.auth.getUser();
  if(error||data?.user?.app_metadata?.wwsolar_role!=='admin'){
-   status('Acesso restrito ao administrador. Faça login na área do cliente com sua conta administrativa.');
+   $('admin-signin').hidden=false;
+   $('admin-clients-panel').hidden=true;
+   status('Acesso exclusivo da administração. Faça login abaixo.');
    return;
  }
+ enableAdmin();
+}
+function enableAdmin(){
  ready=true;
+ $('admin-signin').hidden=true;
+ $('admin-signin-password').value='';
+ $('admin-session-actions').hidden=false;
  $('admin-tabs').hidden=false;
+ $('admin-clients-panel').hidden=false;
  $('admin-dev-form').hidden=false;
  $('admin-client-directory').hidden=false;
- status('Administrador autenticado. Utilize a aba Clientes para administrar acessos.');
+ status('Administrador autenticado. Utilize as abas do painel.');
  void loadClients();
 }
+async function signInAdmin(event){
+ event.preventDefault();
+ const submit=$('admin-signin-submit');
+ submit.disabled=true;
+ $('admin-signin-status').textContent='Verificando credenciais...';
+ try{
+   const email=$('admin-signin-email').value.trim().toLowerCase();
+   const password=$('admin-signin-password').value;
+   const {data,error}=await db.auth.signInWithPassword({email,password});
+   if(error||!data?.user||data.user.app_metadata?.wwsolar_role!=='admin'){
+     if(data?.user)await db.auth.signOut();
+     throw Error('Esta conta não tem acesso à administração ou as credenciais são inválidas.');
+   }
+   $('admin-signin-status').textContent='';
+   enableAdmin();
+ }catch(err){
+   $('admin-signin-password').value='';
+   $('admin-signin-status').textContent=err?.message||'Não foi possível entrar no painel.';
+ }finally{submit.disabled=false;}
+}
+async function signOutAdmin(){
+ if(db)await db.auth.signOut();
+ ready=false;
+ clearCredentials();
+ $('admin-tabs').hidden=true;
+ $('admin-session-actions').hidden=true;
+ $('admin-dev-form').hidden=true;
+ $('admin-client-directory').hidden=true;
+ for(const name of ['clients','orders','kits','composer'])$('admin-'+name+'-panel').hidden=true;
+ $('admin-signin').hidden=false;
+ $('admin-signin-password').value='';
+ $('admin-signin-status').textContent='Sessão encerrada.';
+}
+$('admin-signin-form').addEventListener('submit',signInAdmin);
+$('admin-session-logout').addEventListener('click',()=>void signOutAdmin());
 async function functionError(error,fallback){
  if(!error)return fallback;
  let code='';
