@@ -60,9 +60,11 @@ test('somente administrador autenticado consulta a tabela privada sem modificar 
  assert.doesNotMatch(adminHtml, /SOO-665572|SOO-657985|5869,90/);
  assert.doesNotMatch(adminHtml,/Editar custo|Cadastrar preço|Salvar custo/);
 });
-test('painel conserva seções anteriores e só acrescenta tabela simples para composição',()=>{
- for(const id of ['admin-tab-clients','admin-tab-orders','admin-tab-kits','admin-tab-composer','admin-clients-panel','admin-orders-panel','admin-kits-panel','admin-composer-panel','admin-compose-rows','admin-compose-total','admin-compose-add','admin-compose-copy','admin-compose-clear'])
+test('painel administrativo simplificado mantém vendas e composição sem login de clientes',()=>{
+ for(const id of ['admin-tab-sales','admin-tab-composer','admin-sales-panel','admin-composer-panel','admin-sale-form','admin-sales-list','admin-compose-rows','admin-compose-total','admin-compose-add','admin-compose-copy','admin-compose-clear'])
  assert.ok(adminHtml.includes('id="'+id+'"'),id);
+ for(const legacy of ['admin-tab-clients','admin-tab-orders','admin-tab-kits','admin-clients-panel','admin-kits-panel'])
+ assert.ok(!adminHtml.includes('id="'+legacy+'"'),legacy);
  assert.match(adminHtml,/CÓDIGO/);
  assert.match(adminHtml,/CATEGORIA/);
  assert.match(adminHtml,/DESCRIÇÃO DO PRODUTO/);
@@ -71,9 +73,9 @@ test('painel conserva seções anteriores e só acrescenta tabela simples para c
  assert.match(adminHtml,/Composição interna para conferência/);
  assert.match(adminCss,/#FA4100/);
  assert.match(adminCss,/#81F002/);
- assert.match(adminCss, /overflow-x:auto/);
- assert.match(adminHtml, /admin-composition-core\.js\?v=20261117-composition-v1/);
- assert.match(build, /admin-composition-core\.js/);
+ assert.match(adminCss,/overflow-x:auto/);
+ assert.match(adminHtml,/admin-composition-core\.js\?v=20261117-composition-v1/);
+ assert.match(build,/admin-composition-core\.js/);
 });
 
 test('lista de seleção administrativa exibe o custo ao lado de cada produto sem alterar SKU',()=>{
