@@ -700,6 +700,7 @@
     $('client-drawer-refresh').textContent=expired()?'↻ Renovar cotação':'↻ Atualizar valores';
     for(const id of ['client-top-clock','client-cart-timer','client-drawer-timer'])
       $(id).classList.toggle('client-clock-expired',expired());
+    if(GUEST_QUOTE_MODE&&expired()&&!S.expiryNotified)clearGuestWhatsApp();
     if(expired()&&!S.expiryNotified){
       S.expiryNotified=true;
       status('Cotação de 25 minutos expirada. Atualize os preços antes de solicitar pelo WhatsApp.');
@@ -740,6 +741,7 @@
     catch(e){status('Revise quantidades ou produtos no carrinho.');return;}
     S.lines=clean;
     S.orderKey=null;
+    if(GUEST_QUOTE_MODE)clearGuestWhatsApp();
     S.cartUpdatedAt=new Date().toISOString();
     renderCart();
     if(feedback){showToast(feedback);status(feedback);}
@@ -997,6 +999,7 @@
       }
       await save(S.lines,'Preços consultados e prazo renovado.');
       renderCart();
+      if(GUEST_QUOTE_MODE)clearGuestWhatsApp();
       status('Preços atualizados. O total é de referência; estoque e frete sujeitos à confirmação.');
     }catch(e){
       status('Não foi possível conferir os preços atuais. Tente novamente.');
@@ -1005,6 +1008,13 @@
   }
   // DEV: a cotação pública é validada contra a RPC comercial atual, sem
   // autenticar, gravar pedidos ou enviar mensagens automaticamente.
+  function clearGuestWhatsApp(){
+    const anchor=$('client-quote-whatsapp');
+    anchor.hidden=true;anchor.removeAttribute('href');
+    $('client-quote-safety-note').hidden=true;
+    $('client-quote-preview').hidden=true;
+    $('client-quote-preview').open=false;
+  }
   async function checkoutGuest(){
     if(!S.lines.length||S.cartInvalid||S.checkoutPending||expired())return;
     S.checkoutPending=true;updateClock();
@@ -1017,6 +1027,7 @@
       if(sum.cents!==previous.cents||
          sum.selected.some(x=>previousUnits.get(x.id)!==x.unit)){
         S.catalog=latest;
+        if(GUEST_QUOTE_MODE)clearGuestWhatsApp();
         renderAll();
         status('Os preços foram atualizados. Confira a cotação e clique novamente para continuar.');
         showToast('Preços alterados: revise o carrinho.');
@@ -1034,14 +1045,23 @@
         'Esta é uma solicitação de cotação, não uma compra concluída.'
       ].join('\n');
       if(text.length>4000)throw Error('Cotação muito extensa');
+      const hasProject=S.lines.some(line=>line.id.startsWith('PRJ-B-')||line.id.startsWith('PRJ-WW-'));
+      const destination=hasProject&&/^55[0-9]{10,11}$/.test(cfg.projectWhatsapp||'')
+        ?cfg.projectWhatsapp:cfg.whatsapp;
+      if(!/^55[0-9]{10,11}$/.test(destination))throw Error('Destino WhatsApp inválido');
       const preview=$('client-quote-preview');
       $('client-quote-preview-text').textContent=text;
+      const link=$('client-quote-whatsapp');
+      link.href='https://wa.me/'+destination+'?text='+encodeURIComponent(text);
+      link.hidden=false;
+      $('client-quote-safety-note').hidden=false;
       preview.hidden=false;
       preview.open=true;
-      status('Prévia DEV validada. Nenhuma solicitação foi registrada nem enviada. Confira a mensagem abaixo.');
-      showToast('Cotação preparada sem login (somente DEV).');
+      status('Cotação conferida. Abra a mensagem no WhatsApp para solicitar atendimento. Nenhum pedido foi registrado.');
+      showToast('Cotação preparada para o WhatsApp (DEV).');
       preview.scrollIntoView({behavior:'smooth',block:'nearest'});
     }catch(_){
+      clearGuestWhatsApp();
       status('Não foi possível validar os itens e preços públicos. Atualize os valores e tente novamente.');
     }finally{S.checkoutPending=false;updateClock();}
   }
