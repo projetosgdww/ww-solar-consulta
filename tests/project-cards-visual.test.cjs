@@ -41,7 +41,7 @@ test('seleção e preço seguem a integração original do catálogo',()=>{
  assert.match(js,/button\.parentElement\?\.querySelector\('strong'\)/);
  assert.match(js,/price\.textContent=project\?euro\(project\.price\):'Sob consulta'/);
  assert.match(js,/button\.dataset\.projectId/);
- assert.match(js,/if\(!S\.user\)\{requestLoginFor\(id\);return;\}/);
+ assert.match(js,/if\(!S\.user&&!GUEST_QUOTE_MODE\)\{requestLoginFor\(id\);return;\}/);
  assert.match(js,/add\(id\)/);
  assert.match(section,/client-projects-hint/);
  assert.match(section,/client-projects-important/);
