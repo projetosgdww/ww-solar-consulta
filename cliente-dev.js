@@ -3,6 +3,23 @@
   const $ = id => document.getElementById(id);
   const C=window.WWSolarClienteCore, cfg=window.WWSOLAR_CLIENTE_CONFIG||{};
   const S={db:null,user:null,admin:false,catalog:[],lines:[],kind:'kit',category:'all',query:'',target:300,cartUpdatedAt:null,cartInvalid:false,saveQueue:Promise.resolve(),timer:null,toastTimer:null,drawerOpen:false,expiryNotified:false,checkoutPending:false,orderKey:null,recoveryMode:false,pendingProductId:null};
+  // Piloto público restrito à branch DEV; nenhuma alteração no PROD.
+  const GUEST_QUOTE_MODE=true;
+  const GUEST_CART_KEY='wwsolar:guest-quote:v1';
+  function loadGuestCart(){
+    try{
+      const raw=window.localStorage.getItem(GUEST_CART_KEY);
+      if(!raw)return {lines:[],updatedAt:null};
+      const saved=JSON.parse(raw);
+      return {lines:C.cleanLines(saved.lines||[]),
+        updatedAt:typeof saved.updatedAt==='string'?saved.updatedAt:null};
+    }catch(_){return {lines:[],updatedAt:null};}
+  }
+  function storeGuestCart(){
+    try{window.localStorage.setItem(GUEST_CART_KEY,JSON.stringify({
+      lines:S.lines,updatedAt:S.cartUpdatedAt
+    }));return true;}catch(_){return false;}
+  }
   const status=(m,id='client-action-status')=>{$(id).textContent=m;};
   const show=(id,visible)=>{$(id).hidden=!visible;};
   const euro = v => C.money(v);
@@ -126,16 +143,21 @@
       const snapshot=await readPreviewSnapshot();
       publicItems=snapshot.items;source='snapshot';snapshotDate=snapshot.date;
     }
-    S.user=null;S.admin=false;S.catalog=publicItems;S.lines=[];S.cartUpdatedAt=null;
+    const guest=GUEST_QUOTE_MODE?loadGuestCart():{lines:[],updatedAt:null};
+    S.user=null;S.admin=false;S.catalog=publicItems;
+    S.lines=guest.lines;S.cartUpdatedAt=guest.updatedAt;
     show('client-entry',false);show('client-app',true);show('client-nav',true);
-    show('client-cart-top',false);show('client-admin-link',false);
-    show('client-logout',false);show('client-login-open',true);
+    show('client-cart-top',GUEST_QUOTE_MODE);show('client-admin-link',false);
+    show('client-logout',false);show('client-login-open',!GUEST_QUOTE_MODE);
     show('client-preview-disclaimer',PREVIEW_HOST);
     if(PREVIEW_HOST)$('client-preview-disclaimer').textContent=source==='snapshot'
       ?'Prévia DEV · preços de '+snapshotDate+' (não atualizados em tempo real). Confirme os valores antes de solicitar cotação.'
       :'Prévia DEV · preços públicos consultados no Supabase. Cotação sujeita à confirmação.';
-    $('client-identity').textContent='Consulte preços livremente. Para detalhes completos e cotação, entre na sua conta.';
+    $('client-identity').textContent=GUEST_QUOTE_MODE?
+      'Consulte kits, adicione à cotação e solicite atendimento sem cadastro.':
+      'Consulte preços livremente. Para detalhes completos e cotação, entre na sua conta.';
     renderAll();
+    if(GUEST_QUOTE_MODE&&!S.timer)S.timer=setInterval(updateClock,1000);
   }
   function requestLoginFor(id){
     S.pendingProductId=id||null;
@@ -214,6 +236,14 @@
     S.recoveryMode=hashParams.get('type')==='recovery'||queryParams.get('wwsolar_recovery')==='1';
     S.db=window.supabase.createClient(cfg.supabaseUrl,cfg.publishableKey,
       {auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+    if(GUEST_QUOTE_MODE){
+      try{await showPublicCatalog();}
+      catch(_){
+        showLogin();
+        status('Não foi possível carregar o catálogo. Tente novamente mais tarde.','client-login-status');
+      }
+      return;
+    }
     S.db.auth.onAuthStateChange((event)=>{
       if(event==='PASSWORD_RECOVERY'){
         S.recoveryMode=true;
@@ -392,8 +422,8 @@
     $('result-panels').textContent=number(x.placas)+' × '+number(x.moduloWp)+' Wp';
     $('result-inverter').textContent=String(x.inversor||'A confirmar');
     $('result-price').textContent=euro(kit.price);
-    $('client-result-button').textContent=S.user?'Adicionar à cotação ↗':'Ver detalhes ↗';
-    if(!S.user){
+    $('client-result-button').textContent=S.user||GUEST_QUOTE_MODE?'Adicionar à cotação ↗':'Ver detalhes ↗';
+    if(!S.user&&!GUEST_QUOTE_MODE){
       $('result-description').textContent='Geração média mensal estimada · detalhes técnicos completos após login';
       $('result-panels').textContent='Após login';
       $('result-inverter').textContent='Após login';
@@ -558,7 +588,7 @@
           'ww-kit-detail-note'));
       }
       const addButton=btn('Adicionar à cotação +',()=>add(p.id),'button button-accent ww-kit-add');
-      if(S.user)detailPanel.append(addButton);
+      if(S.user||GUEST_QUOTE_MODE)detailPanel.append(addButton);
 
       const commercial=el('div',undefined,'ww-kit-commercial');
       commercial.append(el('span','Valor dos equipamentos','ww-kit-price-label'));
@@ -567,18 +597,19 @@
       price.append(el('strong',euro(p.price).replace(/^R\$\s*/,''),'ww-kit-price-value'));
       commercial.append(price);
       const hint=el('p',undefined,'ww-kit-login-hint');
-      hint.append(wwKitIcon('info'),el('span','Consulte detalhes e condições após entrar.'));
+      hint.append(wwKitIcon('info'),el('span',GUEST_QUOTE_MODE?
+        'Detalhes e cotação disponíveis sem cadastro.':'Consulte detalhes e condições após entrar.'));
       commercial.append(hint);
       // Ao clicar, mostrar detalhes do kit; o carrinho continua com add(p.id).
       // Sem login, manter a autenticação original antes de permitir cotação.
       const action=btn('Ver Detalhes do Kit →',()=>{
-        if(!S.user){requestLoginFor(p.id);return;}
+        if(!S.user&&!GUEST_QUOTE_MODE){requestLoginFor(p.id);return;}
         const expanded=detailPanel.hidden;
         detailPanel.hidden=!expanded;
         action.setAttribute('aria-expanded',String(expanded));
         action.textContent=expanded?'Ocultar detalhes do kit ↑':'Ver Detalhes do Kit →';
       },'details-button ww-kit-cta');
-      action.setAttribute('aria-label',S.user?'Ver detalhes de '+p.title:'Entrar para consultar detalhes de '+p.title);
+      action.setAttribute('aria-label',S.user||GUEST_QUOTE_MODE?'Ver detalhes de '+p.title:'Entrar para consultar detalhes de '+p.title);
       action.setAttribute('aria-expanded','false');
       action.setAttribute('aria-controls',detailPanel.id);
       commercial.append(action);
@@ -609,10 +640,10 @@
     const ok=S.lines.length>0&&!S.cartInvalid&&!expired()&&!S.checkoutPending;
     $('client-checkout').disabled=!ok;
     $('client-drawer-checkout').disabled=!ok;
-    $('client-drawer-checkout').textContent=PREVIEW_HOST?'Simular cotação (sem registrar)':'Enviar pelo WhatsApp ↗';
-    $('client-checkout').textContent=PREVIEW_HOST?'Simular cotação':'Solicitar cotação';
+    $('client-drawer-checkout').textContent=GUEST_QUOTE_MODE?'Prévia da cotação (DEV)':PREVIEW_HOST?'Simular cotação (sem registrar)':'Enviar pelo WhatsApp ↗';
+    $('client-checkout').textContent=GUEST_QUOTE_MODE?'Prévia da cotação (DEV)':PREVIEW_HOST?'Simular cotação':'Solicitar cotação';
     // Sincroniza o botão em todo tick, inclusive após trocas de sessão/cache.
-    $('client-drawer-clear').disabled=!S.user||S.lines.length===0;
+    $('client-drawer-clear').disabled=S.lines.length===0;
     $('client-cart-refresh').textContent=expired()?'Renovar cotação':'Atualizar preços';
     $('client-drawer-refresh').textContent=expired()?'↻ Renovar cotação':'↻ Atualizar valores';
     for(const id of ['client-top-clock','client-cart-timer','client-drawer-timer'])
@@ -624,7 +655,7 @@
     if(!expired())S.expiryNotified=false;
   }
   function openDrawer(){
-    if(!S.user)return;
+    if(!S.user&&!GUEST_QUOTE_MODE)return;
     S.drawerOpen=true;
     $('client-cart-shade').hidden=false;
     $('client-cart-drawer').hidden=false;
@@ -651,7 +682,7 @@
     return data||[];
   }
   async function save(next,feedback='Carrinho atualizado.'){
-    if(!S.user)return;
+    if(!S.user&&!GUEST_QUOTE_MODE)return;
     let clean;
     try{clean=C.cleanLines(next);}
     catch(e){status('Revise quantidades ou produtos no carrinho.');return;}
@@ -660,6 +691,11 @@
     S.cartUpdatedAt=new Date().toISOString();
     renderCart();
     if(feedback){showToast(feedback);status(feedback);}
+    if(GUEST_QUOTE_MODE){
+      if(!storeGuestCart())status('Carrinho mantido nesta aba, mas o navegador bloqueou o salvamento local.');
+      updateClock();
+      return;
+    }
     // Serializa escritas para evitar que cliques rápidos sobrescrevam o carrinho fora de ordem.
     S.saveQueue=S.saveQueue.catch(()=>{}).then(async()=>{
       const {data,error}=await S.db.from('wwsolar_carts').upsert({
@@ -682,7 +718,7 @@
     return S.saveQueue;
   }
   function add(id){
-    if(!S.user){requestLoginFor(id);return;}
+    if(!S.user&&!GUEST_QUOTE_MODE){requestLoginFor(id);return;}
     if(!available().some(p=>p.id===id)){status('Este produto não está disponível.');return;}
     const next=S.lines.map(x=>({...x}));
     const row=next.find(x=>x.id===id);
@@ -876,10 +912,10 @@
       const price=button.parentElement?.querySelector('strong');
       if(price)price.textContent=project?euro(project.price):'Sob consulta';
       button.disabled=!project;
-      button.textContent=!project?'Indisponível':S.user?'Adicionar +':'Ver detalhes ↗';
+      button.textContent=!project?'Indisponível':S.user||GUEST_QUOTE_MODE?'Adicionar +':'Ver detalhes ↗';
     }
     const hint=$('client-projects-hint');
-    if(hint)hint.textContent=S.user?
+    if(hint)hint.textContent=S.user||GUEST_QUOTE_MODE?
       'Selecione a faixa correspondente à potência instalada. É possível solicitar apenas o projeto; TRT não inclusa.' :
       'Entre na sua conta para adicionar somente o projeto ao carrinho.';
   }
@@ -888,13 +924,13 @@
     renderRecommendation();renderCategories();renderProducts();renderStandaloneProjects();renderCart();setTarget(S.target);
   }
   async function refreshQuote(){
-    if(!S.user)return;
+    if(!S.user&&!GUEST_QUOTE_MODE)return;
     const buttons=[$('client-cart-refresh'),$('client-drawer-refresh')];
     buttons.forEach(b=>b.disabled=true);
     status('Consultando os preços atuais...');
     try{
       await S.saveQueue;
-      const newCatalog=await getFreshCatalog();
+      const newCatalog=GUEST_QUOTE_MODE?await readPublicCatalog():await getFreshCatalog();
       S.catalog=newCatalog;
       const invalid=S.lines.filter(line=>!newCatalog.some(p=>p.id===line.id&&quotableProduct(p)));
       renderProducts();
@@ -915,6 +951,7 @@
     }finally{buttons.forEach(b=>b.disabled=false);}
   }
   async function checkout(){
+    if(GUEST_QUOTE_MODE){await checkoutGuest();return;}
     if(!S.user||!S.lines.length||S.cartInvalid||S.checkoutPending||expired())return;
     S.checkoutPending=true;updateClock();
     status('Conferindo o carrinho e registrando a solicitação...');
@@ -1098,7 +1135,7 @@
       const project=available().find(p=>p.id===id && p.kind==='piece' &&
         p.payload?.categoria==='projetos' && !p.payload?.kitCodigo);
       if(!project){status('Projeto indisponível.');return;}
-      if(!S.user){requestLoginFor(id);return;}
+      if(!S.user&&!GUEST_QUOTE_MODE){requestLoginFor(id);return;}
       add(id);
       status('Projeto elétrico adicionado. Você pode cotar apenas esse serviço; TRT não inclusa.');
       openDrawer();
@@ -1109,7 +1146,7 @@
   $('client-cart-refresh').addEventListener('click',refreshQuote);
   $('client-drawer-refresh').addEventListener('click',refreshQuote);
   $('client-drawer-clear').addEventListener('click',()=>{
-    if(!S.user||S.lines.length===0)return;
+    if(!S.user&&!GUEST_QUOTE_MODE||S.lines.length===0)return;
     if(!window.confirm('Limpar todos os itens do carrinho? Os pedidos já registrados permanecerão no histórico.'))return;
     void save([],'Carrinho limpo.');
   });
