@@ -126,6 +126,41 @@
     if(error)throw error;
     return validatePublicItems(data);
   }
+  // Retorna apenas dados técnicos aprovados para demonstração no DEV.
+  // O catálogo comercial e seus preços continuam vindo da RPC pública original.
+  const TECH_FIELDS=['placas','moduloWp','moduloFabricante','tipoModulo',
+    'inversor','tipoRede','fixacao','componentesIncluidos'];
+  async function enrichDevKitDetails(items){
+    if(!GUEST_QUOTE_MODE)return items;
+    const {data,error}=await S.db.rpc('wwsolar_public_kit_details_dev');
+    if(error||!Array.isArray(data))throw Error('Detalhes técnicos DEV indisponíveis');
+    const details=new Map();
+    for(const item of data){
+      if(!item||typeof item.id!=='string'||!/^[-A-Za-z0-9]+$/.test(item.id)||
+         !item.details||typeof item.details!=='object'||Array.isArray(item.details)||
+         details.has(item.id))throw Error('Detalhes técnicos inválidos');
+      const technical={};
+      for(const field of TECH_FIELDS){
+        const value=item.details[field];
+        if(value===undefined||value===null)continue;
+        if(field==='componentesIncluidos'){
+          if(!Array.isArray(value)||value.length>45||
+             value.some(v=>typeof v!=='string'||v.length>250))throw Error('Composição inválida');
+          technical[field]=value;
+        }else if(field==='placas'||field==='moduloWp'){
+          if(!Number.isFinite(Number(value))||Number(value)<0||Number(value)>5000)throw Error('Quantidade inválida');
+          technical[field]=Number(value);
+        }else{
+          if(typeof value!=='string'||value.length>600)throw Error('Campo técnico inválido');
+          technical[field]=value;
+        }
+      }
+      details.set(item.id,technical);
+    }
+    return items.map(item=>item.kind!=='kit'?item:{
+      ...item,payload:{...item.payload,...(details.get(item.id)||{})}
+    });
+  }
   async function readPreviewSnapshot(){
     const response=await fetch('./dados/vitrine-preview.json',{cache:'no-store'});
     if(!response.ok)throw Error('Vitrine de prévia indisponível');
@@ -143,6 +178,7 @@
       const snapshot=await readPreviewSnapshot();
       publicItems=snapshot.items;source='snapshot';snapshotDate=snapshot.date;
     }
+    if(GUEST_QUOTE_MODE)publicItems=await enrichDevKitDetails(publicItems);
     const guest=GUEST_QUOTE_MODE?loadGuestCart():{lines:[],updatedAt:null};
     S.user=null;S.admin=false;S.catalog=publicItems;
     S.lines=guest.lines;S.cartUpdatedAt=guest.updatedAt;
@@ -582,6 +618,22 @@
         detailSpecs.append(item);
       }
       detailPanel.append(detailSpecs);
+      if(Array.isArray(x.componentesIncluidos)&&x.componentesIncluidos.length){
+        const componentsTitle=el('strong','Componentes incluídos na composição','ww-kit-detail-title');
+        componentsTitle.style.display='block';
+        componentsTitle.style.marginTop='18px';
+        const componentsList=el('ul',undefined,'ww-kit-components-list');
+        componentsList.style.cssText='padding-left:20px;margin:10px 0 6px;line-height:1.65';
+        for(const description of x.componentesIncluidos){
+          componentsList.append(el('li',description));
+        }
+        detailPanel.append(componentsTitle,componentsList);
+      }
+      if(GUEST_QUOTE_MODE){
+        detailPanel.append(el('p',
+          'Composição informada no cadastro do kit, sujeita à confirmação de disponibilidade, compatibilidade técnica e entrega antes da venda.',
+          'ww-kit-detail-note'));
+      }
       if(x.origemKit==='fotus_pronto'){
         detailPanel.append(el('p',
           'Kit pronto do fornecedor · Venda somente dos equipamentos; projeto elétrico e instalação não inclusos. Frete sob consulta para todas as cidades, inclusive Canindé/CE. Prazo previsto: até 15 dias úteis, podendo acrescentar até 5 dias úteis após confirmação do pedido e da disponibilidade.',
@@ -930,7 +982,8 @@
     status('Consultando os preços atuais...');
     try{
       await S.saveQueue;
-      const newCatalog=GUEST_QUOTE_MODE?await readPublicCatalog():await getFreshCatalog();
+      const newCatalog=GUEST_QUOTE_MODE?
+        await enrichDevKitDetails(await readPublicCatalog()):await getFreshCatalog();
       S.catalog=newCatalog;
       const invalid=S.lines.filter(line=>!newCatalog.some(p=>p.id===line.id&&quotableProduct(p)));
       renderProducts();
@@ -957,7 +1010,7 @@
     S.checkoutPending=true;updateClock();
     status('Conferindo produtos, projetos e preços públicos...');
     try{
-      const latest=await readPublicCatalog();
+      const latest=await enrichDevKitDetails(await readPublicCatalog());
       const sum=C.sumCart(S.lines,latest);
       const previous=C.sumCart(S.lines,available());
       const previousUnits=new Map(previous.selected.map(x=>[x.id,x.unit]));
