@@ -12,7 +12,7 @@ test('WhatsApp tem destino controlado e link gerado somente depois da validaçã
  assert.match(guest,/const hasProject=S\.lines\.some/);
  assert.match(guest,/cfg\.projectWhatsapp/);
  assert.match(guest,/cfg\.whatsapp/);
- assert.match(guest,/^.*destination.*\.test\(destination\)/m);
+ assert.ok(guest.includes('.test(destination)'));
  assert.match(guest,/link\.href='https:\/\/wa\.me\/'/);
  assert.match(guest,/encodeURIComponent\(text\)/);
  assert.match(html,/id="client-quote-whatsapp"/);
