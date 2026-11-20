@@ -24,6 +24,8 @@ test('checkout público confirma cotação sem registrar, com validade e preço 
  assert.match(code,/C\.sumCart\(S\.lines,latest\)/);
  assert.match(code,/sum\.cents!==previous\.cents/);
  assert.match(code,/if\(expired\(\)\)throw Error/);
+ assert.match(code,/const quoteState=JSON\.stringify/);
+ assert.match(code,/!==quoteState/);
  assert.match(code,/C\.linkedProjectNote\(S\.lines,latest\)/);
  assert.match(code,/link\.href='https:\/\/wa\.me\/'/);
  assert.doesNotMatch(code,/\.insert\(|\.upsert\(|\.delete\(|window\.location\.assign/);
