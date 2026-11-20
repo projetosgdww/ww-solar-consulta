@@ -988,6 +988,7 @@
     if(!S.user&&!GUEST_QUOTE_MODE)return;
     const buttons=[$('client-cart-refresh'),$('client-drawer-refresh')];
     buttons.forEach(b=>b.disabled=true);
+    if(GUEST_QUOTE_MODE)clearGuestWhatsApp();
     status('Consultando os preços atuais...');
     try{
       await S.saveQueue;
@@ -1051,6 +1052,7 @@
         'Frete e disponibilidade sob consulta. Valores sujeitos a confirmação.',
         'Esta é uma solicitação de cotação, não uma compra concluída.'
       ].join('\n');
+      if(expired())throw Error('Cotação expirada durante a consulta');
       if(text.length>4000)throw Error('Cotação muito extensa');
       const hasProject=S.lines.some(line=>line.id.startsWith('PRJ-B-')||line.id.startsWith('PRJ-WW-'));
       const destination=hasProject&&/^55[0-9]{10,11}$/.test(cfg.projectWhatsapp||'')
