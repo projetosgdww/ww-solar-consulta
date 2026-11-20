@@ -950,6 +950,48 @@
       showToast('Não foi possível atualizar a cotação.');
     }finally{buttons.forEach(b=>b.disabled=false);}
   }
+  // DEV: a cotação pública é validada contra a RPC comercial atual, sem
+  // autenticar, gravar pedidos ou enviar mensagens automaticamente.
+  async function checkoutGuest(){
+    if(!S.lines.length||S.cartInvalid||S.checkoutPending||expired())return;
+    S.checkoutPending=true;updateClock();
+    status('Conferindo produtos, projetos e preços públicos...');
+    try{
+      const latest=await readPublicCatalog();
+      const sum=C.sumCart(S.lines,latest);
+      const previous=C.sumCart(S.lines,available());
+      const previousUnits=new Map(previous.selected.map(x=>[x.id,x.unit]));
+      if(sum.cents!==previous.cents||
+         sum.selected.some(x=>previousUnits.get(x.id)!==x.unit)){
+        S.catalog=latest;
+        renderAll();
+        status('Os preços foram atualizados. Confira a cotação e clique novamente para continuar.');
+        showToast('Preços alterados: revise o carrinho.');
+        return;
+      }
+      const note=C.linkedProjectNote(S.lines,latest);
+      const text=[
+        'Olá! Gostaria de solicitar uma cotação WW Solar.','',
+        ...sum.selected.map(x=>'- '+x.qty+' × '+x.title+' ['+x.id+'] — '+euro(x.amount/100)),
+        ...(note?['',note]:[]),
+        '','Total estimado: '+euro(sum.cents/100),
+        'Venda de equipamentos; projeto elétrico opcional, instalação e materiais CA não inclusos.',
+        'TRT de projeto, quando incluído, paga pelo contratante.',
+        'Frete e disponibilidade sob consulta. Valores sujeitos a confirmação.',
+        'Esta é uma solicitação de cotação, não uma compra concluída.'
+      ].join('\\n');
+      if(text.length>4000)throw Error('Cotação muito extensa');
+      const preview=$('client-quote-preview');
+      $('client-quote-preview-text').textContent=text;
+      preview.hidden=false;
+      preview.open=true;
+      status('Prévia DEV validada. Nenhuma solicitação foi registrada nem enviada. Confira a mensagem abaixo.');
+      showToast('Cotação preparada sem login (somente DEV).');
+      preview.scrollIntoView({behavior:'smooth',block:'nearest'});
+    }catch(_){
+      status('Não foi possível validar os itens e preços públicos. Atualize os valores e tente novamente.');
+    }finally{S.checkoutPending=false;updateClock();}
+  }
   async function checkout(){
     if(GUEST_QUOTE_MODE){await checkoutGuest();return;}
     if(!S.user||!S.lines.length||S.cartInvalid||S.checkoutPending||expired())return;
