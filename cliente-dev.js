@@ -979,7 +979,7 @@
         'TRT de projeto, quando incluído, paga pelo contratante.',
         'Frete e disponibilidade sob consulta. Valores sujeitos a confirmação.',
         'Esta é uma solicitação de cotação, não uma compra concluída.'
-      ].join('\\n');
+      ].join('\n');
       if(text.length>4000)throw Error('Cotação muito extensa');
       const preview=$('client-quote-preview');
       $('client-quote-preview-text').textContent=text;
