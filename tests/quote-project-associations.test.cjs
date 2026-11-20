@@ -70,9 +70,10 @@ test('backend persiste associação validada em items JSONB, usa mesmos itens na
   'if(total!==expectedTotal)'
  ])assert.ok(server.includes(fragment),fragment);
 });
-test('histórico exibe nomes dos kits vinculados sem presumir associação por faixa',()=>{
- assert.ok(admin.includes("Array.isArray(x.linked_kits)"));
- assert.ok(admin.includes('Projeto elétrico vinculado a:'));
+test('backend mantém vínculos de projeto; registro manual não inventa associação',()=>{
+ assert.ok(server.includes('projectAssociationNotes(order.items)'));
+ assert.ok(admin.includes("wwsolar_manual_sales_dev"));
+ assert.ok(admin.includes("kit_sku:sku"));
  assert.ok(client.includes('C.quoteSnapshotMatches(S.lines,data.order.items)'));
 });
 

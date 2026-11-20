@@ -3,53 +3,39 @@
 <main class="shell client-main">
 <div class="section-label">WW SOLAR / ADMINISTRAÇÃO</div>
 <h1 class="admin-main-title">Seu painel <em>comercial.</em></h1>
-<p class="admin-main-intro">Acessos e histórico de solicitações em um só lugar. Atualizações de produtos e kits permanecem no desenvolvimento técnico.</p>
+<p class="admin-main-intro">Registre vendas concluídas e monte composições internas. O catálogo permanece aberto aos visitantes, sem cadastro.</p>
+<section id="admin-signin" class="client-login admin-clients-panel" hidden aria-labelledby="admin-signin-title">
+  <h2 id="admin-signin-title">Acesso exclusivo do administrador</h2>
+  <p>Entre com sua conta administrativa WW Solar. O catálogo público não exige login.</p>
+  <form id="admin-signin-form" class="client-form" autocomplete="on">
+    <label for="admin-signin-email">E-mail</label><input id="admin-signin-email" type="email" autocomplete="username" required maxlength="254" placeholder="Seu e-mail administrativo">
+    <label for="admin-signin-password">Senha</label><input id="admin-signin-password" type="password" autocomplete="current-password" required placeholder="Sua senha">
+    <button id="admin-signin-submit" class="button button-accent" type="submit">Entrar no painel ↗</button>
+  </form>
+  <p id="admin-signin-status" class="client-status" role="status" aria-live="polite"></p>
+</section>
+<div id="admin-session-actions" hidden><button id="admin-session-logout" class="button button-outline" type="button">Sair da administração</button></div>
 <div id="admin-tabs" class="admin-tabs" role="group" aria-label="Seções do painel" hidden>
-  <button id="admin-tab-clients" class="active" type="button" aria-pressed="true" data-admin-panel="clients"><span>👥</span><strong>Clientes</strong><small>Cadastrar e gerenciar acessos</small></button>
-  <button id="admin-tab-orders" type="button" aria-pressed="false" data-admin-panel="orders"><span>📋</span><strong>Pedidos</strong><small>Histórico e negociações</small></button>
-  <button id="admin-tab-kits" type="button" aria-pressed="false" data-admin-panel="kits"><span>☀️</span><strong>Kits em revisão</strong><small>30 composições em revisão</small></button>
-  <button id="admin-tab-composer" type="button" aria-pressed="false" data-admin-panel="composer"><span aria-hidden="true">🧩</span><strong>Composição</strong><small>Montar kits com preços cadastrados</small></button>
+  <button id="admin-tab-sales" class="active" type="button" aria-pressed="true" data-admin-panel="sales"><span aria-hidden="true">▣</span><strong>Vendas</strong><small>Registrar venda fechada</small></button>
+  <button id="admin-tab-composer" type="button" aria-pressed="false" data-admin-panel="composer"><span aria-hidden="true">▤</span><strong>Composição</strong><small>Montar kits com custos privados</small></button>
 </div>
-<section class="client-login admin-clients-panel" id="admin-clients-panel">
-<h1>Liberação de <em>clientes.</em></h1><p>Informe apenas o e-mail do cliente. Para novos acessos, o sistema gera uma <strong>senha temporária</strong>, mostrada uma única vez. No primeiro login, o cliente deverá substituí-la por uma senha pessoal de no mínimo 12 caracteres.</p><p>Perdeu a senha de um cliente? O cliente pode usar <strong>Esqueci minha senha</strong> para receber um link de recuperação por e-mail. A opção <strong>Reemitir senha</strong> permanece como procedimento administrativo de contingência, sem excluir a conta ou o carrinho.</p>
-<p id="admin-dev-status" role="status" class="client-status">Verificando seu perfil de acesso...</p>
-<form id="admin-dev-form" class="client-form" hidden><label for="admin-dev-email">E-mail do cliente</label><input id="admin-dev-email" type="email" required maxlength="254" placeholder="cliente@exemplo.com" autocomplete="off">
-<button class="button button-accent" type="submit" id="admin-dev-submit">Criar acesso <span>↗</span></button>
-<button class="button button-outline" type="button" id="admin-dev-rotate">Reemitir senha</button></form>
-
-<div id="admin-dev-created" hidden><div class="section-label">CREDENCIAIS — MOSTRADAS APENAS UMA VEZ</div>
-<p class="client-muted">Copie agora e envie diretamente ao cliente. Não salve senhas em planilhas ou repositórios.</p>
-<pre id="admin-dev-credentials" style="white-space:pre-wrap;overflow-wrap:anywhere;border:1px solid #dae9e3;padding:16px;border-radius:12px;background:#f4f8f6"></pre>
-<button type="button" id="admin-dev-copy" class="button button-outline">Copiar acesso</button>
-<button type="button" id="admin-dev-clear" class="button button-outline">Limpar da tela</button>
-</div>
-<p class="client-muted">Cadastro restrito aos administradores; não há cadastro público. As credenciais iniciais são temporárias e o cliente deve criar sua própria senha. Evite encaminhar a senha por canais compartilhados. O envio de links de recuperação depende da configuração de e-mails do Supabase.</p>
-<div id="admin-client-directory" class="admin-client-directory" hidden>
-<div class="admin-section-row"><div><h2>Acessos cadastrados</h2><p class="client-muted">Consulte e bloqueie acessos sem apagar o histórico.</p></div><button type="button" id="admin-refresh-clients" class="button button-outline">Atualizar</button></div>
-<div id="admin-client-list" class="admin-client-list"></div>
-</div>
-</section>
-<section id="admin-orders-panel" class="admin-orders-panel" hidden>
-<div class="admin-section-row"><div><h2>Histórico de solicitações</h2><p class="client-muted">Valores e itens preservados no momento da solicitação. O registro não confirma envio da mensagem pelo WhatsApp nem compra concluída.</p></div><button id="admin-refresh-orders" type="button" class="button button-outline">Atualizar pedidos</button></div>
-<div class="admin-order-toolbar"><label for="admin-order-filter">Filtrar por situação</label>
-<select id="admin-order-filter"><option value="todos">Todas as solicitações</option><option value="registrado">Registradas</option><option value="em_atendimento">Em atendimento</option><option value="fechado">Fechadas</option><option value="cancelado">Canceladas</option></select>
-<span id="admin-order-count" aria-live="polite">—</span></div>
-<p id="admin-order-status" class="client-status" role="status"></p>
-<div id="admin-order-list" class="admin-order-list"></div>
-<p class="client-muted">São exibidas as 100 solicitações mais recentes neste piloto DEV. Nenhum pagamento ou compra é realizado automaticamente.</p>
-</section>
-<section id="admin-kits-panel" class="admin-orders-panel" hidden aria-label="Composições preliminares de kits">
- <div class="admin-section-row"><div><h2>Nova linha · 8 kits para cotação</h2>
- <p class="client-muted">Oito faixas padronizadas: 300, 500, 800, 1.000, 1.200, 1.500, 1.800 e 2.000 kWh/mês. Kits disponíveis para cotação, sujeitos à confirmação da instalação.</p></div>
- <button type="button" id="admin-refresh-kits" class="button button-outline">Atualizar prévias</button></div>
- <div class="admin-order-toolbar">
- <label for="admin-kit-status-filter">Situação</label>
- <select id="admin-kit-status-filter"><option value="all">Todos os 8 kits</option><option value="pendente_engenharia">Com pendências técnicas</option></select>
- <span id="admin-kit-count" aria-live="polite">—</span></div>
- <p id="admin-kit-status" class="client-status" role="status">Abra esta aba para carregar as composições.</p>
- <div id="admin-kit-list" class="admin-order-list"></div>
- <p class="client-muted">Geração média mensal estimada, equipamentos incluídos e preço para cotação. A composição definitiva depende das características do local.</p>
- <p class="client-muted"><small>Orientação de padrão de entrada: até 10 kW pode haver atendimento monofásico; acima de 10 kW e até 75 kW, confirmar se o fornecimento aplicável é bifásico ou trifásico. A definição depende da rede, das normas da distribuidora e da potência dos equipamentos; a indicação no kit não substitui a análise de conexão.</small></p>
+<section id="admin-sales-panel" class="admin-orders-panel" hidden>
+ <div class="admin-section-row"><div><h2>Registrar <em>venda</em></h2><p>Preencha apenas quando a negociação estiver concluída. Cotação pelo WhatsApp não é venda.</p></div></div>
+ <form id="admin-sale-form" class="admin-sale-form" autocomplete="on">
+  <label>Nome do cliente <input id="sale-name" name="customer_name" type="text" maxlength="120" minlength="2" required autocomplete="name" placeholder="Nome do comprador"></label>
+  <label>Telefone/WhatsApp <input id="sale-phone" name="customer_phone" type="tel" maxlength="24" minlength="10" required autocomplete="tel" placeholder="(85) 99999-9999"></label>
+  <label class="admin-sale-wide">Kit vendido
+   <select id="sale-kit" name="kit_sku" required><option value="">Selecione o kit do catálogo...</option></select>
+  </label>
+  <label>Quantidade <input id="sale-qty" name="quantity" type="number" min="1" max="99" step="1" value="1" required></label>
+  <label>Valor total fechado (R$) <input id="sale-total" name="agreed_total" type="text" inputmode="decimal" maxlength="15" placeholder="Ex.: 8.260,98" required></label>
+  <label>Data da venda <input id="sale-date" name="closed_on" type="date" required></label>
+  <label class="admin-sale-wide">Observação (opcional) <textarea id="sale-notes" name="notes" maxlength="500" rows="2" placeholder="Frete, projeto ou condição acordada"></textarea></label>
+  <div class="admin-sale-wide admin-sale-submit"><button id="sale-submit" type="submit" class="button button-accent">Registrar venda</button><small>Registro privado. Não altera o catálogo, preços ou estoque.</small></div>
+ </form>
+ <p id="admin-sale-status" class="client-status" role="status" aria-live="polite"></p>
+ <div class="admin-section-row admin-sales-history-heading"><div><h2>Vendas registradas</h2><p>Somente registros do seu acesso administrativo. Histórico anterior preservado no banco.</p></div><button id="sale-refresh" type="button" class="button button-outline">Atualizar</button></div>
+ <div id="admin-sales-list" class="admin-sales-list"></div>
 </section>
 <section class="admin-orders-panel admin-compose-panel" id="admin-composer-panel" hidden aria-label="Composição de kits solares">
  <div class="admin-section-row">

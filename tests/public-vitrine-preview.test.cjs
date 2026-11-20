@@ -27,15 +27,19 @@ test('allowlist não exporta custos, dados de clientes nem payload interno',()=>
  }
  assert.doesNotMatch(JSON.stringify(data),/service_role|custo[A-Za-z]*|fornecedor|email|user_id|origemKit|componentesIncluidos/i);
 });
-test('visitante não obtém carrinho, somente login sob demanda',()=>{
+test('visitante possui carrinho local independente sem login',()=>{
  assert.match(js,/async function showPublicCatalog\(\)/);
- assert.match(js,/if\(!S\.user\)\{requestLoginFor\(id\);return;\}/);
- assert.match(js,/show\('client-cart-top',false\)/);
- assert.match(js,/if\(!S\.user\)\{requestLoginFor\(id\);return;\}/);
- assert.match(html,/id="client-login-open"/);
+ assert.match(js,/const GUEST_QUOTE_MODE=cfg\.publicQuoteEnabled===true/);
+ assert.match(js,/ww-solar-composicao-dev/);
+ assert.match(js,/const GUEST_CART_KEY=/);
+ assert.match(js,/window\.localStorage\.getItem\(GUEST_CART_KEY\)/);
+ assert.match(js,/window\.localStorage\.setItem\(GUEST_CART_KEY/);
+ assert.match(js,/show\('client-cart-top',GUEST_QUOTE_MODE\)/);
+ assert.match(js,/if\(!S\.user&&!GUEST_QUOTE_MODE\)\{requestLoginFor\(id\);return;\}/);
+ assert.match(html,/id="client-cart-drawer"/);
  assert.match(html,/id="client-preview-disclaimer"/);
- assert.match(html,/Clique aqui e fale com a WW Solar/);
 });
+
 test('migração preparada não concede SELECT sobre wwsolar_catalog a anon',()=>{
  assert.match(draft,/revoke all on function public\.wwsolar_public_catalog\(\) from public,anon,authenticated/);
  assert.match(draft,/grant execute on function public\.wwsolar_public_catalog\(\) to anon,authenticated/);
@@ -45,6 +49,7 @@ test('migração preparada não concede SELECT sobre wwsolar_catalog a anon',()=
 
 test('RPC dinâmica substitui snapshot, com falha fechada fora do DEV',()=>{
  assert.ok(js.includes("S.db.rpc('wwsolar_public_catalog')"));
+ assert.ok(js.includes("S.db.rpc('wwsolar_public_catalog_v2')"));
  assert.ok(js.includes('if(!PREVIEW_HOST)throw error'));
  assert.ok(js.includes("source='snapshot'"));
  assert.ok(js.includes('client-returned-item'));
