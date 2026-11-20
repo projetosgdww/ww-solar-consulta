@@ -12,7 +12,9 @@ test('login legado do cliente não aparece antes da consulta pública',()=>{
 test('administrador possui login exclusivo e navegação separada',()=>{
  for(const id of ['admin-signin','admin-signin-form','admin-signin-email','admin-signin-password','admin-signin-submit','admin-session-logout'])
   assert.match(adminHtml,new RegExp('id="'+id+'"'));
- assert.match(adminHtml,/id="admin-clients-panel" hidden>/);
+ assert.match(adminHtml,/id="admin-tab-sales"/);
+ assert.match(adminHtml,/id="admin-tab-composer"/);
+ assert.doesNotMatch(adminHtml,/id="admin-tab-clients"/);
  assert.match(adminJs,/db\.auth\.signInWithPassword/);
  assert.match(adminJs,/app_metadata\?\.wwsolar_role!=='admin'/);
  assert.match(adminJs,/db\.auth\.signOut\(\)/);
