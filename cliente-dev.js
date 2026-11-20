@@ -4,7 +4,7 @@
   const C=window.WWSolarClienteCore, cfg=window.WWSOLAR_CLIENTE_CONFIG||{};
   const S={db:null,user:null,admin:false,catalog:[],lines:[],kind:'kit',category:'all',query:'',target:300,cartUpdatedAt:null,cartInvalid:false,saveQueue:Promise.resolve(),timer:null,toastTimer:null,drawerOpen:false,expiryNotified:false,checkoutPending:false,orderKey:null,recoveryMode:false,pendingProductId:null};
   // Piloto público restrito à branch DEV; nenhuma alteração no PROD.
-  const GUEST_QUOTE_MODE=/(^localhost$|^127\.0\.0\.1$|(^|\.)ww-solar-composicao-dev\.pages\.dev$)/.test(window.location.hostname);
+  const GUEST_QUOTE_MODE=cfg.publicQuoteEnabled===true && /(^localhost$|^127\.0\.0\.1$|(^|\.)ww-solar-composicao-dev\.pages\.dev$|^catalogo\.wwplatform\.com\.br$)/.test(window.location.hostname);
   const GUEST_CART_KEY='wwsolar:guest-quote:v1';
   function loadGuestCart(){
     try{
@@ -122,7 +122,9 @@
   }
   async function readPublicCatalog(){
     if(!S.db)throw Error('Conexão não configurada');
-    const {data,error}=await S.db.rpc('wwsolar_public_catalog');
+    const {data,error}=GUEST_QUOTE_MODE
+      ?await S.db.rpc('wwsolar_public_catalog_v2')
+      :await S.db.rpc('wwsolar_public_catalog');
     if(error)throw error;
     return validatePublicItems(data);
   }
@@ -275,8 +277,13 @@
     if(GUEST_QUOTE_MODE){
       try{await showPublicCatalog();}
       catch(_){
-        showLogin();
-        status('Não foi possível carregar o catálogo. Tente novamente mais tarde.','client-login-status');
+        show('client-entry',false);
+        show('client-app',false);
+        show('client-nav',false);
+        show('client-cart-top',false);
+        // Nunca mostrar autenticação do cliente quando a vitrine pública está indisponível.
+        const error=$('client-startup-error');
+        if(error)error.hidden=false;
       }
       return;
     }
