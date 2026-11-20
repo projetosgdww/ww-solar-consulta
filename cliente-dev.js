@@ -1025,6 +1025,8 @@
   }
   async function checkoutGuest(){
     if(!S.lines.length||S.cartInvalid||S.checkoutPending||expired())return;
+    // Se o carrinho mudar durante a consulta, não fornecer mensagem obsoleta.
+    const quoteState=JSON.stringify({lines:S.lines,updatedAt:S.cartUpdatedAt});
     S.checkoutPending=true;updateClock();
     status('Conferindo produtos, projetos e preços públicos...');
     try{
@@ -1041,6 +1043,11 @@
         showToast('Preços alterados: revise o carrinho.');
         return;
       }
+      if(JSON.stringify({lines:S.lines,updatedAt:S.cartUpdatedAt})!==quoteState){
+        clearGuestWhatsApp();
+        status('O carrinho mudou durante a consulta. Confira os itens e solicite novamente.');
+        return;
+      }
       const note=C.linkedProjectNote(S.lines,latest);
       const text=[
         'Olá! Gostaria de solicitar uma cotação WW Solar.','',
@@ -1052,6 +1059,11 @@
         'Frete e disponibilidade sob consulta. Valores sujeitos a confirmação.',
         'Esta é uma solicitação de cotação, não uma compra concluída.'
       ].join('\n');
+      if(JSON.stringify({lines:S.lines,updatedAt:S.cartUpdatedAt})!==quoteState){
+        clearGuestWhatsApp();
+        status('O carrinho mudou durante a conferência. Gere uma nova cotação.');
+        return;
+      }
       if(expired())throw Error('Cotação expirada durante a consulta');
       if(text.length>4000)throw Error('Cotação muito extensa');
       const hasProject=S.lines.some(line=>line.id.startsWith('PRJ-B-')||line.id.startsWith('PRJ-WW-'));
