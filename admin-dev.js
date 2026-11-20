@@ -1,53 +1,44 @@
 (()=>{
 'use strict';
 const $=id=>document.getElementById(id),cfg=window.WWSOLAR_CLIENTE_CONFIG||{};
-let db=null,oneTime='',ready=false,orders=[],orderEvents=[];
-const statuses={registrado:'Registrada',em_atendimento:'Em atendimento',fechado:'Fechada',cancelado:'Cancelada'};
-const status=m=>{$('admin-dev-status').textContent=m;};
-const orderStatus=m=>{$('admin-order-status').textContent=m;};
-const element=(tag,text,cls)=>{
+let db=null,ready=false,saleKits=[];
+const status=m=>{$('admin-sale-status').textContent=m;};
+const element=(tag,content,cls)=>{
  const e=document.createElement(tag);
- if(text!==undefined)e.textContent=String(text);
+ if(content!==undefined)e.textContent=String(content);
  if(cls)e.className=cls;
  return e;
 };
-const button=(text,onClick,cls='button button-outline')=>{
- const b=element('button',text,cls);b.type='button';b.addEventListener('click',onClick);return b;
+const button=(text,fn,cls='button button-outline')=>{
+ const b=element('button',text,cls);b.type='button';b.addEventListener('click',fn);return b;
 };
 const money=cents=>new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(Number(cents||0)/100);
 const date=iso=>{
- const n=Date.parse(String(iso||''));
- return Number.isFinite(n)?new Intl.DateTimeFormat('pt-BR',{dateStyle:'short',timeStyle:'short'}).format(new Date(n)):'—';
+ const n=Date.parse(String(iso||''));return Number.isFinite(n)?
+ new Intl.DateTimeFormat('pt-BR',{dateStyle:'short',timeStyle:'short'}).format(new Date(n)):'—';
 };
-function clearCredentials(){
- oneTime='';$('admin-dev-credentials').textContent='';
- $('admin-dev-created').hidden=true;
-}
 function showPanel(which){
  if(!ready)return;
- clearCredentials();
- for(const name of ['clients','orders','kits','composer']){
-   $('admin-'+name+'-panel').hidden=which!==name;
-   $('admin-tab-'+name).classList.toggle('active',which===name);
-   $('admin-tab-'+name).setAttribute('aria-pressed',String(which===name));
+ for(const name of ['sales','composer']){
+  $('admin-'+name+'-panel').hidden=which!==name;
+  $('admin-tab-'+name).classList.toggle('active',which===name);
+  $('admin-tab-'+name).setAttribute('aria-pressed',String(which===name));
  }
- if(which==='clients')void loadClients();
- if(which==='orders')void loadOrders();
- if(which==='kits')void loadKitPreviews();
+ if(which==='sales')void loadSales();
  if(which==='composer')void loadCompositionCatalog();
 }
 async function init(){
- if(!/^https:\/\/[a-z0-9-]+\.supabase\.co$/.test(cfg.supabaseUrl||'')
-    ||!cfg.publishableKey||!window.supabase?.createClient){
-   status('Administração DEV não configurada. Nenhuma conta foi alterada.');return;
+ if(!/^https:\/\/[a-z0-9-]+\.supabase\.co$/.test(cfg.supabaseUrl||'')||
+   !cfg.publishableKey||!window.supabase?.createClient){
+  $('admin-signin').hidden=false;
+  $('admin-signin-status').textContent='Configuração indisponível. Não informe credenciais.';
+  return;
  }
  db=window.supabase.createClient(cfg.supabaseUrl,cfg.publishableKey);
  const {data,error}=await db.auth.getUser();
  if(error||data?.user?.app_metadata?.wwsolar_role!=='admin'){
-   $('admin-signin').hidden=false;
-   $('admin-clients-panel').hidden=true;
-   status('Acesso exclusivo da administração. Faça login abaixo.');
-   return;
+  $('admin-signin').hidden=false;
+  return;
  }
  enableAdmin();
 }
@@ -57,304 +48,122 @@ function enableAdmin(){
  $('admin-signin-password').value='';
  $('admin-session-actions').hidden=false;
  $('admin-tabs').hidden=false;
- $('admin-clients-panel').hidden=false;
- $('admin-dev-form').hidden=false;
- $('admin-client-directory').hidden=false;
- status('Administrador autenticado. Utilize as abas do painel.');
- void loadClients();
+ $('sale-date').value=new Date(Date.now()-new Date().getTimezoneOffset()*60000).toISOString().slice(0,10);
+ showPanel('sales');
+ void loadSaleKits();
 }
 async function signInAdmin(event){
  event.preventDefault();
- const submit=$('admin-signin-submit');
- submit.disabled=true;
- $('admin-signin-status').textContent='Verificando credenciais...';
+ const submit=$('admin-signin-submit');submit.disabled=true;
+ $('admin-signin-status').textContent='Conferindo acesso...';
  try{
-   const email=$('admin-signin-email').value.trim().toLowerCase();
-   const password=$('admin-signin-password').value;
-   const {data,error}=await db.auth.signInWithPassword({email,password});
-   if(error||!data?.user||data.user.app_metadata?.wwsolar_role!=='admin'){
-     if(data?.user)await db.auth.signOut();
-     throw Error('Esta conta não tem acesso à administração ou as credenciais são inválidas.');
-   }
-   $('admin-signin-status').textContent='';
-   enableAdmin();
- }catch(err){
-   $('admin-signin-password').value='';
-   $('admin-signin-status').textContent=err?.message||'Não foi possível entrar no painel.';
+  const email=$('admin-signin-email').value.trim().toLowerCase();
+  const password=$('admin-signin-password').value;
+  const {data,error}=await db.auth.signInWithPassword({email,password});
+  if(error||!data?.user||data.user.app_metadata?.wwsolar_role!=='admin'){
+   if(data?.user)await db.auth.signOut();
+   throw Error('E-mail ou senha inválidos, ou usuário sem permissão administrativa.');
+  }
+  $('admin-signin-status').textContent='';
+  enableAdmin();
+ }catch(e){
+  $('admin-signin-password').value='';
+  $('admin-signin-status').textContent=e.message||'Não foi possível autenticar.';
  }finally{submit.disabled=false;}
 }
 async function signOutAdmin(){
  if(db)await db.auth.signOut();
  ready=false;
- clearCredentials();
  $('admin-tabs').hidden=true;
  $('admin-session-actions').hidden=true;
- $('admin-dev-form').hidden=true;
- $('admin-client-directory').hidden=true;
- for(const name of ['clients','orders','kits','composer'])$('admin-'+name+'-panel').hidden=true;
+ $('admin-sales-panel').hidden=true;
+ $('admin-composer-panel').hidden=true;
  $('admin-signin').hidden=false;
  $('admin-signin-password').value='';
  $('admin-signin-status').textContent='Sessão encerrada.';
 }
+function parseBrlCents(value){
+ const input=String(value||'').trim().replace(/\s|R\$/gi,'');
+ if(!input||!/^\d{1,3}(?:\.\d{3})*(?:,\d{1,2})?$|^\d+(?:,\d{1,2})?$/.test(input))throw Error('Informe o valor em reais, por exemplo 8.260,98.');
+ const normalized=input.replace(/\./g,'').replace(',','.');
+ const cents=Math.round(Number(normalized)*100);
+ if(!Number.isSafeInteger(cents)||cents<1||cents>1e9)throw Error('Valor fora do limite permitido.');
+ return cents;
+}
+async function loadSaleKits(){
+ if(!ready)return;
+ const select=$('sale-kit');select.replaceChildren();
+ const placeholder=element('option','Selecione um kit do catálogo...');placeholder.value='';select.append(placeholder);
+ const {data,error}=await db.from('wwsolar_catalog')
+  .select('id,title,price,payload,active,approved')
+  .eq('kind','kit').eq('active',true).eq('approved',true).order('title').limit(200);
+ if(error){status('Não foi possível carregar os kits. Atualize a página.');return;}
+ saleKits=(data||[]).filter(p=>Number(p.price)>0);
+ for(const p of saleKits){
+  const opt=element('option',p.title+' · '+p.id+' · '+money(Math.round(p.price*100)));
+  opt.value=p.id;select.append(opt);
+ }
+}
+async function saveSale(event){
+ event.preventDefault();
+ if(!ready||!db)return;
+ const submit=$('sale-submit');submit.disabled=true;status('Registrando venda...');
+ try{
+  const name=$('sale-name').value.trim(),phone=$('sale-phone').value.trim();
+  const sku=$('sale-kit').value,kit=saleKits.find(x=>x.id===sku);
+  const quantity=Number($('sale-qty').value),total=parseBrlCents($('sale-total').value);
+  const closed=$('sale-date').value,notes=$('sale-notes').value.trim();
+  if(name.length<2||name.length>120||!/^[0-9+() -]{10,24}$/.test(phone)||
+     !kit||!Number.isInteger(quantity)||quantity<1||quantity>99||
+     !/^\d{4}-\d{2}-\d{2}$/.test(closed)||notes.length>500)
+   throw Error('Confira os campos da venda.');
+  if(!window.confirm('Confirmar venda fechada para '+name+' no valor de '+money(total)+'?'))
+   {status('Registro cancelado.');return;}
+  const {data:user,error:authError}=await db.auth.getUser();
+  if(authError||user?.user?.app_metadata?.wwsolar_role!=='admin')throw Error('Sessão administrativa inválida.');
+  const {data,error}=await db.from('wwsolar_manual_sales_dev').insert({
+   customer_name:name,customer_phone:phone,kit_sku:sku,kit_title:kit.title,
+   quantity,agreed_total_cents:total,closed_on:closed,notes
+  }).select('id').single();
+  if(error||!data?.id)throw Error('Falha ao registrar. Confira a conexão e as permissões.');
+  $('admin-sale-form').reset();
+  $('sale-date').value=new Date(Date.now()-new Date().getTimezoneOffset()*60000).toISOString().slice(0,10);
+  status('Venda registrada com sucesso. Código: '+data.id.slice(0,8).toUpperCase()+'.');
+  await loadSales(true);
+ }catch(e){status(e.message||'Não foi possível registrar a venda.');}
+ finally{submit.disabled=false;}
+}
+async function loadSales(keepStatus=false){
+ if(!ready||!db)return;
+ if(!keepStatus)status('Consultando vendas...');
+ const {data,error}=await db.from('wwsolar_manual_sales_dev')
+  .select('id,customer_name,customer_phone,kit_sku,kit_title,quantity,agreed_total_cents,closed_on,notes,created_at')
+  .order('created_at',{ascending:false}).limit(100);
+ const target=$('admin-sales-list');target.replaceChildren();
+ if(error){status('Não foi possível consultar o histórico de vendas.');return;}
+ if(!keepStatus)status((data||[]).length+' venda(s) registrada(s).');
+ if(!data?.length){target.append(element('p','Nenhuma venda registrada neste ambiente.','client-muted'));return;}
+ for(const s of data){
+  const card=element('article',undefined,'admin-order-card');
+  const head=element('div',undefined,'admin-order-header');
+  const info=element('div');
+  info.append(element('strong',s.customer_name));
+  info.append(element('small',s.customer_phone+' · '+s.closed_on.split('-').reverse().join('/')));
+  head.append(info,element('strong',money(s.agreed_total_cents),'admin-order-money'),element('span','Fechada','admin-pill admin-pill-green'));
+  card.append(head);
+  const details=element('div',undefined,'admin-sale-summary');
+  details.append(element('strong',s.quantity+' × '+s.kit_title),element('small',s.kit_sku));
+  if(s.notes)details.append(element('p',s.notes));
+  card.append(details);target.append(card);
+ }
+}
 $('admin-signin-form').addEventListener('submit',signInAdmin);
 $('admin-session-logout').addEventListener('click',()=>void signOutAdmin());
-async function functionError(error,fallback){
- if(!error)return fallback;
- let code='';
- try{code=(await error.context?.json())?.error||'';}catch(_){}
- const dictionary={
-  client_not_found:'Cliente não encontrado. Verifique o e-mail.',
-  cannot_create_customer:'O e-mail já pode ter cadastro. Confira a lista.',
-  client_identity_not_valid:'A conta não corresponde a um cliente autorizado.',
-  not_authorized:'Sessão administrativa não autorizada. Entre novamente.',
-  audit_failed_status_may_have_changed:'O pedido pode ter sido alterado, mas houve falha ao registrar a auditoria. Atualize antes de tentar de novo.',
-  concurrent_update:'Este pedido foi alterado em outra sessão. Atualize a lista.'
- };
- return dictionary[code]||fallback;
-}
-async function sendAction(action){
- if(!ready)return;
- const input=$('admin-dev-email');
- if(!input.reportValidity())return;
- const email=input.value.trim().toLowerCase();
- if(action==='rotate'&&!window.confirm(
-   'Reemitir uma senha para '+email+'? A senha anterior deixará de funcionar.'
- ))return;
- $('admin-dev-submit').disabled=true;
- $('admin-dev-rotate').disabled=true;
- status(action==='rotate'?'Reemitindo senha...':'Criando acesso...');
- clearCredentials();
- try{
-   const {data,error}=await db.functions.invoke('wwsolar-create-customer',{body:{email,action}});
-   if(error)throw new Error(await functionError(error,'Falha ao gerar o acesso. Confira os dados ou tente novamente.'));
-   if(!data?.email||!data?.password||data?.action!==action)
-      throw Error('O servidor não confirmou a criação da senha. Não envie credenciais.');
-   oneTime='WW Solar — Área do cliente\n'
-     +'Acesso: '+new URL('./cliente-dev.html',window.location.href).href+'\n'
-     +'E-mail: '+data.email+'\nSenha temporária: '+data.password+'\n'
-     +'No primeiro acesso, crie sua senha pessoal. Não compartilhe a nova senha.';
-   $('admin-dev-credentials').textContent=oneTime;
-   $('admin-dev-created').hidden=false;
-   input.value='';
-   status(action==='rotate'
-     ?'Senha temporária reemitida. O cliente deverá trocá-la no acesso.'
-     :'Acesso criado. Encaminhe a senha temporária; a troca será obrigatória.');
-   void loadClients();
- }catch(e){status(e?.message||'Não foi possível confirmar a operação.');}
- finally{$('admin-dev-submit').disabled=false;$('admin-dev-rotate').disabled=false;}
-}
-async function loadClients(){
- if(!ready)return;
- const target=$('admin-client-list');
- target.replaceChildren(element('p','Carregando acessos...','client-muted'));
- const {data,error}=await db.from('wwsolar_client_access')
-   .select('user_id,email,active,created_at').order('created_at',{ascending:false}).limit(100);
- if(error){
-   target.replaceChildren(element('p','Não foi possível consultar os clientes. Verifique a conexão.','client-status'));
-   return;
- }
- target.replaceChildren();
- if(!data?.length){target.append(element('p','Nenhum cliente cadastrado.','client-muted'));return;}
- for(const item of data){
-   const row=element('div',undefined,'admin-client-row');
-   const desc=element('div');
-   desc.append(element('strong',item.email));
-   desc.append(element('small','Criado em '+date(item.created_at)));
-   const state=element('span',item.active?'Ativo':'Bloqueado',item.active?'admin-pill admin-pill-green':'admin-pill');
-   const action=button(item.active?'Bloquear':'Reativar',()=>void changeAccess(item,action));
-   row.append(desc,state,action);
-   target.append(row);
- }
-}
-async function changeAccess(item,btn){
- if(!ready)return;
- const enabled=!item.active;
- if(!window.confirm((enabled?'Reativar':'Bloquear')+' o acesso de '+item.email+'? O histórico será preservado.'))return;
- btn.disabled=true;
- status('Atualizando situação do cliente...');
- try{
-   const {data,error}=await db.functions.invoke('wwsolar-create-customer',{
-     body:{action:'set_access',email:item.email,enabled}
-   });
-   if(error||data?.action!=='set_access'||data?.active!==enabled){
-     throw new Error(await functionError(error,'Não foi possível alterar o acesso.'));
-   }
-   status(enabled?'Acesso reativado com sucesso.':'Acesso bloqueado sem excluir o histórico.');
-   await loadClients();
- }catch(e){status(e?.message||'Não foi possível alterar o cliente.');}
- finally{btn.disabled=false;}
-}
-async function loadOrders(){
- if(!ready)return;
- orderStatus('Consultando solicitações...');
- const {data,error}=await db.from('wwsolar_quote_requests')
-   .select('id,user_id,customer_email,items,total_cents,status,created_at,updated_at')
-   .order('created_at',{ascending:false}).limit(100);
- if(error){
-   orderStatus('Não foi possível ler o histórico. Verifique as permissões ou conexão.');
-   return;
- }
- orders=data||[];
- orderEvents=[];
- if(orders.length){
-   const {data:events}=await db.from('wwsolar_quote_status_events')
-     .select('request_id,old_status,new_status,changed_at,changed_by')
-     .in('request_id',orders.map(x=>x.id)).order('changed_at',{ascending:false}).limit(300);
-   orderEvents=events||[];
- }
- orderStatus(orders.length+' solicitações encontradas (até 100 mais recentes).');
- renderOrders();
-}
-function renderOrders(){
- const list=$('admin-order-list'),filter=$('admin-order-filter').value;
- const shown=orders.filter(x=>filter==='todos'||x.status===filter);
- $('admin-order-count').textContent=shown.length+' exibidos';
- list.replaceChildren();
- if(!shown.length){
-   list.append(element('p','Nenhuma solicitação encontrada neste filtro.','client-muted'));
-   return;
- }
- for(const item of shown){
-   const card=element('article',undefined,'admin-order-card');
-   const header=element('div',undefined,'admin-order-header');
-   const ref=element('div');
-   ref.append(element('strong','PED-'+item.id.slice(0,8).toUpperCase()));
-   ref.append(element('small',date(item.created_at)+' · '+item.customer_email));
-   const sum=element('strong',money(item.total_cents),'admin-order-money');
-   const pill=element('span',statuses[item.status]||item.status,'admin-pill');
-   header.append(ref,sum,pill);card.append(header);
-   const detail=element('details',undefined,'admin-order-detail');
-   const summary=element('summary','Conferir equipamentos e histórico');
-   detail.append(summary);
-   const rows=element('div',undefined,'admin-order-items');
-   for(const x of Array.isArray(item.items)?item.items:[]){
-     const one=element('div',undefined,'admin-order-item');
-     const info=element('div',undefined,'admin-order-item-description');
-     info.append(element('span',String(x.qty)+' × '+String(x.title)+' ['+String(x.sku)+']'));
-     const links=Array.isArray(x.linked_kits)?x.linked_kits:[];
-     if(links.length){
-       const names=links.map(kit=>String(kit.title)+' ['+String(kit.sku)+']');
-       info.append(element('small','Projeto elétrico vinculado a: '+names.join('; '),'admin-linked-project-hint'));
-     }
-     if(Number.isInteger(x.standalone_qty)&&x.standalone_qty>0)
-       info.append(element('small',x.standalone_qty+' projeto(s) avulso(s) sem kit vinculado.','admin-linked-project-hint'));
-     one.append(info,element('strong',money(x.subtotal_cents)));
-     rows.append(one);
-   }
-   detail.append(rows);
-   const relevant=orderEvents.filter(x=>x.request_id===item.id);
-   if(relevant.length){
-     const changes=element('div',undefined,'admin-order-audit');
-     changes.append(element('strong','Alterações registradas:'));
-     for(const e of relevant){
-       changes.append(element('p',date(e.changed_at)+' — '+(statuses[e.old_status]||e.old_status)+
-        ' → '+(statuses[e.new_status]||e.new_status)));
-     }
-     detail.append(changes);
-   }
-   card.append(detail);
-   const actions=element('div',undefined,'admin-order-actions');
-   const label=element('label','Situação:');
-   const choose=element('select');
-   choose.setAttribute('aria-label','Situação do pedido PED-'+item.id.slice(0,8));
-   for(const [key,title] of Object.entries(statuses)){
-     const option=element('option',title);option.value=key;choose.append(option);
-   }
-   choose.value=item.status;
-   const save=button('Salvar situação',()=>void changeOrder(item,choose,save));
-   actions.append(label,choose,save);
-   card.append(actions);
-   list.append(card);
- }
-}
-async function changeOrder(item,select,buttonElement){
- const value=select.value;
- if(value===item.status)return;
- if(!window.confirm('Alterar PED-'+item.id.slice(0,8).toUpperCase()+
-  ' de "'+(statuses[item.status]||item.status)+'" para "'+(statuses[value]||value)+'"?'))return;
- buttonElement.disabled=true;
- orderStatus('Salvando situação e registrando alteração...');
- try{
-   const {data,error}=await db.functions.invoke('wwsolar-quote',{
-     body:{action:'status',id:item.id,status:value}
-   });
-   if(error||data?.status!==value)throw Error(await functionError(error,'Falha ao atualizar o pedido.'));
-   await loadOrders();
-   orderStatus('Situação atualizada com sucesso; alteração registrada no histórico.');
- }catch(e){
-   orderStatus(e?.message||'Falha ao atualizar o pedido. Recarregue antes de tentar novamente.');
- }finally{buttonElement.disabled=false;}
-}
-// Painel de kits: SOMENTE LEITURA. Nunca publica, aprova ou cadastra produtos.
-let kitPreviews=[],kitCatalog=[];
-const kitCurrency=v=>new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(Number(v)||0);
-const kitNumber=v=>new Intl.NumberFormat('pt-BR',{maximumFractionDigits:2}).format(Number(v)||0);
-const kitLabels={
- candidato_pendente:'Candidato preliminar · homologação pendente',
- ficha_modelo_pendente:'Ficha do inversor pendente',
- sem_inversor_na_base:'Sem inversor na potência de referência',
- incompativel_preliminar:'ALERTA ELÉTRICO: revisão obrigatória antes da homologação'
-};
-async function loadKitPreviews(){
- if(!ready||!window.WWSolarEightKits)return;
- const K=window.WWSolarEightKits;
- $('admin-kit-status').textContent='Atualizando as oito propostas comerciais...';
- const cat=await db.from('wwsolar_catalog').select('id,kind,title,price,payload,active,approved')
-    .eq('kind','piece').eq('active',true).eq('approved',true);
- if(cat.error){$('admin-kit-status').textContent='Erro ao carregar as peças. Verifique as permissões.';return;}
- kitCatalog=cat.data||[];
- kitPreviews=K.specifications.map(p=>K.compose(p,kitCatalog));
- $('admin-kit-status').textContent='8 kits disponíveis para solicitar cotação, sujeitos à conferência técnica da instalação. Os 32 rascunhos antigos continuam preservados.';
- renderKitPreviews();
-}
-function renderKitPreviews(){
- const filter=$('admin-kit-status-filter').value;
- const shown=kitPreviews.filter(p=>filter==='all'||(filter==='pendente_engenharia'&&p.engineeringPending.length>0));
- $('admin-kit-count').textContent=shown.length+' de '+kitPreviews.length+' kits';
- const target=$('admin-kit-list');target.replaceChildren();
- if(!shown.length){target.append(element('p','Sem kits nesta seleção.','client-muted'));return;}
- const niceItem=row=>{
-   if(row.label==='Módulos')return 'Módulos fotovoltaicos';
-   if(row.label==='Inversor')return 'Inversor solar';
-   if(row.label.startsWith('Fixação'))return 'Kit de fixação para telhado cerâmico';
-   if(row.label.startsWith('Perfil'))return 'Perfis de alumínio';
-   if(row.label.startsWith('Cabo solar vermelho'))return 'Cabo solar vermelho — rolo de 25 m';
-   if(row.label.startsWith('Cabo solar preto'))return 'Cabo solar preto — rolo de 25 m';
-   if(row.sku==='PAV-007')return 'Conectores MC4 (2 pares por embalagem)';
-   return row.label;
- };
- for(const kit of shown){
-   const card=element('article',undefined,'admin-order-card');
-   const head=element('div',undefined,'admin-order-header');
-   const desc=element('div');
-   desc.append(element('strong','Kit '+kitNumber(kit.target)+' kWh/mês'));
-   desc.append(element('small',kit.panels+' módulos '+kit.brand+' de '+kit.moduleWp+' W · geração média estimada: '+kitNumber(kit.generationKwhMonth)+' kWh/mês'));
-   head.append(desc,element('strong',kit.previewPrice===null?'Sob consulta':kitCurrency(kit.previewPrice),'admin-order-money'),element('span','COTAÇÃO SUJEITA À CONFERÊNCIA','admin-pill'));
-   card.append(head);
-   card.append(element('p','Inversor: '+kit.inverterName,'client-muted'));
-   if(kit.gridRequired==='trifasica_380')
-     card.append(element('small','ℹ️ Indicado para instalação com rede trifásica 380 V.','client-muted'));
-   const detail=element('details',undefined,'admin-order-detail');
-   detail.append(element('summary','Ver o que está incluído no kit'));
-   const lines=element('div',undefined,'admin-order-items');
-   for(const row of kit.rows){
-     const item=element('div',undefined,'admin-order-item');
-     const label=niceItem(row);
-     const extra=row.label==='Módulos'?' · '+kit.moduleWp+' W':row.label==='Inversor'?' · '+kit.inverterName:'';
-     item.append(element('span',row.quantity+' × '+label+extra));
-     item.append(element('strong',row.subtotal===null?'Sob consulta':kitCurrency(row.subtotal)));
-     lines.append(item);
-   }
-   detail.append(lines);
-   detail.append(element('p','Valor do conjunto: '+(kit.previewPrice===null?'sob consulta':kitCurrency(kit.previewPrice))+'. Preço e disponibilidade sujeitos à confirmação.','client-muted'));
-   card.append(detail);
-   const internal=element('details',undefined,'admin-order-detail');
-   internal.append(element('summary','Análise interna (somente administrador)'));
-   internal.append(element('p','Referência interna: '+kit.code+' · Itens: '+kit.rows.map(x=>x.quantity+' × '+x.sku).join(', '),'admin-order-audit'));
-   internal.append(element('p',kit.engineeringPending.join(' · '),'admin-order-audit'));
-   card.append(internal);target.append(card);
- }
-}
+$('admin-tab-sales').addEventListener('click',()=>showPanel('sales'));
+$('admin-tab-composer').addEventListener('click',()=>showPanel('composer'));
+$('admin-sale-form').addEventListener('submit',saveSale);
+$('sale-refresh').addEventListener('click',()=>void loadSales());
+
 // Apenas composição no administrador: custos privados com RLS. Sem INSERT/UPDATE.
 let composerCatalog=[],composerLines=[{sku:'',quantity:1}],composerLoaded=false,composerLoading=false;
 const composeStatus=m=>{$('admin-compose-status').textContent=m;};
@@ -525,27 +334,11 @@ async function loadCompositionCatalog(force=false){
  }finally{composerLoading=false;}
 }
 
-$('admin-dev-form').addEventListener('submit',ev=>{ev.preventDefault();void sendAction('create');});
-$('admin-dev-rotate').addEventListener('click',()=>void sendAction('rotate'));
-$('admin-dev-copy').addEventListener('click',async()=>{
- if(!oneTime)return;
- try{await navigator.clipboard.writeText(oneTime);status('Credenciais copiadas.');}
- catch(e){status('Selecione e copie o texto apresentado.');}
-});
-$('admin-dev-clear').addEventListener('click',()=>{clearCredentials();status('Credenciais retiradas da tela.');});
-$('admin-tab-clients').addEventListener('click',()=>showPanel('clients'));
-$('admin-tab-orders').addEventListener('click',()=>showPanel('orders'));
-$('admin-tab-kits').addEventListener('click',()=>showPanel('kits'));
-$('admin-tab-composer').addEventListener('click',()=>showPanel('composer'));
+
 $('admin-compose-refresh').addEventListener('click',()=>void loadCompositionCatalog(true));
 $('admin-compose-add').addEventListener('click',()=>{if(composerLines.length>=80){composeStatus('Limite de 80 linhas atingido.');return;}composerLines.push({sku:'',quantity:1});renderComposition();$('admin-compose-rows').querySelector('tr:last-child select')?.focus();});
 $('admin-compose-clear').addEventListener('click',()=>{if(composerLines.some(x=>x.sku)&&!window.confirm('Limpar esta composição?'))return;composerLines=[{sku:'',quantity:1}];renderComposition();composeStatus('Composição limpa. Custos cadastrados preservados.');});
 $('admin-compose-copy').addEventListener('click',async()=>{const txt=composeCore()?.summary(composerLines,composerCatalog);if(!txt){composeStatus('Selecione ao menos um equipamento antes de copiar.');return;}try{await navigator.clipboard.writeText(txt);composeStatus('Composição copiada. Você pode enviar o resumo para revisão.');}catch(_){composeStatus('Não foi possível copiar automaticamente neste navegador.');}});
-$('admin-refresh-kits').addEventListener('click',()=>void loadKitPreviews());
 
-$('admin-kit-status-filter').addEventListener('change',renderKitPreviews);
-$('admin-refresh-clients').addEventListener('click',()=>void loadClients());
-$('admin-refresh-orders').addEventListener('click',()=>void loadOrders());
-$('admin-order-filter').addEventListener('change',renderOrders);
 void init();
 })();
