@@ -29,7 +29,7 @@ test('allowlist não exporta custos, dados de clientes nem payload interno',()=>
 });
 test('visitante possui carrinho local independente sem login',()=>{
  assert.match(js,/async function showPublicCatalog\(\)/);
- assert.match(js,/const GUEST_QUOTE_MODE=true/);
+ assert.match(js,/const GUEST_QUOTE_MODE=.*ww-solar-composicao-dev/);
  assert.match(js,/const GUEST_CART_KEY=/);
  assert.match(js,/window\.localStorage\.getItem\(GUEST_CART_KEY\)/);
  assert.match(js,/window\.localStorage\.setItem\(GUEST_CART_KEY/);
