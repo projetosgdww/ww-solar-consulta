@@ -634,6 +634,10 @@ body .header{position:sticky;top:0;z-index:80}
   font-size:12px;line-height:1.5;font-weight:750;
   text-decoration:none;white-space:normal;
 }
+#projetos .ww-project-notes a.ww-installation-contact{margin-top:4px}
+#projetos .ww-project-notes .ww-installation-disclaimer{
+  font-size:11px;line-height:1.5;color:#536b68;margin:5px 0 0;
+}
 #projetos .ww-project-notes a.ww-project-contact:hover{
   color:#FA4100;background:none;box-shadow:none;text-decoration:underline;
 }
