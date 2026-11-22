@@ -45,7 +45,7 @@ test('seleção e preço seguem a integração original do catálogo',()=>{
  assert.match(js,/add\(id\)/);
  assert.match(section,/client-projects-hint/);
  assert.match(section,/client-projects-important/);
- assert.match(section,/5585991170375/);
+ assert.match(section,/5585992723637/);
  assert.equal(core.PROJECT_TIERS.length,7);
 });
 
@@ -72,11 +72,11 @@ test('rodapé preserva avisos, estado do acesso e WhatsApp sem duplicar elemento
    'Para instalações enquadradas no Grupo A ou acima de 60 kW',
    'O enquadramento é confirmado na análise da unidade consumidora.',
    'Entre na sua conta para incluir somente o projeto no carrinho',
-   'Falar sobre projetos · (85) 99117-0375 ↗'
+   'Falar sobre projetos · (85) 99272-3637 ↗'
  ])assert.ok(section.includes(content),content);
  assert.equal((section.match(/id="client-projects-hint"/g)||[]).length,1);
  assert.equal((section.match(/class="client-projects-important"/g)||[]).length,1);
- assert.equal((section.match(/wa\.me\/5585991170375/g)||[]).length,1);
+ assert.equal((section.match(/wa\.me\/5585992723637/g)||[]).length,1);
  assert.match(js,/function renderStandaloneProjects\(/);
  assert.match(js,/const hint=\$\('client-projects-hint'\)/);
  assert.match(section,/target="_blank" rel="noopener noreferrer"/);
