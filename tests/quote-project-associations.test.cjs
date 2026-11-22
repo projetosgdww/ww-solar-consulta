@@ -117,7 +117,9 @@ test('backend antigo impede submit real sem registrar pedido incompleto',()=>{
  assert.ok(!client.includes('C.linkedProjectNote(S.lines,available())'));
  assert.ok(client.includes('const message=String(data.message)'));
 });
-test('número WhatsApp de projetos aceita somente dígitos e mantém separação comercial',()=>{
- assert.ok(client.includes('/^55[0-9]{10,11}$/.test(cfg.projectWhatsapp'));
- assert.ok(!client.includes('^55'+String.fromCharCode(92,92)+'d'));
+test('cotações com e sem projetos usam o mesmo número comercial aprovado',()=>{
+ const matches=client.match(/const destination='5585992723637';/g)||[];
+ assert.equal(matches.length,2);
+ assert.ok(!client.includes('cfg.projectWhatsapp||'));
+ assert.ok(!client.includes('99117-0375'));
 });
