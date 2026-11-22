@@ -120,8 +120,8 @@ test('origem pública é somente leitura e não permite uso de função piloto n
 test('WhatsApp só abre após registro confirmado e usa texto do servidor e telefone configurado',()=>{
  const cfg=fs.readFileSync('cliente-dev-config.js','utf8');
  assert.match(cfg,/whatsapp:\s*"5585992723637"/);
- assert.match(cfg,/projectWhatsapp:\s*"5585991170375"/);
- const primary='5585992723637',project='5585991170375';
+ assert.match(cfg,/projectWhatsapp:\s*"5585992723637"/);
+ const primary='5585992723637',project='5585992723637';
  assert.match(primary,/^55[0-9]{10,11}$/);
  assert.match(project,/^55[0-9]{10,11}$/);
  const redirect=client.indexOf("window.location.assign('https://wa.me/'");
@@ -130,7 +130,7 @@ test('WhatsApp só abre após registro confirmado e usa texto do servidor e tele
  assert.ok(snapshot>0&&confirmed>0&&redirect>snapshot&&redirect>confirmed);
  assert.ok(client.includes('const message=String(data.message)'));
  assert.ok(client.includes('encodeURIComponent(message)'));
- assert.ok(client.includes("const destination=hasProject&&/^55[0-9]{10,11}$/.test(cfg.projectWhatsapp||'')?cfg.projectWhatsapp:cfg.whatsapp;"));
+ assert.ok(client.includes("const destination='5585992723637';"));
  assert.ok(client.includes("window.location.assign('https://wa.me/'+destination+'?text='+encodeURIComponent(message))"));
  assert.doesNotMatch(client,/https:\/\/api\.whatsapp\.com\/send\?phone=|fetch\(['"]https:\/\/wa\.me/);
 });
