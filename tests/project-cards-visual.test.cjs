@@ -72,11 +72,14 @@ test('rodapé preserva avisos, estado do acesso e WhatsApp sem duplicar elemento
    'Para instalações enquadradas no Grupo A ou acima de 60 kW',
    'O enquadramento é confirmado na análise da unidade consumidora.',
    'Entre na sua conta para incluir somente o projeto no carrinho',
-   'Falar sobre projetos · (85) 99272-3637 ↗'
+   'Projetos GD WW · Projetos elétricos · (85) 99272-3637 ↗'
  ])assert.ok(section.includes(content),content);
  assert.equal((section.match(/id="client-projects-hint"/g)||[]).length,1);
  assert.equal((section.match(/class="client-projects-important"/g)||[]).length,1);
  assert.equal((section.match(/wa\.me\/5585992723637/g)||[]).length,1);
+ assert.ok(section.includes('RS Energia Solar · Instalação · (85) 9107-8023 ↗'));
+ assert.ok(section.includes('wa.me/558591078023'));
+ assert.ok(section.includes('Instalação não inclusa no valor dos kits.'));
  assert.match(js,/function renderStandaloneProjects\(/);
  assert.match(js,/const hint=\$\('client-projects-hint'\)/);
  assert.match(section,/target="_blank" rel="noopener noreferrer"/);
