@@ -1066,9 +1066,8 @@
       }
       if(expired())throw Error('Cotação expirada durante a consulta');
       if(text.length>4000)throw Error('Cotação muito extensa');
-      const hasProject=S.lines.some(line=>line.id.startsWith('PRJ-B-')||line.id.startsWith('PRJ-WW-'));
-      const destination=hasProject&&/^55[0-9]{10,11}$/.test(cfg.projectWhatsapp||'')
-        ?cfg.projectWhatsapp:cfg.whatsapp;
+      // Um único WhatsApp oficial para kits, projetos e cotações combinadas.
+      const destination='5585992723637';
       if(!/^55[0-9]{10,11}$/.test(destination))throw Error('Destino WhatsApp inválido');
       // Abre diretamente o WhatsApp com o resumo; o cliente decide se envia a mensagem.
       // Não cria pedido nem registra venda no Supabase.
@@ -1184,8 +1183,8 @@
       const reference=String(data.order.id).slice(0,8).toUpperCase();
       status('Solicitação '+reference+' registrada no histórico. O envio da mensagem deve ser confirmado no WhatsApp.');
       showToast('Solicitação registrada! Abrindo WhatsApp...');
-      const hasProject=S.lines.some(line=>available().some(p=>p.id===line.id&&p.payload?.categoria==='projetos'));
-      const destination=hasProject&&/^55[0-9]{10,11}$/.test(cfg.projectWhatsapp||'')?cfg.projectWhatsapp:cfg.whatsapp;
+      // Mesmo canal comercial para qualquer composição de itens.
+      const destination='5585992723637';
       window.location.assign('https://wa.me/'+destination+'?text='+encodeURIComponent(message));
     }catch(e){
       status('A operação não pôde ser concluída ou confirmada. Consulte o histórico antes de tentar de novo.');
