@@ -13,15 +13,16 @@ test('WhatsApp tem destino controlado e link gerado somente depois da validaçã
  assert.match(guest,/cfg\.projectWhatsapp/);
  assert.match(guest,/cfg\.whatsapp/);
  assert.ok(guest.includes('.test(destination)'));
- assert.match(guest,/link\.href='https:\/\/wa\.me\/'/);
+ assert.match(guest,/const whatsappUrl='https:\/\/wa\.me\/'/);
  assert.match(guest,/encodeURIComponent\(text\)/);
- assert.match(html,/id="client-quote-whatsapp"/);
- assert.match(html,/target="_blank" rel="noopener noreferrer" hidden/);
+ assert.match(html,/id="client-drawer-checkout"/);
+ assert.match(js,/Enviar cotação pelo WhatsApp ↗/);
  assert.match(js,/function clearGuestWhatsApp\(\)/);
  assert.match(js,/if\(GUEST_QUOTE_MODE\)clearGuestWhatsApp\(\)/);
 });
 test('DEV não registra pedido nem envia mensagem sem clique do visitante',()=>{
- assert.doesNotMatch(guest,/\.insert\(|\.upsert\(|\.update\(|\.delete\(|wwsolar_quote_requests|window\.location\.assign|window\.open\(/);
+ assert.doesNotMatch(guest,/\.insert\(|\.upsert\(|\.update\(|\.delete\(|wwsolar_quote_requests|window\.open\(/);
+ assert.match(guest,/window\.location\.assign\(whatsappUrl\)/);
  assert.match(html,/O envio só acontece se você confirmar no WhatsApp/);
- assert.match(guest,/Nenhum pedido foi registrado/);
+ assert.match(guest,/Não cria pedido nem registra venda/);
 });
