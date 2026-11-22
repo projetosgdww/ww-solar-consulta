@@ -9,9 +9,9 @@ test('cotação pública usa preço comercial atualizado e mantém associações
  assert.match(guest,/sum\.cents!==previous\.cents/);
 });
 test('WhatsApp tem destino controlado e link gerado somente depois da validação',()=>{
- assert.match(guest,/const hasProject=S\.lines\.some/);
- assert.match(guest,/cfg\.projectWhatsapp/);
- assert.match(guest,/cfg\.whatsapp/);
+ assert.match(guest,/const destination='5585992723637'/);
+ assert.doesNotMatch(guest,/cfg\.projectWhatsapp/);
+ assert.match(js,/const destination='5585992723637'/);
  assert.ok(guest.includes('.test(destination)'));
  assert.match(guest,/const whatsappUrl='https:\/\/wa\.me\/'/);
  assert.match(guest,/encodeURIComponent\(text\)/);
