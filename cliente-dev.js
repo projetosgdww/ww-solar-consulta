@@ -699,8 +699,8 @@
     const ok=S.lines.length>0&&!S.cartInvalid&&!expired()&&!S.checkoutPending;
     $('client-checkout').disabled=!ok;
     $('client-drawer-checkout').disabled=!ok;
-    $('client-drawer-checkout').textContent=GUEST_QUOTE_MODE?'Prévia da cotação (DEV)':PREVIEW_HOST?'Simular cotação (sem registrar)':'Enviar pelo WhatsApp ↗';
-    $('client-checkout').textContent=GUEST_QUOTE_MODE?'Prévia da cotação (DEV)':PREVIEW_HOST?'Simular cotação':'Solicitar cotação';
+    $('client-drawer-checkout').textContent=GUEST_QUOTE_MODE?'Enviar cotação pelo WhatsApp ↗':PREVIEW_HOST?'Simular cotação (sem registrar)':'Enviar pelo WhatsApp ↗';
+    $('client-checkout').textContent=GUEST_QUOTE_MODE?'Enviar cotação pelo WhatsApp ↗':PREVIEW_HOST?'Simular cotação':'Solicitar cotação';
     // Sincroniza o botão em todo tick, inclusive após trocas de sessão/cache.
     $('client-drawer-clear').disabled=S.lines.length===0;
     $('client-cart-refresh').textContent=expired()?'Renovar cotação':'Atualizar preços';
@@ -1014,8 +1014,8 @@
       showToast('Não foi possível atualizar a cotação.');
     }finally{buttons.forEach(b=>b.disabled=false);}
   }
-  // DEV: a cotação pública é validada contra a RPC comercial atual, sem
-  // autenticar, gravar pedidos ou enviar mensagens automaticamente.
+  // A cotação pública é validada contra a RPC comercial atual, sem
+  // autenticar, gravar pedidos nem enviar mensagens automaticamente.
   function clearGuestWhatsApp(){
     const anchor=$('client-quote-whatsapp');
     anchor.hidden=true;anchor.removeAttribute('href');
@@ -1070,17 +1070,11 @@
       const destination=hasProject&&/^55[0-9]{10,11}$/.test(cfg.projectWhatsapp||'')
         ?cfg.projectWhatsapp:cfg.whatsapp;
       if(!/^55[0-9]{10,11}$/.test(destination))throw Error('Destino WhatsApp inválido');
-      const preview=$('client-quote-preview');
-      $('client-quote-preview-text').textContent=text;
-      const link=$('client-quote-whatsapp');
-      link.href='https://wa.me/'+destination+'?text='+encodeURIComponent(text);
-      link.hidden=false;
-      $('client-quote-safety-note').hidden=false;
-      preview.hidden=false;
-      preview.open=true;
-      status('Cotação conferida. Abra a mensagem no WhatsApp para solicitar atendimento. Nenhum pedido foi registrado.');
-      showToast('Cotação preparada para o WhatsApp (DEV).');
-      preview.scrollIntoView({behavior:'smooth',block:'nearest'});
+      // Abre diretamente o WhatsApp com o resumo; o cliente decide se envia a mensagem.
+      // Não cria pedido nem registra venda no Supabase.
+      const whatsappUrl='https://wa.me/'+destination+'?text='+encodeURIComponent(text);
+      status('Cotação validada. Abrindo o WhatsApp para você confirmar o envio.');
+      window.location.assign(whatsappUrl);
     }catch(_){
       clearGuestWhatsApp();
       status('Não foi possível validar os itens e preços públicos. Atualize os valores e tente novamente.');
