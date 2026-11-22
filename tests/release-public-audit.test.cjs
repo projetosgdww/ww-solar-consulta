@@ -27,8 +27,9 @@ test('checkout público confirma cotação sem registrar, com validade e preço 
  assert.match(code,/const quoteState=JSON\.stringify/);
  assert.match(code,/!==quoteState/);
  assert.match(code,/C\.linkedProjectNote\(S\.lines,latest\)/);
- assert.match(code,/link\.href='https:\/\/wa\.me\/'/);
- assert.doesNotMatch(code,/\.insert\(|\.upsert\(|\.delete\(|window\.location\.assign/);
+ assert.match(code,/const whatsappUrl='https:\/\/wa\.me\/'/);
+ assert.match(code,/window\.location\.assign\(whatsappUrl\)/);
+ assert.doesNotMatch(code,/\.insert\(|\.upsert\(|\.delete\(/);
 });
 test('admin permanece restrito com vendas fechadas e composição privada',()=>{
  assert.match(admin,/app_metadata\?\.wwsolar_role!=='admin'/);
