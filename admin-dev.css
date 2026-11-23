@@ -123,7 +123,6 @@
  font:inherit;font-size:12px;color:#1d3a30;cursor:pointer;list-style:none;
 }
 .admin-compose-table .admin-compose-product-chooser>summary::-webkit-details-marker{display:none}
-.admin-compose-table .admin-compose-product-chooser>summary:after{content:'⌄';font-size:18px;flex:none}
 .admin-compose-table .admin-compose-product-chooser[open]>summary{border-color:#529c18;border-radius:8px 8px 0 0}
 .admin-compose-table .admin-compose-product-chooser>summary:focus-visible,
 .admin-compose-table .admin-compose-product-option:focus-visible{outline:2px solid #81F002;outline-offset:2px}
