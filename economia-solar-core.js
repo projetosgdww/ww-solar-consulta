@@ -1,6 +1,6 @@
 'use strict';
 (function(root){
-const policy = Object.freeze({baseYear:2026,reference:'2026-11',te:.21326,tusd:.48849,fioB:(.48849-.31825)/.60,icms:.20,pis:.0048,cofins:.0219,annualDegradation:.005,transition:Object.freeze({2023:.15,2024:.30,2025:.45,2026:.60,2027:.75,2028:.90})});
+const policy=typeof module==='object'&&module.exports?require('./economia-solar-tarifas.js'):root.WWSolarTariff;
 function tariffFor(year,gd){
  const incidence=gd===1?0:policy.transition[year];
  if(incidence===undefined)return null;
@@ -8,6 +8,7 @@ function tariffFor(year,gd){
 }
 
 function calculate(v,year=policy.baseYear){
+ if(![v.consumo,v.geracao,v.sim,v.min,v.cip].every(Number.isFinite)||v.consumo<0||v.geracao<0||v.sim<0||v.sim>100||![30,50,100].includes(v.min)||v.cip<0||![1,2].includes(v.gd))throw new RangeError('Parametros invalidos');
  const tariff=tariffFor(year,v.gd);
  if(!tariff)return null;
  const federal=1-tariff.pis-tariff.cofins;
