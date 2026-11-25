@@ -18,7 +18,10 @@ function calculate(v,year=policy.baseYear){
  const full=(tariff.te+tariff.tusd)/((1-tariff.icms)*federal);
  const credit=tariff.te/((1-tariff.icms)*federal)+tariff.tusdCredit/federal;
  const self=Math.min(v.consumo,v.geracao*v.sim/100), grid=v.consumo-self, injected=v.geracao-self;
- const compensated=Math.min(grid,injected), uncredited=grid-compensated, residual=full-credit;
+ // Regulatory floor uses tariff components before taxes; fiscal treatment is separate.
+ const base=tariff.te+tariff.tusd, transport=tariff.tusd-tariff.tusdCredit;
+ const maxComp=Math.max(0,(grid*base-v.min*base)/(base-transport));
+ const compensated=Math.min(grid,injected,maxComp), uncredited=grid-compensated, residual=full-credit;
  const raw=uncredited*full+compensated*residual;
  // Approximate monetary floor, not an implementation of REN 1000 art. 655-I.
  const floor=v.min*full, energy=Math.max(floor,raw);
@@ -34,7 +37,7 @@ function render(){
  if(!r)return;
  document.getElementById('eco-year-note').textContent='Fio B: '+qty(tariffFor(year,v.gd).incidence*100)+'% · Tarifas de nov/2026 mantidas constantes; valores estimados.';
  for(const k of ['before','after','saving']) document.getElementById(k).textContent=money(r[k]);
- const rows=[['Economia anual (12 meses)',money(r.saving*12)],['Redução estimada',qty(r.before>0?r.saving/r.before*100:0)+'%'],['Autoconsumo',qty(r.self)+' kWh'],['Consumo da rede',qty(r.grid)+' kWh'],['Energia injetada',qty(r.injected)+' kWh'],['Compensação teórica',qty(r.compensated)+' kWh'],['Energia não compensada',qty(r.uncredited)+' kWh'],['Excedente nominal',qty(r.excess)+' kWh'],['Fio B estimado sem tributos (incluído no residual)',money(r.wire)],['Energia não compensada com tributos',money(r.uncredited*(policy.te+policy.tusd)/((1-policy.icms)*(1-policy.pis-policy.cofins)))],['Iluminação pública',money(v.cip)],['Custo residual total da compensação',money(r.residual)],['Ajuste mínimo aproximado',money(r.floorAdjustment)],['Payback simples (economia constante)',v.invest>0&&r.saving>0?qty(v.invest/(12*r.saving))+' anos':'Não calculado']];
+ const rows=[['Economia anual (12 meses)',money(r.saving*12)],['Redução estimada',qty(r.before>0?r.saving/r.before*100:0)+'%'],['Autoconsumo',qty(r.self)+' kWh'],['Consumo da rede',qty(r.grid)+' kWh'],['Energia injetada',qty(r.injected)+' kWh'],['Compensação estimada',qty(r.compensated)+' kWh'],['Energia não compensada',qty(r.uncredited)+' kWh'],['Excedente não utilizado',qty(r.excess)+' kWh'],['Fio B estimado sem tributos (incluído no residual)',money(r.wire)],['Energia não compensada com tributos',money(r.uncredited*(policy.te+policy.tusd)/((1-policy.icms)*(1-policy.pis-policy.cofins)))],['Iluminação pública',money(v.cip)],['Custo residual total da compensação',money(r.residual)],['Ajuste mínimo aproximado',money(r.floorAdjustment)],['Payback simples (economia constante)',v.invest>0&&r.saving>0?qty(v.invest/(12*r.saving))+' anos':'Não calculado']];
  if(form.elements.atual.value!=='')rows.push(['Fatura atual informada (não usada no cálculo)',money(v.atual)]);
  const dl=document.getElementById('details');dl.replaceChildren();
  for(const [label,value] of rows){const dt=document.createElement('dt'),dd=document.createElement('dd');dt.textContent=label;dd.textContent=value;dl.append(dt,dd);}
