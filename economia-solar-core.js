@@ -1,31 +1,50 @@
 'use strict';
 (function(root){
 const policy=typeof module==='object'&&module.exports?require('./economia-solar-tarifas.js'):root.WWSolarTariff;
-function tariffFor(year,gd){
+function tariffFor(year,gd,competence){
+ if(!Number.isInteger(year)||![1,2].includes(gd)||!Object.hasOwn(policy.transition,year))return null;
+ const ref=competence??policy.reference;
+ if(typeof ref!=='string'||!Object.hasOwn(policy.profiles,ref))return null;
+ if(competence!==undefined&&Number(ref.slice(0,4))!==year)return null;
+ const profile=policy.profiles[ref];
  const incidence=gd===1?0:policy.transition[year];
- if(incidence===undefined)return null;
- return {...policy,incidence,tusdCredit:policy.tusd-policy.fioB*incidence};
+ return {...profile,incidence,tusdCredit:profile.tusd-profile.fioB*incidence,scenario:year!==Number(ref.slice(0,4))};
 }
-
-function calculate(v,year=policy.baseYear){
- if(![v.consumo,v.geracao,v.sim,v.min,v.cip].every(Number.isFinite)||v.consumo<0||v.geracao<0||v.sim<0||v.sim>100||![30,50,100].includes(v.min)||v.cip<0||![1,2].includes(v.gd))throw new RangeError('Parametros invalidos');
- const tariff=tariffFor(year,v.gd);
+function validEnergy(n){return Number.isFinite(n)&&n>=0&&n<=1e9;}
+function calculate(v,year=policy.baseYear,competence){
+ const previous=v.creditsPrevious??0, received=v.creditsReceived??0;
+ if(![v.consumo,v.geracao,v.cip,previous,received].every(validEnergy)||!Number.isFinite(v.sim)||v.sim<0||v.sim>100||![30,50,100].includes(v.min)||![1,2].includes(v.gd))throw new RangeError('Parametros invalidos');
+ const tariff=tariffFor(year,v.gd,competence);
  if(!tariff)return null;
  const federal=1-tariff.pis-tariff.cofins;
  const full=(tariff.te+tariff.tusd)/((1-tariff.icms)*federal);
  const credit=tariff.te/((1-tariff.icms)*federal)+tariff.tusdCredit/federal;
  const self=Math.min(v.consumo,v.geracao*v.sim/100), grid=v.consumo-self, injected=v.geracao-self;
- // Regulatory floor uses tariff components before taxes; fiscal treatment is separate.
+ // Approximate regulatory floor, computed before taxes; empirical fiscal model.
  const base=tariff.te+tariff.tusd, transport=tariff.tusd-tariff.tusdCredit;
  const maxComp=Math.max(0,(grid*base-v.min*base)/(base-transport));
- const compensated=Math.min(grid,injected,maxComp), uncredited=grid-compensated, residual=full-credit;
- const raw=uncredited*full+compensated*residual;
- // Approximate monetary floor, not an implementation of REN 1000 art. 655-I.
+ // Single-regime scenario. Source allocation is illustrative, not a regulatory credit ledger.
+ const compensated=Math.min(grid,injected+received+previous,maxComp);
+ const usedOwn=Math.min(injected,compensated);
+ const usedReceived=Math.min(received,Math.max(0,compensated-usedOwn));
+ const usedPrevious=Math.min(previous,Math.max(0,compensated-usedOwn-usedReceived));
+ const excess=Math.max(0,injected-usedOwn), remainingReceived=received-usedReceived, remainingPrevious=previous-usedPrevious;
+ const uncredited=grid-compensated, residual=full-credit;
+ const nonCompensatedCost=uncredited*full, residualCost=compensated*residual;
+ const raw=nonCompensatedCost+residualCost;
  const floor=v.min*full, energy=Math.max(floor,raw);
  const before=Math.max(v.consumo,v.min)*full+v.cip, after=energy+v.cip;
- return {before,after,saving:before-after,self,grid,injected,compensated,uncredited,excess:injected-compensated,wire:v.gd===2?compensated*(tariff.tusd-tariff.tusdCredit):0,floorAdjustment:energy-raw,residual:compensated*residual};
+ return {before,after,saving:before-after,self,grid,injected,compensated,uncredited,excess,usedOwn,usedReceived,usedPrevious,remainingReceived,remainingPrevious,creditBalance:excess+remainingReceived+remainingPrevious,wire:v.gd===2?compensated*transport:0,floorAdjustment:energy-raw,residual:residualCost,nonCompensatedCost,energy,reference:tariff.reference,incidence:tariff.incidence};
 }
-
-const api=Object.freeze({policy,tariffFor,calculate});
+// Pure percentage allocation for a hypothetical available surplus; no persistence or transfer.
+// Input percentages must total at most 100; unallocated energy remains with the source.
+function allocateExcess(kwh,percentages){
+ if(!validEnergy(kwh)||!Array.isArray(percentages)||!percentages.every(x=>Number.isFinite(x)&&x>=0&&x<=100))throw new RangeError('Rateio invalido');
+ const total=percentages.reduce((a,b)=>a+b,0);
+ if(total>100+1e-9)throw new RangeError('Rateio acima de 100%');
+ const allocations=percentages.map(p=>kwh*p/100);
+ return {allocations,remaining:Math.max(0,kwh-allocations.reduce((a,b)=>a+b,0))};
+}
+const api=Object.freeze({policy,tariffFor,calculate,allocateExcess});
 if(typeof module==='object'&&module.exports)module.exports=api;else root.WWSolarEconomia=api;
 })(typeof globalThis==='object'?globalThis:this);
