@@ -231,3 +231,27 @@ test('referencia publica DEV somente leitura, sem dados de auditoria e com resta
  const restored=await (await handle(new Request(url),env)).json();assert.equal(restored.profile,null);assert.equal(restored.revision,4);
  assert.equal((await handle(new Request(url),{})).status,503);
 });
+
+
+test('Economia Solar transmite geração e abre o kit compatível, sem adicionar ao carrinho',()=>{
+ const fs=require('node:fs'),vm=require('node:vm');
+ const eco=fs.readFileSync('economia-solar.js','utf8');
+ const client=fs.readFileSync('cliente-dev.js','utf8');
+ const link={hidden:true,setAttribute(){},removeAttribute(k){delete this[k];}};
+ vm.runInNewContext(eco.slice(eco.indexOf('function updateKitLink('),eco.indexOf('function render()'))+'\nupdateKitLink(599.1)',{kitLink:link});
+ assert.equal(link.href,'./?economia_kwh=600#catalogo');assert.equal(link.hidden,false);
+ vm.runInNewContext(eco.slice(eco.indexOf('function updateKitLink('),eco.indexOf('function render()'))+'\nupdateKitLink(0)',{kitLink:link});
+ assert.equal(link.href,undefined);assert.equal(link.hidden,true);
+ const src=client.slice(client.indexOf('let economiaTargetApplied=false'),client.indexOf('function renderAll()'));
+ for(const [query,expected,match] of [['?economia_kwh=600',600,true],['?economia_kwh=2500',2500,false],['?economia_kwh=0',null,false],['?economia_kwh=1e3',null,false]]){
+  let target=null,scrolled='',kind=null;const S={query:'old',target:300};
+  const card={dataset:{productId:'kit1'},scrollIntoView(){scrolled='kit';}};
+  const custom={scrollIntoView(){scrolled='custom';}};
+  const els={'client-search':{value:'old'},'client-product-grid':{children:[card]},'client-custom-kit-cta':custom,'catalogo':{}};
+  const ctx={S,window:{location:{search:query}},URLSearchParams,$:id=>els[id],setTarget(v,exact){assert.equal(exact,true);target=v;S.target=v;},setKind(v){kind=v;},available:()=>[],C:{recommendedKit(){return match?{id:'kit1'}:null;}},requestAnimationFrame:fn=>fn()};
+  vm.runInNewContext(src+'\napplyEconomiaTarget();applyEconomiaTarget();',ctx);
+  assert.equal(target,expected);assert.equal(scrolled,expected===null?'':match?'kit':'custom');
+  if(expected!==null){assert.equal(kind,'kit');assert.equal(S.query,'');}
+ }
+ assert.match(client,/if\(fromEconomia&&Number\.isSafeInteger\(n\)&&n>0&&n<=100000\)S\.target=n/);
+});
