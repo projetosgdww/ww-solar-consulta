@@ -25,9 +25,9 @@ function renderEcr(v,year,r){
  }catch{status.textContent='Cenário ECR indisponível; confira os parâmetros.';}
 }
 function render(){
- if(!form.checkValidity()) return;
+ if(!form.checkValidity()){document.getElementById('eco-ecr-study').hidden=true;return;}
  const v=Object.fromEntries([...new FormData(form)].map(([k,x])=>[k,Number(x)]));
- if(Object.values(v).some(n=>!Number.isFinite(n)||n<0)) return;
+ if(Object.values(v).some(n=>!Number.isFinite(n)||n<0)){document.getElementById('eco-ecr-study').hidden=true;return;}
  const year=Number(document.getElementById('eco-year').value);
  const r=activeProfile?calculateDraft(v,activeProfile,year):calculate(v,year);
  if(!r)return;
