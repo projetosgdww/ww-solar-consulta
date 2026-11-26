@@ -209,3 +209,25 @@ test('falha de autenticacao central e classificada sem acessar banco',async()=>{
  for(const [fetcher,code] of cases){const r=await handle(req,env,{fetcher});assert.equal(r.status,503);assert.equal((await r.json()).code,code);}
  assert.equal(touches,0);
 });
+
+test('referencia publica DEV somente leitura, sem dados de auditoria e com restauracao',async()=>{
+ const {handle}=await import('../functions/api/tarifa-ativa-dev.js');
+ const {sameTariff}=await import('../functions/api/tarifas-dev.js');
+ const id='11111111-1111-4111-8111-111111111111',actor='22222222-2222-4222-8222-222222222222';
+ const draft={...policy.profiles['2026-11'],source:'Referencia de teste'};
+ const rows=[{seq:1,expected_seq:0,action:'save',version_id:id,draft_json:JSON.stringify(draft),actor_id:actor,occurred_at:'2026-11-26'},{seq:2,expected_seq:1,action:'approve',version_id:id,actor_id:actor},{seq:3,expected_seq:2,action:'activate',version_id:id,actor_id:actor}];
+ const url='https://ww-solar-economia-dev.pages.dev/api/tarifa-ativa-dev';
+ let reads=0;const env={TARIFFS_DEV:{prepare:sql=>{assert.match(sql,/^SELECT /);reads++;return {all:async()=>({success:true,results:rows})};}}};
+ assert.equal((await handle(new Request(url,{method:'POST'}),env)).status,405);
+ assert.equal((await handle(new Request('https://catalogo.wwplatform.com.br/api/tarifa-ativa-dev'),env)).status,404);
+ assert.equal((await handle(new Request(url+'?x=1'),env)).status,400);
+ assert.equal(reads,0);
+ const r=await handle(new Request(url),env);assert.equal(r.status,200);assert.equal(r.headers.get('Cache-Control'),'no-store');
+ const body=await r.json();assert.equal(body.revision,3);assert.equal(body.profile.reference,'2026-11');
+ assert.equal(Object.hasOwn(body.profile,'source'),false);assert.equal(Object.hasOwn(body,'events'),false);assert.equal(JSON.stringify(body).includes(actor),false);
+ near(require('../economia-solar-core.js').calculateDraft(v,{...body.profile,source:'Referencia central DEV'}).saving,calculate(v).saving);
+ assert.equal(sameTariff(draft,{...draft,source:'Outra consulta'}),true);assert.equal(sameTariff(draft,{...draft,pis:.01}),false);
+ rows.push({seq:4,expected_seq:3,action:'restore_default',version_id:null,actor_id:actor});
+ const restored=await (await handle(new Request(url),env)).json();assert.equal(restored.profile,null);assert.equal(restored.revision,4);
+ assert.equal((await handle(new Request(url),{})).status,503);
+});
