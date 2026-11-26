@@ -545,7 +545,7 @@ $('admin-tariff-online')?.addEventListener('click',async()=>{
    response=await fetch('/api/aneel?month='+encodeURIComponent(month),{signal:controller.signal,credentials:'omit'});
    payload=await response.json();
   }finally{clearTimeout(timer);}
-  if(!response.ok||payload?.ok!==true)throw new Error(payload?.code??'INVALID_RESPONSE');
+  if(!response.ok||payload?.ok!==true){const err=new Error(payload?.code??'INVALID_RESPONSE');err.source=payload?.source;err.httpStatus=payload?.httpStatus;throw err;}
   const r=payload.result;
   if(!r||r.month!==month||!Array.isArray(r.periods))throw new Error('INVALID_RESPONSE');
   if(form.elements.reference.value!==month){out.textContent='';return;}
@@ -564,7 +564,7 @@ $('admin-tariff-online')?.addEventListener('click',async()=>{
   }
   out.append(element('p',r.flag?'Bandeira: '+r.flag.name+' · R$ '+r.flag.rate.toLocaleString('pt-BR',{maximumFractionDigits:6})+'/kWh':'Bandeira sem registro para o mês.'));
   out.append(element('p','Consulta informativa. Tributos não são obtidos por esta consulta. A base local e o rascunho permanecem inalterados.'));
- }catch(err){if(form.elements.reference.value===month){const labels={UPSTREAM_TIMEOUT:'Tempo limite da ANEEL',UPSTREAM_HTTP:'Resposta HTTP da ANEEL indisponível',UPSTREAM_DATA:'Dados da ANEEL incompletos ou inconsistentes',UPSTREAM_UNAVAILABLE:'Comunicação com a ANEEL indisponível',INVALID_MONTH:'Consulta disponível somente para 2026',DEV_ONLY:'Consulta restrita ao DEV',INVALID_RESPONSE:'Resposta inválida do intermediário'};const detail=labels[err.message]??'Falha na comunicação com o intermediário';out.textContent=detail+'. Utilize a base importada. Nenhuma tarifa foi alterada.';}}
+ }catch(err){if(form.elements.reference.value===month){const labels={UPSTREAM_TIMEOUT:'Tempo limite da ANEEL',UPSTREAM_HTTP:'Resposta HTTP da ANEEL indisponível',UPSTREAM_DATA:'Dados da ANEEL incompletos ou inconsistentes',UPSTREAM_UNAVAILABLE:'Comunicação com a ANEEL indisponível',INVALID_MONTH:'Consulta disponível somente para 2026',DEV_ONLY:'Consulta restrita ao DEV',INVALID_RESPONSE:'Resposta inválida do intermediário'};const detail=labels[err.message]??'Falha na comunicação com o intermediário';const stage={componentes:'Componentes tarifárias',bandeiras:'Bandeiras tarifárias',validacao:'Validação dos dados',consulta:'Consulta'}[err.source];const http=Number.isInteger(err.httpStatus)?' (HTTP '+err.httpStatus+')':'';out.textContent=(stage?stage+' — ':'')+detail+http+'. Utilize a base importada. Nenhuma tarifa foi alterada.';}}
  finally{btn.disabled=false;}
 });
 function tariffDraft(){
