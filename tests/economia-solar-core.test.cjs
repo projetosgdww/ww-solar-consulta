@@ -266,3 +266,20 @@ test('interface de rateio inicia desativada e nao interfere em FormData da gerad
  assert.match(js,/calculateGroup\(v,\[b\],year,undefined,activeProfile\)/);
  assert.match(js,/g.source.compensated\+u.compensated/);
 });
+
+test('dashboard de rateio preserva indicadores individuais, comparativo e detalhes',()=>{
+ const fs=require('node:fs'),html=fs.readFileSync('economia-solar.html','utf8'),js=fs.readFileSync('economia-solar.js','utf8');
+ const ids=['dashboard','kpi-source','kpi-beneficiary','kpi-combined','kpi-payback','annual','mini-available','mini-percent','mini-allocated','mini-compensated','energy','source','bill','total','ecr','ecr-values'];
+ for(const unit of ['source','beneficiary','combined'])for(const field of ['before','after','saving'])ids.push(unit+'-'+field);
+ for(const id of ids)assert.equal((html.match(new RegExp('id="eco-rateio-'+id+'"','g'))||[]).length,1,id);
+ assert.match(html,/<details><summary>Detalhes técnicos do rateio/);
+ assert.match(html,/<details><summary>Premissas e observações regulatórias/);
+ assert.match(html,/<details id="eco-rateio-ecr" hidden>/);
+ assert.match(js,/\['source',g\.source\],\['beneficiary',u\],\['combined',t\]/);
+ assert.match(js,/put\('kpi-payback',payback\(t\.saving\)\)/);
+ assert.match(js,/money\(g\.source\.saving\*12\)/);
+ assert.match(js,/money\(u\.saving\*12\)/);
+ assert.match(js,/dashboard\.hidden=true/);
+ assert.match(js,/dashboard\.hidden=false/);
+ new (require('node:vm').Script)(js);
+});
