@@ -11,11 +11,12 @@ function tariffFor(year,gd,competence){
  return {...profile,incidence,tusdCredit:profile.tusd-profile.fioB*incidence,scenario:year!==Number(ref.slice(0,4))};
 }
 function validEnergy(n){return Number.isFinite(n)&&n>=0&&n<=1e9;}
-function calculate(v,year=policy.baseYear,competence){
+function calculate(v,year=policy.baseYear,competence){return calculateInternal(v,year,competence,null);}
+function calculateInternal(v,year,competence,profile){
  const previous=v.creditsPrevious??0, received=v.creditsReceived??0;
  if(![v.consumo,v.geracao,v.cip,previous,received].every(validEnergy)||!Number.isFinite(v.sim)||v.sim<0||v.sim>100||![30,50,100].includes(v.min)||![1,2].includes(v.gd))throw new RangeError('Parametros invalidos');
- const tariff=tariffFor(year,v.gd,competence);
- if(!tariff)return null;
+ const tariff=profile?{...profile,incidence:v.gd===1?0:policy.transition[year],tusdCredit:profile.tusd-profile.fioB*(v.gd===1?0:policy.transition[year])}:tariffFor(year,v.gd,competence);
+ if(!tariff||!Object.hasOwn(policy.transition,year))return null;
  const flag=v.flag??tariff.flag;
  if(typeof flag!=='string'||!Object.hasOwn(policy.flags,flag))throw new RangeError('Bandeira invalida');
  const federal=1-tariff.pis-tariff.cofins;
@@ -59,7 +60,8 @@ function validateTariffDraft(d){
  if(![te,tusd,fioB,icms,pis,cofins].every(Number.isFinite)||te<=0||te>10||tusd<=0||tusd>10||fioB<0||fioB>tusd||icms<0||icms>=.5||pis<0||cofins<0||pis+cofins>=.3||typeof flag!=='string'||!Object.hasOwn(policy.flags,flag))throw new RangeError('Parametros tarifarios fora dos limites');
  const source=typeof d.source==='string'?d.source.trim():'';
  if(source.length<5||source.length>300)throw new RangeError('Informe a referencia documental');
- return {reference:d.reference,te,tusd,fioB,icms,pis,cofins,flag,source,status:'rascunho'};
+ const norm=n=>Number(n.toFixed(12));
+ return {reference:d.reference,te:norm(te),tusd:norm(tusd),fioB:norm(fioB),icms:norm(icms),pis:norm(pis),cofins:norm(cofins),flag,source,status:'rascunho'};
 }
 // Simulates one generator and beneficiary units, same regime and reference.
 // Only the current generator surplus is allocated; no reallocation of old credits.
@@ -89,8 +91,11 @@ function prepareOnlineDraft(r,monthlyTaxes,queriedAt){
  // Only same-month taxes from the configured reference are trusted.
  const taxes=policy.taxes[r.month]??null;
  const source=('ANEEL online '+date.toISOString().slice(0,10)+'; '+p.reh+(taxes?'; tributos observados em fatura da mesma competência':'')).slice(0,300);
- return {reference:r.month,te:p.te,tusd:p.tusd,fioB:p.fioB,flag,taxes,source,status:'rascunho'};
+ const norm=n=>Number(n.toFixed(12));
+ return {reference:r.month,te:norm(p.te),tusd:norm(p.tusd),fioB:norm(p.fioB),flag,taxes,source,status:'rascunho'};
 }
-const api=Object.freeze({policy,tariffFor,calculate,allocateExcess,validateTariffDraft,calculateGroup,prepareOnlineDraft});
+// Explicit sandbox profile; never changes the public reference or policy.
+function calculateDraft(v,d,year=policy.baseYear){return calculateInternal(v,year,undefined,validateTariffDraft(d));}
+const api=Object.freeze({policy,tariffFor,calculate,allocateExcess,validateTariffDraft,calculateGroup,prepareOnlineDraft,calculateDraft});
 if(typeof module==='object'&&module.exports)module.exports=api;else root.WWSolarEconomia=api;
 })(typeof globalThis==='object'?globalThis:this);
