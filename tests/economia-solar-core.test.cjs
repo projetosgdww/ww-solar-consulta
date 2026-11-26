@@ -283,3 +283,33 @@ test('dashboard de rateio preserva indicadores individuais, comparativo e detalh
  assert.match(js,/dashboard\.hidden=false/);
  new (require('node:vm').Script)(js);
 });
+
+test('dashboard principal executa com o motor real, troca escopo e conserva fluxo e ECR',()=>{
+ const fs=require('node:fs'),vm=require('node:vm'),html=fs.readFileSync('economia-solar.html','utf8'),js=fs.readFileSync('economia-solar.js','utf8'),C=require('../economia-solar-core.js'),E=require('../economia-solar-ecr.js');
+ const ids=new Map();
+ function el(id=''){return {id,children:[],attrs:{},style:{},dataset:{},hidden:false,disabled:false,value:'',textContent:'',checked:false,classList:{toggle(){}},events:{},setAttribute(k,v){this.attrs[k]=String(v)},replaceChildren(...x){this.children=x},append(...x){this.children.push(...x)},addEventListener(k,f){this.events[k]=f},checkValidity(){return true},focus(){}}}
+ for(const [,id] of html.matchAll(/id="([^"]+)"/g)){assert.ok(!ids.has(id),id);ids.set(id,el(id));}
+ const get=id=>{assert.ok(ids.has(id),'ID ausente '+id);return ids.get(id);};
+ const data={consumo:600,geracao:1000,sim:30,gd:2,min:30,cip:40,invest:15000,atual:''};
+ const form=get('form');form.elements={atual:{value:''}};form.reset=()=>{};
+ for(const [id,value] of Object.entries({'eco-year':'2027','eco-ecr-factor':'52.4','eco-rateio-consumo':'400','eco-rateio-min':'30','eco-rateio-cip':'25','eco-rateio-percent':'50'}))get(id).value=value;
+ get('eco-rateio-enabled').checked=true;
+ const tabs=['overview','flow','rateio','ecr'].map(id=>get('eco-tab-'+id));
+ const scopes=['source','combined'].map(id=>{const b=el();b.dataset.ecoScope=id;return b;});
+ const document={getElementById:get,createElement:()=>el(),createElementNS:()=>el(),createTextNode:s=>s,querySelectorAll:s=>s==='[data-eco-scope]'?scopes:tabs};
+ class FormData{constructor(){} *[Symbol.iterator](){yield*Object.entries(data);}}
+ vm.runInNewContext(js,{document,FormData,location:{hostname:'test'},window:{addEventListener(){}},WWSolarEconomia:C,WWSolarECR:E});
+ const source=C.calculate(data,2027),group=C.calculateGroup(data,[{consumo:400,min:30,cip:25,percent:50}],2027),money=n=>n.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+ assert.equal(get('saving').textContent,money(source.saving));
+ assert.equal(get('eco-dash-content').hidden,false);
+ assert.equal(get('eco-dash-flow').children.length,4);
+ near(get('eco-dash-flow').children.reduce((sum,x)=>sum+parseFloat(x.style.width),0),100);
+ assert.equal(get('eco-dash-payback-legend').children.length,4);
+ scopes[1].events.click();assert.equal(get('saving').textContent,money(group.totals.saving));
+ assert.equal(get('after').textContent,money(group.totals.after));
+ const e=E.estimate({year:2027,gd:2,compensated:group.source.compensated+group.units[0].compensated,profile:C.policy.profiles['2026-11']});
+ assert.equal(get('eco-impact-after').textContent,money(E.sensitivity(group.totals,e.ecr,data.invest).annual));
+ tabs[2].events.click();assert.equal(get('eco-panel-rateio').hidden,false);
+ get('eco-rateio-enabled').checked=false;form.events.input();assert.equal(get('eco-tab-rateio').hidden,true);assert.equal(get('eco-panel-overview').hidden,false);assert.equal(get('saving').textContent,money(source.saving));
+ get('eco-year').value='2026';get('eco-year').events.change();assert.equal(get('eco-tab-ecr').hidden,true);
+});
