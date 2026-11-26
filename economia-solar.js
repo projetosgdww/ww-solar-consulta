@@ -146,20 +146,20 @@ function barPairs(id,groups,label){
  }
 }
 
-function verticalBills(id,groups,components=null){
+function verticalBills(id,groups,components=null,withRateio=false){
  const max=Math.max(1,...groups.flatMap(g=>[g.before,g.after])),w=480,h=250,base=194,top=22;
  const svg=svgChart(id,w,h,'Faturas antes e depois: '+groups.map(g=>g.label+' antes '+money(g.before)+', depois '+money(g.after)).join('; ')),y=n=>base-Math.max(0,n)/max*(base-top);
  for(let i=0;i<=4;i++){const n=max*i/4,yy=y(n);svg.append(svgNode('line',{x1:65,x2:470,y1:yy,y2:yy,stroke:'#dce5da'}));chartText(svg,60,yy+4,qty(n),{'text-anchor':'end','font-size':10});}
  const slot=390/groups.length,bw=Math.min(66,slot*.34);
  for(const [i,g] of groups.entries()){
-  const center=70+slot*(i+.5),left=center-bw-4,right=center+4;
+  const center=70+slot*(i+.5),left=center-bw-(groups.length===1?22:4),right=center+(groups.length===1?22:4);
   svg.append(svgNode('rect',{x:left,y:y(g.before),width:bw,height:Math.max(0,base-y(g.before)),rx:4,fill:colors.before}));
   if(components&&groups.length===1&&components.every(p=>p.value>=0)){
    let subtotal=0;for(const p of components){const yy=y(subtotal+p.value);svg.append(svgNode('rect',{x:right,y:yy,width:bw,height:Math.max(0,y(subtotal)-yy),fill:p.color}));subtotal+=p.value;}
   }else svg.append(svgNode('rect',{x:right,y:y(g.after),width:bw,height:Math.max(0,base-y(g.after)),rx:4,fill:colors.solar}));
   chartText(svg,left+bw/2,Math.max(12,y(g.before)-5),money(g.before),{'text-anchor':'middle','font-size':groups.length===1?11:9,'font-weight':700,fill:'#172123'});
   chartText(svg,right+bw/2,Math.max(12,y(g.after)-5),money(g.after),{'text-anchor':'middle','font-size':groups.length===1?11:9,'font-weight':700,fill:'#172123'});
-  if(groups.length===1){chartText(svg,left+bw/2,base+17,'Sem solar',{'text-anchor':'middle'});chartText(svg,right+bw/2,base+17,'Com solar / rateio',{'text-anchor':'middle','font-size':10});}
+  if(groups.length===1){chartText(svg,left+bw/2,base+17,'Sem solar',{'text-anchor':'middle'});chartText(svg,right+bw/2,base+17,withRateio?'Solar + rateio':'Com solar',{'text-anchor':'middle','font-size':10});}
   else chartText(svg,center,base+17,g.label,{'text-anchor':'middle','font-size':10,'font-weight':700});
  }
  if(groups.length>1){svg.append(svgNode('rect',{x:126,y:230,width:10,height:10,fill:colors.before,rx:2}),svgNode('rect',{x:256,y:230,width:10,height:10,fill:colors.solar,rx:2}));chartText(svg,141,239,'Antes');chartText(svg,271,239,'Depois');}
@@ -199,11 +199,12 @@ function dashboard(v,year,r,g){
  byId('eco-dash-scope').hidden=!g;byId('eco-tab-rateio').hidden=!g;byId('eco-tab-ecr').hidden=year<2027;
  document.querySelectorAll('[data-eco-scope]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.ecoScope===dashScope)));openTab(dashTab);
  const combined=dashScope==='combined'&&g,base=combined?{...g.totals,compensated:r.compensated+g.units[0].compensated}:r,caption=combined?'Consolidado — duas unidades':'Unidade geradora';
+ setText('eco-dash-bill-label',combined?'Fatura conjunta com solar e rateio':'Fatura com energia solar');
  setText('eco-dash-year','('+year+')');setText('before',money(base.before));setText('after',money(base.after));setText('saving',money(base.saving));setText('eco-dash-before','Antes: '+money(base.before)+(base.before>0?' · Redução '+qty(base.saving/base.before*100)+'%':''));
  setText('eco-dash-saving-sub',caption);setText('eco-dash-annual',money(base.saving*12));setText('eco-dash-annual-sub','12 meses · '+caption);setText('eco-dash-payback-value',paybackLabel(base.saving,v.invest));setText('eco-dash-payback-sub','Investimento '+money(v.invest));
  for(const id of ['saving','eco-dash-annual'])byId(id).classList.toggle('dash-negative',base.saving<0);
  const cip=v.cip+(combined?Number(byId('eco-rateio-cip').value):0),wire=r.wire+(combined?g.units[0].wire:0);
- verticalBills('eco-dash-bill',[{label:caption,before:base.before,after:base.after}],[{value:cip,color:'#52635f'},{value:wire,color:'#d97000'},{value:Math.max(0,base.after-cip-wire),color:'#196541'}]);
+ verticalBills('eco-dash-bill',[{label:caption,before:base.before,after:base.after}],[{value:cip,color:'#52635f'},{value:wire,color:'#d97000'},{value:Math.max(0,base.after-cip-wire),color:'#196541'}],Boolean(combined));
  fillRateio('eco-dash-composition',[['Iluminação pública',money(cip)],['Fio B sem tributos (dentro da fatura)',money(wire)],['Demais custos estimados',money(base.after-cip-wire)],['Total da fatura estimada',money(base.after)]]);
  drawPayback(v,year,r,g);drawFlow(v,r,g);
  if(g)verticalBills('eco-dash-rateio-chart',[{label:'Geradora',...g.source},{label:'Beneficiária',...g.units[0]},{label:'Conjunto',...g.totals}]);
