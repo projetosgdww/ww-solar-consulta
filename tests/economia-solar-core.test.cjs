@@ -231,3 +231,38 @@ test('referencia publica DEV somente leitura, sem dados de auditoria e com resta
  const restored=await (await handle(new Request(url),env)).json();assert.equal(restored.profile,null);assert.equal(restored.revision,4);
  assert.equal((await handle(new Request(url),{})).status,503);
 });
+
+test('autoconsumo remoto distribui somente excedente liquido e conserva energia',()=>{
+ const b={consumo:400,min:30,cip:25,percent:100};
+ for(const gd of [1,2])for(const min of [30,50,100]){
+  const equal=calculateGroup({...v,gd,min},[b],2026);
+  near(equal.available,0);near(equal.distribution.allocations[0],0);near(equal.units[0].saving,0);
+  const g=calculateGroup({...v,gd,min,geracao:1000},[b],2026);
+  near(g.available,400);near(g.distribution.allocations[0],400);
+  near(g.sourceRemaining+g.units[0].usedReceived+g.units[0].remainingReceived,g.source.creditBalance);
+  near(g.totals.saving,g.source.saving+g.units[0].saving);
+  const half=calculateGroup({...v,gd,min,geracao:1000},[{...b,percent:50}],2026);
+  near(half.distribution.allocations[0],200);near(half.distribution.remaining,200);
+  const deficit=calculateGroup({...v,gd,min,geracao:300},[b],2026);near(deficit.available,0);
+ }
+});
+test('rateio usa mesma tarifa central em ambas unidades e ECR somente sobre compensacao',()=>{
+ const C=require('../economia-solar-core.js'),E=require('../economia-solar-ecr.js');
+ const p={...policy.profiles['2026-11'],source:'referencia de teste'};
+ const b={consumo:400,min:30,cip:25,percent:100},gen={...v,geracao:1000};
+ const g=C.calculateGroup(gen,[b],2027,undefined,p);
+ const expected=C.calculateDraft({...b,gd:2,geracao:0,sim:0,creditsReceived:400},p,2027);
+ near(g.units[0].after,expected.after);near(g.source.after,C.calculateDraft(gen,p,2027).after);
+ const e=E.estimate({year:2027,gd:2,compensated:g.source.compensated+g.units[0].compensated,profile:p});
+ assert.equal(e.status,'provisional');near(e.ecr,(g.source.compensated+g.units[0].compensated)*.24768*.524);
+ near(E.sensitivity(g.totals,e.ecr,15000).saving,g.totals.saving-e.ecr);
+});
+test('interface de rateio inicia desativada e nao interfere em FormData da geradora',()=>{
+ const fs=require('node:fs'),html=fs.readFileSync('economia-solar.html','utf8'),js=fs.readFileSync('economia-solar.js','utf8');
+ assert.match(html,/id="eco-rateio-enabled" type="checkbox">/);
+ assert.match(html,/id="eco-rateio-fields" hidden disabled/);
+ assert.match(html,/id="eco-rateio-result" class="eco-rateio-result" hidden/);
+ assert.match(js,/if\(!rateioEnabled.checked\)return/);
+ assert.match(js,/calculateGroup\(v,\[b\],year,undefined,activeProfile\)/);
+ assert.match(js,/g.source.compensated\+u.compensated/);
+});
