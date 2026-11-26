@@ -57,7 +57,53 @@ function renderEcr(v,year,r){
   renderEcrImpact(r,result.ecr,v.invest);
  }catch{document.getElementById('eco-ecr-impact').hidden=true;status.textContent='Cenário ECR indisponível; confira os parâmetros.';}
 }
+const rateioEnabled=document.getElementById('eco-rateio-enabled');
+const rateioFields=document.getElementById('eco-rateio-fields');
+const rateioResult=document.getElementById('eco-rateio-result');
+function fillRateio(id,rows){
+ const dl=document.getElementById(id);dl.replaceChildren();
+ for(const [label,value] of rows){const dt=document.createElement('dt'),dd=document.createElement('dd');dt.textContent=label;dd.textContent=value;dl.append(dt,dd);}
+}
+function renderRateio(v,year){
+ rateioResult.hidden=true;
+ const ecrBox=document.getElementById('eco-rateio-ecr');ecrBox.hidden=true;
+ if(!rateioEnabled.checked)return;
+ const status=document.getElementById('eco-rateio-status');
+ for(const id of ['eco-rateio-energy','eco-rateio-bill','eco-rateio-total','eco-rateio-ecr-values'])fillRateio(id,[]);
+ try{
+  const num=id=>Number(document.getElementById(id).value);
+  const b={consumo:num('eco-rateio-consumo'),min:num('eco-rateio-min'),cip:num('eco-rateio-cip'),percent:num('eco-rateio-percent')};
+  const g=globalThis.WWSolarEconomia.calculateGroup(v,[b],year,undefined,activeProfile);
+  if(!g)throw Error('Referência indisponível');
+  const u=g.units[0],allocated=g.distribution.allocations[0],t=g.totals;
+  const kwh=n=>qty(n)+' kWh',payback=s=>v.invest>0&&s>0?qty(v.invest/(12*s))+' anos':'Não calculado';
+  status.textContent=g.available>0?'Excedente líquido disponível para distribuição neste ciclo.':'Não há excedente líquido para rateio neste ciclo.';
+  fillRateio('eco-rateio-energy',[
+   ['Excedente líquido disponível na geradora',kwh(g.available)],['Percentual destinado',qty(b.percent)+'%'],['Energia destinada à beneficiária',kwh(allocated)],['Energia efetivamente compensada na beneficiária',kwh(u.usedReceived)],['Créditos não utilizados na beneficiária',kwh(u.remainingReceived)],['Excedente líquido não destinado',kwh(g.distribution.remaining)],['Saldo estimado na geradora após rateio',kwh(g.sourceRemaining)],['Consumo não compensado da beneficiária',kwh(u.uncredited)]
+  ]);
+  fillRateio('eco-rateio-bill',[
+   ['Fatura estimada sem rateio',money(u.before)],['Fatura estimada com rateio',money(u.after)],['Economia mensal na beneficiária',money(u.saving)],['Fio B sem tributos (incluído no residual)',money(u.wire)]
+  ]);
+  fillRateio('eco-rateio-total',[
+   ['Fatura conjunta sem energia solar',money(t.before)],['Fatura conjunta com energia solar',money(t.after)],['Economia mensal conjunta',money(t.saving)],['Economia anual conjunta',money(t.saving*12)],['Payback conjunto (economia constante)',payback(t.saving)]
+  ]);
+  const field=document.getElementById('eco-ecr-factor'),engine=globalThis.WWSolarECR;
+  if(year===2027&&v.gd===2&&field.value!==''&&field.checkValidity()){
+   const profile=activeProfile??policy.profiles[policy.reference];
+   const scenario={...engine.reference,...centralEcr,factor:Number(field.value)/100};
+   const e=engine.estimate({year,gd:v.gd,compensated:g.source.compensated+u.compensated,profile},scenario);
+   if(e.status==='provisional'){
+    const c=engine.sensitivity(t,e.ecr,v.invest);
+    fillRateio('eco-rateio-ecr-values',[
+     ['ECR adicional conjunto sem tributos',money(e.ecr)],['Fatura conjunta ilustrativa com ECR',money(c.after)],['Economia mensal conjunta ilustrativa',money(c.saving)],['Economia anual conjunta ilustrativa',money(c.annual)],['Payback conjunto ilustrativo',c.payback===null?'Não calculado':qty(c.payback)+' anos']
+    ]);ecrBox.hidden=false;
+   }
+  }
+  rateioResult.hidden=false;
+ }catch{status.textContent='Rateio indisponível; confira os parâmetros.';rateioResult.hidden=false;}
+}
 function render(){
+ rateioFields.hidden=!rateioEnabled.checked;rateioFields.disabled=!rateioEnabled.checked;rateioResult.hidden=true;
  if(!form.checkValidity()){document.getElementById('eco-ecr-study').hidden=true;return;}
  const v=Object.fromEntries([...new FormData(form)].map(([k,x])=>[k,Number(x)]));
  if(Object.values(v).some(n=>!Number.isFinite(n)||n<0)){document.getElementById('eco-ecr-study').hidden=true;return;}
@@ -74,6 +120,7 @@ function render(){
  const dl=document.getElementById('details');dl.replaceChildren();
  for(const [label,value] of rows){const dt=document.createElement('dt'),dd=document.createElement('dd');dt.textContent=label;dd.textContent=value;dl.append(dt,dd);}
  renderEcr(v,year,r);
+ renderRateio(v,year);
  document.getElementById('kit').textContent='Potência de referência: '+qty(v.geracao/132)+' kWp (produtividade hipotética de 132 kWh/kWp/mês).';
 }
 async function refreshReference(){
