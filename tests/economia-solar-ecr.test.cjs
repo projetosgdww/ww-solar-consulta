@@ -96,7 +96,7 @@ test('Economia Solar reutiliza identidade do catalogo e separa resultados sem pe
  assert.ok(html.includes(brand));assert.match(html,/href="\.\/cliente-dev.css"/);
  for(const id of ['details','details-energy','details-finance','before','after','saving','eco-ecr-impact','eco-kit-link'])assert.match(html,new RegExp('id="'+id+'"'));
  for(const hash of ['simulador','catalogo','projetos','consumo'])assert.ok(html.includes('./index.html#'+hash));
- assert.match(html,/aria-current="page"/);assert.match(html,/abrir_carrinho=1/);
+ assert.match(html,/aria-current="page"/);assert.ok(html.includes('href="./#client-cart-trigger"'));
  const start=js.indexOf(' const groups={details:'),end=js.indexOf(' renderEcr(v,year,r);',start);
  assert.ok(start>=0&&end>start);
  const rows=Array.from({length:16},(_,i)=>['label'+i,'value'+i]),out={};
@@ -105,9 +105,4 @@ test('Economia Solar reutiliza identidade do catalogo e separa resultados sem pe
  assert.deepEqual(out.details,['label0','value0','label1','value1','label14','value14','label15','value15']);
  assert.equal(out['details-energy'].length,12);assert.equal(out['details-finance'].length,12);
  assert.equal(Object.values(out).flat().length,32);
-});
-test('link do carrinho abre o fluxo original somente apos carregar catalogo',()=>{
- const fs=require('node:fs'),src=fs.readFileSync('cliente-dev.js','utf8');
- assert.match(src,/renderAll\(\);\s*if\(GUEST_QUOTE_MODE&&new URLSearchParams\(window.location.search\).get\('abrir_carrinho'\)==='1'\)/);
- assert.match(src,/url.searchParams.delete\('abrir_carrinho'\);window.history.replaceState\(window.history.state,'',url\);openDrawer\(\)/);
 });
