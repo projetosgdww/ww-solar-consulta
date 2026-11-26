@@ -8,19 +8,38 @@ let activeProfile=null,referenceState=isDev?'loading':'default',revision=null,re
 const money = n => n.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
 const qty = n => n.toLocaleString('pt-BR',{maximumFractionDigits:2});
 const form = document.getElementById('form');
+let centralEcr=null,ecrReferenceState=isDev?'loading':'default',ecrRequestVersion=0;
+async function refreshEcr(){
+ if(!isDev)return;
+ const version=++ecrRequestVersion,controller=new AbortController(),timer=setTimeout(()=>controller.abort(),8000);
+ try{
+  const response=await fetch('/api/ecr-ativo-dev',{signal:controller.signal,cache:'no-store',credentials:'omit'}),data=await response.json();
+  if(!response.ok||data?.ok!==true||!Number.isSafeInteger(data.revision)||data.revision<0||!Object.hasOwn(data,'profile'))throw Error('invalid_reference');
+  const engine=globalThis.WWSolarECR,p=data.profile===null?null:engine.validateStudyDraft({...data.profile,source:'Despacho / referência central de estudo DEV'});
+  if(version!==ecrRequestVersion)return;
+  centralEcr=p;ecrReferenceState=p?'central':'default';
+  document.getElementById('eco-ecr-factor').value=String((p?.factor??engine.reference.factor)*100);
+ }catch{if(version!==ecrRequestVersion)return;centralEcr=null;ecrReferenceState='unavailable';document.getElementById('eco-ecr-factor').value=String(globalThis.WWSolarECR.reference.factor*100);}
+ finally{clearTimeout(timer);if(version===ecrRequestVersion)render();}
+}
 function renderEcr(v,year,r){
  const box=document.getElementById('eco-ecr-study'),out=document.getElementById('eco-ecr-details'),status=document.getElementById('eco-ecr-status'),field=document.getElementById('eco-ecr-factor');
- box.hidden=year<2027;out.replaceChildren();status.textContent='';
+ box.hidden=year<2027;out.replaceChildren();document.getElementById('eco-ecr-comparison').replaceChildren();status.textContent='';
  if(box.hidden)return;
  field.disabled=year!==2027||v.gd!==2;
  if(!field.disabled&&(field.value===''||!field.checkValidity())){status.textContent='Informe um fator entre 0 e 100%.';return;}
  try{
   const engine=globalThis.WWSolarECR,profile=activeProfile??policy.profiles[policy.reference];
-  const result=engine.estimate({year,gd:v.gd,compensated:r.compensated,profile},{...engine.reference,factor:Number(field.value)/100});
+  const result=engine.estimate({year,gd:v.gd,compensated:r.compensated,profile},{...engine.reference,...centralEcr,factor:Number(field.value)/100});
   if(result.status!=='provisional'){status.textContent=result.reason;return;}
-  status.textContent='Projeção DEV — não homologada. Energia compensada do modelo base: '+qty(result.compensated)+' kWh.';
+  status.textContent='Projeção DEV — não homologada para faturamento. Energia compensada do modelo base: '+qty(result.compensated)+' kWh. '+(ecrReferenceState==='central'?'Referência central de estudo; situação declarada: '+centralEcr.regulatoryStatus+'.':ecrReferenceState==='unavailable'?'Banco ECR indisponível; usando referência de contingência.':ecrReferenceState==='loading'?'Consultando referência central.':'Referência de estudo padrão.')+' Fator editável apenas nesta simulação.';
   for(const [label,value] of [['Tarifa SCEE',result.scee.toFixed(5)+' R$/kWh'],['Fio B de 2027 sem tributos',money(result.wire)],['Benefício bruto estimado CDE',money(result.benefit)],['Fator ECR de estudo',qty(result.factor*100)+'%'],['ECR adicional estimado (sem tributos)',money(result.ecr)],['Benefício restante CDE',money(result.remainingBenefit)],['Fio B + ECR (sem tributos)',money(result.combined)],['ECR anual isolado',money(result.ecr*12)]]){
    const dt=document.createElement('dt'),dd=document.createElement('dd');dt.textContent=label;dd.textContent=value;out.append(dt,dd);
+  }
+  const comparison=engine.sensitivity(r,result.ecr,v.invest);
+  const extra=document.getElementById('eco-ecr-comparison');extra.replaceChildren();
+  for(const [label,value] of [['Fatura base sem ECR',money(r.after)],['Fatura ilustrativa com ECR sem tributos adicionais',money(comparison.after)],['Economia mensal sem ECR',money(r.saving)],['Economia mensal ilustrativa com ECR',money(comparison.saving)],['Economia anual ilustrativa com ECR',money(comparison.annual)],['Payback ilustrativo com ECR',comparison.payback===null?'Não calculado':qty(comparison.payback)+' anos']]){
+   const dt=document.createElement('dt'),dd=document.createElement('dd');dt.textContent=label;dd.textContent=value;extra.append(dt,dd);
   }
  }catch{status.textContent='Cenário ECR indisponível; confira os parâmetros.';}
 }
@@ -57,5 +76,5 @@ async function refreshReference(){
  finally{clearTimeout(timer);if(version===requestVersion)render();}
 }
 document.getElementById('eco-ecr-factor').addEventListener('input',render);
-form.addEventListener('submit',e=>{e.preventDefault();render();void refreshReference();});form.addEventListener('input',render);document.getElementById('eco-year').addEventListener('change',render);render();void refreshReference();window.addEventListener('pageshow',e=>{if(e.persisted)void refreshReference();});
+form.addEventListener('submit',e=>{e.preventDefault();render();void refreshReference();});form.addEventListener('input',render);document.getElementById('eco-year').addEventListener('change',render);render();void refreshReference();void refreshEcr();window.addEventListener('pageshow',e=>{if(e.persisted){void refreshReference();void refreshEcr();}});
 })();
