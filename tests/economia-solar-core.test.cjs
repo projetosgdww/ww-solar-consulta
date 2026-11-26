@@ -301,15 +301,18 @@ test('dashboard principal executa com o motor real, troca escopo e conserva flux
  vm.runInNewContext(js,{document,FormData,location:{hostname:'test'},window:{addEventListener(){}},WWSolarEconomia:C,WWSolarECR:E});
  const source=C.calculate(data,2027),group=C.calculateGroup(data,[{consumo:400,min:30,cip:25,percent:50}],2027),money=n=>n.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
  assert.equal(get('saving').textContent,money(source.saving));
+ assert.equal(get('eco-dash-bill-label').textContent,'Fatura com energia solar');
  assert.equal(get('eco-dash-content').hidden,false);
  assert.equal(get('eco-dash-flow').children.length,4);
  near(get('eco-dash-flow').children.reduce((sum,x)=>sum+parseFloat(x.style.width),0),100);
  assert.equal(get('eco-dash-payback-legend').children.length,4);
  scopes[1].events.click();assert.equal(get('saving').textContent,money(group.totals.saving));
+ assert.equal(get('eco-dash-bill-label').textContent,'Fatura conjunta com solar e rateio');
  assert.equal(get('after').textContent,money(group.totals.after));
  const e=E.estimate({year:2027,gd:2,compensated:group.source.compensated+group.units[0].compensated,profile:C.policy.profiles['2026-11']});
  assert.equal(get('eco-impact-after').textContent,money(E.sensitivity(group.totals,e.ecr,data.invest).annual));
  tabs[2].events.click();assert.equal(get('eco-panel-rateio').hidden,false);
  get('eco-rateio-enabled').checked=false;form.events.input();assert.equal(get('eco-tab-rateio').hidden,true);assert.equal(get('eco-panel-overview').hidden,false);assert.equal(get('saving').textContent,money(source.saving));
+ assert.equal(get('eco-dash-bill-label').textContent,'Fatura com energia solar');
  get('eco-year').value='2026';get('eco-year').events.change();assert.equal(get('eco-tab-ecr').hidden,true);
 });
