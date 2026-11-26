@@ -195,6 +195,9 @@
       'Consulte kits, adicione à cotação e solicite atendimento sem cadastro.':
       'Consulte preços livremente. Para detalhes completos e cotação, entre na sua conta.';
     renderAll();
+    if(GUEST_QUOTE_MODE&&new URLSearchParams(window.location.search).get('abrir_carrinho')==='1'){
+      const url=new URL(window.location.href);url.searchParams.delete('abrir_carrinho');window.history.replaceState(window.history.state,'',url);openDrawer();
+    }
     if(GUEST_QUOTE_MODE&&!S.timer)S.timer=setInterval(updateClock,1000);
   }
   function requestLoginFor(id){
