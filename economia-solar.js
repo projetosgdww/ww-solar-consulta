@@ -22,8 +22,21 @@ async function refreshEcr(){
  }catch{if(version!==ecrRequestVersion)return;centralEcr=null;ecrReferenceState='unavailable';document.getElementById('eco-ecr-factor').value=String(Number((globalThis.WWSolarECR.reference.factor*100).toFixed(12)));}
  finally{clearTimeout(timer);if(version===ecrRequestVersion)render();}
 }
+function renderEcrImpact(base,ecr,investment){
+ const impact=globalThis.WWSolarECR.impact(base,ecr,investment);
+ const put=(id,text)=>{document.getElementById('eco-impact-'+id).textContent=text;};
+ const percent=n=>n===null?'Não calculável':qty(n)+'%';
+ put('before',money(impact.annualBefore));put('after',money(impact.annualAfter));
+ put('reduction',percent(impact.savingReduction));put('loss',money(impact.annualLoss)+' a menos por ano');
+ put('months',impact.paybackMonths===null?'Não calculável':impact.paybackMonths.toLocaleString('pt-BR',{maximumFractionDigits:1})+' meses');
+ put('bill',percent(impact.billIncrease));put('payback',percent(impact.paybackIncrease));
+ document.getElementById('eco-impact-bar-before').style.width=impact.barBefore+'%';
+ document.getElementById('eco-impact-bar-after').style.width=impact.barAfter+'%';
+ document.getElementById('eco-ecr-impact').hidden=false;
+}
 function renderEcr(v,year,r){
  const box=document.getElementById('eco-ecr-study'),out=document.getElementById('eco-ecr-details'),status=document.getElementById('eco-ecr-status'),field=document.getElementById('eco-ecr-factor');
+ document.getElementById('eco-ecr-impact').hidden=true;
  box.hidden=year<2027;out.replaceChildren();document.getElementById('eco-ecr-comparison').replaceChildren();status.textContent='';
  if(box.hidden)return;
  field.disabled=year!==2027||v.gd!==2;
@@ -41,7 +54,8 @@ function renderEcr(v,year,r){
   for(const [label,value] of [['Fatura base sem ECR',money(r.after)],['Fatura ilustrativa com ECR sem tributos adicionais',money(comparison.after)],['Economia mensal sem ECR',money(r.saving)],['Economia mensal ilustrativa com ECR',money(comparison.saving)],['Economia anual ilustrativa com ECR',money(comparison.annual)],['Payback ilustrativo com ECR',comparison.payback===null?'Não calculado':qty(comparison.payback)+' anos']]){
    const dt=document.createElement('dt'),dd=document.createElement('dd');dt.textContent=label;dd.textContent=value;extra.append(dt,dd);
   }
- }catch{status.textContent='Cenário ECR indisponível; confira os parâmetros.';}
+  renderEcrImpact(r,result.ecr,v.invest);
+ }catch{document.getElementById('eco-ecr-impact').hidden=true;status.textContent='Cenário ECR indisponível; confira os parâmetros.';}
 }
 function render(){
  if(!form.checkValidity()){document.getElementById('eco-ecr-study').hidden=true;return;}
