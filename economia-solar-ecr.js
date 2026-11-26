@@ -9,6 +9,20 @@ function validateScenario(p){
  if(!p||p.year!==2027||p.distributor!=='ENEL CE'||p.subgroup!=='B1'||p.modality!=='convencional'||p.status!=='proposta'||![p.teScee,p.tusdScee,p.fioB,p.factor].every(Number.isFinite)||Math.abs(p.teScee)>10||p.tusdScee<=0||p.tusdScee>10||p.teScee+p.tusdScee<0||p.fioB<0||p.fioB>p.tusdScee||p.factor<0||p.factor>1)throw RangeError('Parametros ECR invalidos');
  return p;
 }
+function validateStudyDraft(d){
+ if(!d||!['proposta','homologado'].includes(d.regulatoryStatus))throw RangeError('Situacao regulatoria invalida');
+ const source=typeof d.source==='string'?d.source.trim():'';
+ if(source.length<10||source.length>300)throw RangeError('Informe a fonte normativa');
+ if(d.regulatoryStatus==='homologado'&&!/\b(?:REN|REH|Resolucao|Resolução|Despacho)\b/i.test(source))throw RangeError('Informe ato normativo publicado; cadastro nao comprova homologacao');
+ const p=validateScenario({...reference,teScee:d.teScee,tusdScee:d.tusdScee,fioB:d.fioB,factor:d.factor});
+ if(d.year!==2027||d.start!==reference.start||d.end!==reference.end)throw RangeError('Vigencia fora da base de estudo validada');
+ // Status regulatorio declarado pelo administrador; nao e verificacao oficial.
+ return {year:2027,start:p.start,end:p.end,teScee:p.teScee,tusdScee:p.tusdScee,fioB:p.fioB,factor:p.factor,regulatoryStatus:d.regulatoryStatus,source};
+}
+function sensitivity(base,ecr,investment){
+ if(!base||![base.before,base.after,base.saving,ecr,investment].every(Number.isFinite)||ecr<0||investment<0)throw RangeError('Comparacao invalida');
+ const saving=base.saving-ecr;return {after:base.after+ecr,saving,annual:saving*12,payback:investment>0&&saving>0?investment/(12*saving):null};
+}
 function estimate({year,gd,compensated,profile},scenario=reference){
  if(!Number.isInteger(year)||![1,2].includes(gd)||!Number.isFinite(compensated)||compensated<0||compensated>1e9)throw RangeError('Cenario ECR invalido');
  if(year<2027)return {status:'not-applicable',reason:'Anterior a 2027',ecr:0};
@@ -22,6 +36,6 @@ function estimate({year,gd,compensated,profile},scenario=reference){
  const wire=compensated*wireRate,benefit=compensated*benefitRate,ecr=compensated*ecrRate;
  return {status:'provisional',year,compensated,scee,wireRate,benefitRate,ecrRate,wire,benefit,ecr,remainingBenefit:benefit-ecr,combined:wire+ecr,factor:p.factor,reference:p,limitations:['Sem tributos do ECR','Energia compensada do modelo atual, sem revalidacao do limite do art. 310-A §3','Nao altera a fatura ou payback do motor base','Vigencia congelada; nao constitui previsao de reajuste']};
 }
-const api=Object.freeze({reference,validateScenario,estimate});
+const api=Object.freeze({reference,validateScenario,validateStudyDraft,estimate,sensitivity});
 if(typeof module==='object'&&module.exports)module.exports=api;else root.WWSolarECR=api;
 })(typeof globalThis==='object'?globalThis:this);
