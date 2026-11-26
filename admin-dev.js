@@ -709,7 +709,7 @@ function renderEcrAdmin(){
   if(v.state==='aprovado'&&v.id!==s.active)row.append(button('Ativar estudo DEV',()=>ecrAction('activate',v.id,null)));
   out.append(row);
  }
- if(s.events.length){out.append(element('h3','Histórico ECR'));for(const e of [...s.events].reverse())out.append(element('p',date(e.at)+' · '+e.action+' · '+(e.id?.slice(0,8)??'padrão')));}
+ if(s.events.length){out.append(element('h3','Histórico ECR'));for(const e of [...s.events].reverse())out.append(element('p',date(e.at)+' · '+({save:'Salvou',approve:'Aprovou',activate:'Ativou',restore_default:'Restaurou padrão'}[e.action]??e.action)+' · '+(e.id?.slice(0,8)??'padrão')));}
 }
 $('admin-ecr-refresh')?.addEventListener('click',()=>void loadEcr());
 $('admin-ecr-draft')?.addEventListener('submit',ev=>{
