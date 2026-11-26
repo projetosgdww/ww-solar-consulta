@@ -45,17 +45,19 @@ async function read(resource,filter,fetcher){
  url.searchParams.set('resource_id',resource);url.searchParams.set('filters',JSON.stringify(filter));url.searchParams.set('limit','500');
  const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),15000);
  try{
-  const response=await fetcher(url.toString(),{signal:controller.signal,credentials:'omit',redirect:'error',cache:'no-store'});
+  const response=await fetcher(url.toString(),{signal:controller.signal,redirect:'manual',headers:{Accept:'application/json'}});
   if(!response.ok)throw new Error('ANEEL HTTP '+response.status);
-  const data=await response.json(),r=data?.result;
+  let data;try{data=await response.json();}catch{throw new Error('Resposta JSON ANEEL inválida');}
+ const r=data?.result;
   if(data.success!==true||!Array.isArray(r?.records)||!Number.isInteger(r.total)||r.total!==r.records.length||r.total>500)throw new Error('Resposta incompleta ou inválida da ANEEL');
   return r.records;
  }finally{clearTimeout(timer);}
 }
-async function lookup(month,fetcher=root.fetch.bind(root)){
+async function lookup(month,fetcher=(...args)=>fetch(...args)){
  const [start]=bounds(month);
- const [components,flags]=await Promise.all([read(resources.components,filters,fetcher),read(resources.flags,{DatCompetencia:start},fetcher)]);
- return summarize(month,components,flags);
+ const tagged=async(source,fn)=>{try{return await fn();}catch(err){const e=new Error(String(err?.message??'Falha de consulta'));e.name=err?.name??'Error';e.source=source;throw e;}};
+ const [components,flags]=await Promise.all([tagged('componentes',()=>read(resources.components,filters,fetcher)),tagged('bandeiras',()=>read(resources.flags,{DatCompetencia:start},fetcher))]);
+ return tagged('validacao',()=>summarize(month,components,flags));
 }
 const api=Object.freeze({lookup,summarize,filters,resources});
 if(typeof module==='object'&&module.exports)module.exports=api;else root.WWSolarAneel=api;
