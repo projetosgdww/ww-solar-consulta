@@ -903,10 +903,10 @@
         const projectLine=S.lines.find(item=>item.id===project.id);
         checkbox.checked=project.id==='PRJ-'+x.id
           ?!!projectLine:!!projectLine?.linkedKits?.includes(x.id);
-        checkbox.setAttribute('aria-label','Incluir projeto elétrico para '+x.title+' ('+kitVariantLabel(kit)+')');
+        checkbox.setAttribute('aria-label','Incluir projeto e homologação para '+x.title+' ('+kitVariantLabel(kit)+')');
         checkbox.addEventListener('change',()=>setKitProject(x.id,checkbox.checked));
         const caption=el('span');
-        caption.append(el('strong','Incluir projeto elétrico · '+euro(project.price)),
+        caption.append(el('strong','Incluir projeto e homologação · '+euro(project.price)),
           el('small',project.id==='PRJ-'+x.id
             ?'Projeto opcional vinculado ao kit · TRT paga pelo contratante'
             :'Projeto somente para este kit · TRT paga pelo contratante'));
