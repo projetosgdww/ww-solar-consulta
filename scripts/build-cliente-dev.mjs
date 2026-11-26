@@ -12,7 +12,7 @@ execFileSync(process.execPath,['--check','admin-composition-core.js'],{stdio:'in
 const root=process.cwd();
 const out=resolve(root,'dist-cliente-dev');
 const allowed=[
-  'economia-solar.html','economia-solar.js','economia-solar-core.js','economia-solar-tarifas.js','economia-solar-aneel.js','cliente-dev.html','cliente-dev.js','cliente-dev.css','palette-wwsolar.css','cliente-dev-config.js','cliente-pwa.js',
+  'economia-solar.html','economia-solar.js','economia-solar-core.js','economia-solar-tarifas.js','economia-solar-aneel.js','economia-solar-tariff-sandbox.js','cliente-dev.html','cliente-dev.js','cliente-dev.css','palette-wwsolar.css','cliente-dev-config.js','cliente-pwa.js',
   'cliente-core.js','kit-line-commercial-v2.js','kit-line-eight-review.js','manifest.webmanifest','sw.js','privacidade.html','termos.html','legal.css','admin-dev.html','admin-dev.js','admin-dev.css','admin-composition-core.js','styles.css','favicon.svg'
 ];
 await rm(out,{recursive:true,force:true});
