@@ -91,10 +91,10 @@
 <label>COFINS (%)<input name="cofins" type="number" step="any" min="0" required></label>
  <label>Bandeira<select name="flag" required><option value="">Selecione</option><option value="verde">Verde</option><option value="amarela">Amarela</option><option value="vermelha1">Vermelha 1</option><option value="vermelha2">Vermelha 2</option></select></label>
  <label>Fonte documental (sem dados pessoais)<input name="source" minlength="5" maxlength="300" required></label>
- <button class="button button-accent" type="submit">Validar rascunho</button><button class="button button-outline" id="admin-tariff-copy" type="button">Copiar para revisão</button></form>
- <p id="admin-tariff-status" role="status" class="client-status"></p><pre id="admin-tariff-preview" hidden style="white-space:pre-wrap;overflow-wrap:anywhere"></pre>
+ <button class="button button-accent" type="submit" disabled>Validar rascunho</button><button class="button button-outline" id="admin-tariff-copy" type="button" disabled>Copiar para revisão</button></form>
+ <p id="admin-tariff-status" role="status" class="client-status"></p><div id="admin-tariff-preview" hidden aria-live="polite"></div>
  </section>
 </main>
 <footer class="footer"><div class="shell footer-inner"><span><strong>WW</strong>SOLAR</span><span>Administração restrita</span><nav class="legal-footer-links" aria-label="Documentos legais"><a href="./privacidade.html">Política de Privacidade</a><a href="./termos.html">Termos de Uso</a></nav></div></footer>
-<script defer src="./cliente-dev-config.js"></script><script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0/dist/umd/supabase.min.js"></script><script defer src="./kit-line-eight-review.js?v=20261113-geracao-media-v1"></script><script defer src="./admin-composition-core.js?v=20261117-composition-v1"></script><script defer src="./economia-solar-tarifas.js"></script><script defer src="./economia-solar-core.js"></script><script defer src="./admin-dev.js?v=20261126-tarifas-v2"></script>
+<script defer src="./cliente-dev-config.js"></script><script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0/dist/umd/supabase.min.js"></script><script defer src="./kit-line-eight-review.js?v=20261113-geracao-media-v1"></script><script defer src="./admin-composition-core.js?v=20261117-composition-v1"></script><script defer src="./economia-solar-tarifas.js"></script><script defer src="./economia-solar-core.js"></script><script defer src="./admin-dev.js?v=20261126-tarifas-v3"></script>
 </body></html>
