@@ -166,3 +166,32 @@ test('normalizacao decimal e versoes de homologacao nao alteram simulador comerc
  assert.equal(api.read(storage).active,null);assert.equal(api.read(storage).events.length,8);
  assert.deepEqual(core.calculate(v),baseline);
 });
+
+test('API central DEV rejeita ausencia de sessao, papel de cliente e banco indisponivel',async()=>{
+ const {handle}=await import('../functions/api/tarifas-dev.js');
+ const url='https://ww-solar-economia-dev.pages.dev/api/tarifas-dev',token='Bearer '+ 'a'.repeat(32);
+ const req=new Request(url,{headers:{Authorization:token}});
+ const env={TARIFF_AUTH_PUBLISHABLE_KEY:'test'};
+ const user={id:'11111111-1111-4111-8111-111111111111',app_metadata:{wwsolar_role:'admin'}};
+ const fake=u=>async()=>({ok:true,json:async()=>u});
+ assert.equal((await handle(new Request(url),env)).status,401);
+ assert.equal((await handle(req,env,{fetcher:fake({...user,app_metadata:{wwsolar_role:'client'},user_metadata:{wwsolar_role:'admin'}})})).status,403);
+ assert.equal((await handle(req,env,{fetcher:fake(user)})).status,503);
+ assert.equal((await handle(new Request('https://catalogo.wwplatform.com.br/api/tarifas-dev'),env)).status,404);
+ assert.equal((await handle(new Request(url,{method:'POST',headers:{Authorization:token,'Content-Type':'application/json',Origin:'https://example.com'}}),env)).status,403);
+ const fakeDB={prepare:()=>({all:async()=>({success:true,results:[]})})};
+ const ok=await handle(req,{...env,TARIFFS_DEV:fakeDB},{fetcher:fake(user)});assert.equal(ok.status,200);assert.equal((await ok.json()).state.revision,0);
+});
+test('API central valida comandos e reconstrução do histórico',async()=>{
+ const {command,replay}=await import('../functions/api/tarifas-dev.js');
+ const id='11111111-1111-4111-8111-111111111111',actor='22222222-2222-4222-8222-222222222222';
+ const draft={...policy.profiles['2026-11'],source:'Teste de homologacao'};
+ const c=command({action:'save',requestId:id,expectedRevision:0,draft});
+ assert.equal(c.id,id);
+ assert.throws(()=>command({action:'delete',requestId:id,expectedRevision:0}));
+ const rows=[{seq:1,expected_seq:0,action:'save',version_id:id,draft_json:JSON.stringify(c.draft),actor_id:actor,occurred_at:'2026-11-26'}];
+ assert.throws(()=>replay([...rows,{seq:2,expected_seq:1,action:'activate',version_id:id}]));
+ rows.push({seq:2,expected_seq:1,action:'approve',version_id:id,actor_id:actor},{seq:3,expected_seq:2,action:'activate',version_id:id,actor_id:actor});
+ assert.equal(replay(rows).active,id);assert.equal(replay(rows).revision,3);
+ assert.throws(()=>replay([...rows,{seq:4,expected_seq:1,action:'restore_default'}]));
+});
