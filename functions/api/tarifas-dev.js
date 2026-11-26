@@ -7,16 +7,16 @@ function reply(body,status=200){return new Response(JSON.stringify(body),{status
 async function authorize(request,env,fetcher){
  const bearer=request.headers.get('Authorization')??'';
  if(!/^Bearer [A-Za-z0-9._-]{20,8192}$/.test(bearer))return {status:401};
- if(!env.TARIFF_AUTH_PUBLISHABLE_KEY)return {status:503};
- const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),8000);
+ if(typeof env.TARIFF_AUTH_PUBLISHABLE_KEY!=='string'||!env.TARIFF_AUTH_PUBLISHABLE_KEY.trim())return {status:503,code:'AUTH_CONFIG'};
+ const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),12000);
  try{
-  const r=await fetcher(authUrl,{headers:{Authorization:bearer,apikey:env.TARIFF_AUTH_PUBLISHABLE_KEY},redirect:'error',signal:controller.signal});
+  const r=await fetcher(authUrl,{method:'GET',headers:{Authorization:bearer,apikey:env.TARIFF_AUTH_PUBLISHABLE_KEY.trim(),Accept:'application/json'},redirect:'manual',signal:controller.signal});
   if(r.status===401||r.status===403)return {status:401};
-  if(!r.ok)return {status:503};
-  const user=await r.json();
+  if(!r.ok)return {status:503,code:'AUTH_HTTP',httpStatus:r.status};
+  let user;try{user=await r.json();}catch{return {status:503,code:'AUTH_RESPONSE'};}
   if(!uuid.test(user?.id??'')||user.is_anonymous===true||user.app_metadata?.wwsolar_role!=='admin')return {status:403};
   return {actor:user.id};
- }catch{return {status:503};}finally{clearTimeout(timer);}
+ }catch(err){return {status:503,code:controller.signal.aborted||err?.name==='AbortError'?'AUTH_TIMEOUT':'AUTH_NETWORK'};}finally{clearTimeout(timer);}
 }
 export function replay(rows){
  const versions=new Map();let active=null,revision=0;
@@ -53,7 +53,7 @@ export async function handle(request,env,{fetcher=(...args)=>fetch(...args)}={})
  if(!['GET','POST'].includes(request.method))return reply({ok:false,code:'METHOD'},405);
  if(request.method==='POST'&&(request.headers.get('Origin')!==origin||!/^application\/json(?:;|$)/i.test(request.headers.get('Content-Type')??'')))return reply({ok:false,code:'ORIGIN_OR_CONTENT'},403);
  const auth=await authorize(request,env,fetcher);
- if(!auth.actor)return reply({ok:false,code:auth.status===503?'AUTH_UNAVAILABLE':'NOT_AUTHORIZED'},auth.status);
+ if(!auth.actor)return reply({ok:false,code:auth.status===503?(auth.code??'AUTH_UNAVAILABLE'):'NOT_AUTHORIZED',...(Number.isInteger(auth.httpStatus)?{httpStatus:auth.httpStatus}:{})},auth.status);
  const db=env.TARIFFS_DEV;
  if(!db)return reply({ok:false,code:'STORAGE_UNAVAILABLE'},503);
  try{
