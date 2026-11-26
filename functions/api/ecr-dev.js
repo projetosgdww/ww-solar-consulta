@@ -46,7 +46,7 @@ export function publicReference(s){
  if(!v)throw Error('invalid_active');
  const d=core.validateStudyDraft(v.draft);
  const {year,start,end,teScee,tusdScee,fioB,factor,regulatoryStatus,source}=d;
- return {revision:s.revision,profile:{year,start,end,teScee,tusdScee,fioB,factor,regulatoryStatus,source}};
+ return {revision:s.revision,profile:{year,start,end,teScee,tusdScee,fioB,factor,regulatoryStatus}};
 }
 export function command(body){
  if(!body||!['save','approve','activate','restore_default'].includes(body.action)||!uuid.test(body.requestId??'')||!Number.isSafeInteger(body.expectedRevision)||body.expectedRevision<0)throw Error('invalid_command');
