@@ -35,7 +35,7 @@ function showPanel(which){
  if(which==='orders')void loadOrders();
  if(which==='kits')void loadKitPreviews();
  if(which==='composer')void loadCompositionCatalog();
- if(which==='tariffs'){renderTariffs();renderOfficialTariffs();renderTariffSandbox();void loadCentralTariffs();}
+ if(which==='tariffs'){renderTariffs();renderOfficialTariffs();void loadCentralTariffs();}
 }
 async function init(){
  if(!/^https:\/\/[a-z0-9-]+\.supabase\.co$/.test(cfg.supabaseUrl||'')
@@ -451,7 +451,7 @@ function renderTariffs(){
  const fmt=x=>Number(x).toLocaleString('pt-BR',{minimumFractionDigits:5,maximumFractionDigits:5});
  for(const p of Object.values(core.policy.profiles)){
   const row=element('tr');
-  for(const x of [p.reference,fmt(p.te),fmt(p.tusd),fmt(p.fioB),String(p.icms*100)+'%',(p.pis*100).toFixed(2)+'%',(p.cofins*100).toFixed(2)+'%',p.flag,p.fioBSource,p.reference===core.policy.reference?'Ativa na simulação':'Histórica'])row.append(element('td',x));
+  for(const x of [p.reference,fmt(p.te),fmt(p.tusd),fmt(p.fioB),String(p.icms*100)+'%',(p.pis*100).toFixed(2)+'%',(p.cofins*100).toFixed(2)+'%',p.flag,p.fioBSource,p.reference===core.policy.reference?'Referência padrão':'Histórica'])row.append(element('td',x));
   tbody.append(row);
  }
 }
@@ -488,11 +488,11 @@ function invalidateTariffMonth(){
 }
 function renderTariffPreview(d){
  const out=$('admin-tariff-preview');out.replaceChildren();
- const core=window.WWSolarEconomia,active=core.policy.profiles[core.policy.reference];
+ const core=window.WWSolarEconomia,active=centralState?.versions.find(v=>v.id===centralState.active)?.draft??core.policy.profiles[core.policy.reference];
  const fmt=(n,max=12)=>Number(n).toLocaleString('pt-BR',{maximumFractionDigits:max});
  const rows=[['TE (R$/kWh)','te',1],['TUSD (R$/kWh)','tusd',1],['Fio B integral (R$/kWh)','fioB',1],['ICMS (%)','icms',100],['PIS (%)','pis',100],['COFINS (%)','cofins',100]];
  out.append(element('h3','Rascunho validado — '+d.reference));
- out.append(element('p','Comparação com a referência ativa: '+active.reference+'. Nenhum valor foi ativado.'));
+ out.append(element('p','Comparação com '+(centralState?'a referência atual do simulador DEV':'a referência padrão (banco não confirmado)')+': '+active.reference+'. Nenhum valor foi ativado.'));
  const wrapper=element('div');wrapper.className='admin-compose-table-scroll';
  const table=element('table');table.className='eco-tariff-table';const head=element('thead'),hr=element('tr');
  for(const t of ['Parâmetro','Ativo','Rascunho','Diferença'])hr.append(element('th',t));head.append(hr);table.append(head);
@@ -588,54 +588,6 @@ function applyOnlineTariff(){
   status.textContent='Rascunho preenchido com dados online da ANEEL. '+(d.taxes?'Tributos da mesma competência, conforme base local. ':'Tributos mensais pendentes. ')+(d.flag?'':'Bandeira pendente. ')+'Nenhuma tarifa ativa foi alterada.';
  }catch(err){status.textContent=err.message;}
 }
-// Local DEV rehearsal only: no database, no commercial activation and no trusted audit.
-function renderTariffSandbox(){
- const box=$('admin-tariff-sandbox'),out=$('admin-tariff-sandbox-list'),api=window.WWSolarTariffSandbox;
- if(!box||!ready||!api?.allowed(location.hostname))return;
- box.hidden=false;out.replaceChildren();
- try{
-  const s=api.read(localStorage),core=window.WWSolarEconomia;
-  const selected=s.versions.find(v=>v.id===s.active);
-  out.append(element('p','Referência de teste: '+(selected?selected.draft.reference+' — versão '+selected.id.slice(0,8):'padrão do código ('+core.policy.reference+')')));
-  const example={consumo:600,geracao:600,sim:30,gd:2,min:30,cip:40};
-  const r=selected?core.calculateDraft(example,selected.draft):core.calculate(example);
-  const brl=x=>x.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
-  out.append(element('p','Cenário de controle: 600 kWh de consumo e geração, 30% autoconsumo, GD II, monofásico, CIP R$ 40. Economia mensal estimada: '+brl(r.saving)+'.'));
-  const action=(label,kind,id,expected)=>{
-   const b=element('button',label);b.type='button';b.className='button button-outline';
-   b.addEventListener('click',()=>{if(!ready||!confirm(label+'? Apenas homologação local.'))return;try{api.change(localStorage,kind,{id,expected});renderTariffSandbox();}catch(err){$('admin-tariff-sandbox-status').textContent=err.message;}});return b;
-  };
-  if(selected)out.append(action('Restaurar referência padrão de teste','restoreDefault',null,s.active));
-  if(!s.versions.length)out.append(element('p','Nenhuma versão local salva.'));
-  const list=element('div');
-  for(const v of [...s.versions].reverse()){
-   const row=element('div');row.className='eco-sandbox-entry';
-   row.append(element('strong',v.draft.reference+' · '+v.id.slice(0,8)+' · '+(v.id===s.active?'Ativa no teste':v.state)));
-   row.append(element('p','TE '+v.draft.te+' | TUSD '+v.draft.tusd+' | Fio B '+v.draft.fioB+' | '+v.draft.flag));
-   row.append(element('p','Fonte: '+v.draft.source));
-   if(v.state==='salvo')row.append(action('Aprovar para teste','approve',v.id,s.active));
-   if(v.state==='aprovado'&&v.id!==s.active)row.append(action('Ativar / restaurar no teste','activate',v.id,s.active));
-   list.append(row);
-  }
-  out.append(list);
-  if(s.events.length){
-   out.append(element('h3','Histórico local de ações'));
-   const labels={save:'Salvou',approve:'Aprovou para teste',activate:'Ativou / restaurou no teste',restoreDefault:'Restaurou padrão'};
-   for(const e of s.events.slice(-20).reverse())out.append(element('p',new Date(e.at).toLocaleString('pt-BR')+' · '+labels[e.action]+' · '+(e.id?.slice(0,8)??'padrão')));
-  }
- }catch(err){out.textContent='Histórico local indisponível: '+err.message;}
-}
-function addSandboxSave(d,out){
- const api=window.WWSolarTariffSandbox;if(!api?.allowed(location.hostname))return;
- const b=element('button','Salvar versão para homologação local');b.type='button';b.className='button button-outline';
- b.addEventListener('click',()=>{if(!ready)return;try{
-  const current=tariffDraft();if(!current||JSON.stringify(current)!==JSON.stringify(d))throw Error('Valide novamente o rascunho.');
-  api.change(localStorage,'save',{draft:current,newId:crypto.randomUUID()});
-  b.disabled=true;$('admin-tariff-sandbox-status').textContent='Versão salva somente neste navegador. Nenhuma tarifa comercial foi alterada.';renderTariffSandbox();
- }catch(err){$('admin-tariff-status').textContent=err.message;}});
- out.append(b);
-}
-window.addEventListener('storage',e=>{if(e.key===window.WWSolarTariffSandbox?.key&&ready)renderTariffSandbox();});
 // D1 DEV: the server checks the authenticated role for each request.
 let centralState=null,centralBusy=false;
 const centralHost=()=>location.hostname==='ww-solar-economia-dev.pages.dev';
@@ -648,7 +600,7 @@ async function centralRequest(body){
  try{
   const r=await fetch('/api/tarifas-dev',{method:body?'POST':'GET',headers,body:body?JSON.stringify(body):undefined,signal:controller.signal,cache:'no-store'});
   const d=await r.json();
-  if(!r.ok||d?.ok!==true){const labels={AUTH_UNAVAILABLE:'Verificação administrativa indisponível.',AUTH_CONFIG:'Configuração de autenticação ausente no deploy.',AUTH_HTTP:'Supabase retornou erro HTTP na validação.',AUTH_TIMEOUT:'Tempo limite na validação Supabase.',AUTH_NETWORK:'Falha de conexão com Supabase.',AUTH_RESPONSE:'Resposta de autenticação inválida.',NOT_AUTHORIZED:'Acesso administrativo não autorizado.',STORAGE_UNAVAILABLE:'Banco DEV ainda não conectado.',REFRESH_REQUIRED:'Outra sessão alterou o histórico. Atualize antes de repetir.',WRITE_NOT_CONFIRMED_REFRESH:'Gravação não confirmada. Atualize o histórico antes de repetir.',INVALID_TRANSITION:'Operação não permitida para esta versão.'};throw Error((labels[d?.code]??'Operação não confirmada. Atualize o histórico antes de repetir.')+(Number.isInteger(d?.httpStatus)?' HTTP '+d.httpStatus:''));}
+  if(!r.ok||d?.ok!==true){const labels={AUTH_UNAVAILABLE:'Verificação administrativa indisponível.',AUTH_CONFIG:'Configuração de autenticação ausente no deploy.',AUTH_HTTP:'Supabase retornou erro HTTP na validação.',AUTH_TIMEOUT:'Tempo limite na validação Supabase.',AUTH_NETWORK:'Falha de conexão com Supabase.',AUTH_RESPONSE:'Resposta de autenticação inválida.',NOT_AUTHORIZED:'Acesso administrativo não autorizado.',STORAGE_UNAVAILABLE:'Banco DEV ainda não conectado.',REFRESH_REQUIRED:'Outra sessão alterou o histórico. Atualize antes de repetir.',WRITE_NOT_CONFIRMED_REFRESH:'Gravação não confirmada. Atualize o histórico antes de repetir.',INVALID_TRANSITION:'Operação não permitida para esta versão.',DUPLICATE_TARIFF:'Já existe uma versão com os mesmos parâmetros. Utilize a versão cadastrada.'};throw Error((labels[d?.code]??'Operação não confirmada. Atualize o histórico antes de repetir.')+(Number.isInteger(d?.httpStatus)?' HTTP '+d.httpStatus:''));}
   if(!Number.isSafeInteger(d.state?.revision)||!Array.isArray(d.state?.versions)||!Array.isArray(d.state?.events))throw Error('Resposta inválida do banco DEV.');
   return d.state;
  }finally{clearTimeout(timer);}
@@ -657,13 +609,13 @@ function centralStatus(t){$('admin-tariff-central-status').textContent=t;}
 async function loadCentralTariffs(){
  const section=$('admin-tariff-central');if(!ready||!centralHost()||!section||centralBusy)return;
  section.hidden=false;centralBusy=true;centralState=null;renderCentralTariffs();centralStatus('Consultando banco DEV...');
- try{centralState=await centralRequest();centralStatus('Banco DEV conectado. Referência comercial não alterada.');}
+ try{centralState=await centralRequest();centralStatus('Banco DEV conectado. A referência ativa é utilizada somente pelo simulador DEV.');}
  catch(err){centralStatus(err.message);}
  finally{centralBusy=false;renderCentralTariffs();}
 }
 async function centralAction(action,id,draft,expected){
  if(!ready||!centralHost()||centralBusy||!centralState||centralState.revision!==expected)return;
- if(!confirm('Confirmar operação no banco de homologação DEV? Não altera a tarifa comercial.'))return;
+ if(!confirm('Confirmar operação no banco DEV? Ativar ou restaurar muda a referência do simulador DEV, não da produção.'))return;
  centralBusy=true;renderCentralTariffs();centralStatus('Registrando no banco DEV...');
  try{centralState=await centralRequest({action,id,draft,expectedRevision:expected,requestId:crypto.randomUUID()});centralStatus('Operação confirmada pelo servidor.');}
  catch(err){centralState=null;centralStatus(err.message);}
@@ -673,12 +625,12 @@ function renderCentralTariffs(){
  const out=$('admin-tariff-central-list');if(!out)return;out.replaceChildren();
  const s=centralState;if(!s||centralBusy)return;
  const selected=s.versions.find(v=>v.id===s.active);
- out.append(element('p','Referência central de teste: '+(selected?selected.draft.reference+' · '+selected.id.slice(0,8):'padrão do código')));
+ out.append(element('p','Referência ativa do simulador DEV: '+(selected?selected.draft.reference+' · '+selected.id.slice(0,8):'padrão do código')));
  if(selected)out.append(button('Restaurar padrão central',()=>void centralAction('restore_default',null,null,s.revision)));
  if(!s.versions.length)out.append(element('p','Nenhuma versão central salva.'));
  for(const v of [...s.versions].reverse()){
   const row=element('div',undefined,'eco-sandbox-entry');
-  row.append(element('strong',v.draft.reference+' · '+v.id.slice(0,8)+' · '+(s.active===v.id?'Ativa no teste central':v.state)));
+  row.append(element('strong',v.draft.reference+' · '+v.id.slice(0,8)+' · '+(s.active===v.id?'Ativa no simulador DEV':v.state)));
   row.append(element('p','TE '+v.draft.te+' | TUSD '+v.draft.tusd+' | Fio B '+v.draft.fioB+' | '+v.draft.flag));
   row.append(element('p','Fonte: '+v.draft.source));
   if(v.state==='salvo')row.append(button('Aprovar no banco DEV',()=>void centralAction('approve',v.id,null,s.revision)));
@@ -693,9 +645,10 @@ function addCentralSave(d,out){
  if(!centralHost())return;
  const b=button('Salvar versão no banco DEV',()=>{try{
   if(!centralState||centralBusy)throw Error('Consulte o banco DEV antes de salvar.');
+  if(centralState.versions.some(v=>['reference','te','tusd','fioB','icms','pis','cofins','flag'].every(k=>v.draft[k]===d[k])))throw Error('Já existe uma versão com os mesmos parâmetros. Utilize a versão cadastrada.');
   const current=tariffDraft();if(!current||JSON.stringify(current)!==JSON.stringify(d))throw Error('Valide novamente o rascunho.');
   void centralAction('save',null,current,centralState.revision);
- }catch(err){centralStatus(err.message);}});
+ }catch(err){centralStatus(err.message);$('admin-tariff-status').textContent=err.message;}});
  out.append(b);
 }
 $('admin-tariff-central-refresh')?.addEventListener('click',()=>void loadCentralTariffs());
@@ -714,7 +667,7 @@ $('admin-tab-tariffs')?.addEventListener('click',()=>showPanel('tariffs'));
 $('admin-tariff-draft')?.addEventListener('submit',ev=>{
  ev.preventDefault();if(!ready)return;
  const out=$('admin-tariff-preview'),status=$('admin-tariff-status');out.textContent='';out.hidden=true;
- try{const d=tariffDraft();if(!d)return;renderTariffPreview(d);addSandboxSave(d,out);addCentralSave(d,out);status.textContent='Rascunho validado. Nenhuma tarifa ativa foi alterada.';}
+ try{const d=tariffDraft();if(!d)return;renderTariffPreview(d);addCentralSave(d,out);status.textContent='Rascunho validado. Nenhuma tarifa ativa foi alterada.';}
  catch(err){status.textContent=err.message;}
 });
 $('admin-tariff-draft')?.addEventListener('input',()=>{if(!ready)return;$('admin-tariff-preview').textContent='';$('admin-tariff-preview').hidden=true;$('admin-tariff-status').textContent='Valide novamente apos editar.';});
