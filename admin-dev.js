@@ -467,7 +467,7 @@ function renderOfficialTariffs(){
  }
 }
 // Tarifas: o rascunho pertence a uma competencia consultada explicitamente.
-let tariffConsultedMonth=null;
+let tariffConsultedMonth=null,tariffOnlineResult=null,tariffRequestVersion=0;
 const tariffFields=['te','tusd','fioB','icms','pis','cofins','flag','source'];
 function clearTariffFields(form){
  for(const k of tariffFields)form.elements[k].value='';
@@ -482,7 +482,7 @@ function setTariffActions(enabled){
 function invalidateTariffMonth(){
  const form=$('admin-tariff-draft');
  if(!form)return;
- tariffConsultedMonth=null;clearTariffFields(form);setTariffActions(false);
+ tariffRequestVersion++;tariffOnlineResult=null;tariffConsultedMonth=null;clearTariffFields(form);setTariffActions(false);
  if($('admin-tariff-online-result'))$('admin-tariff-online-result').textContent='';
  $('admin-tariff-status').textContent='Competência alterada. Consulte a base novamente antes de validar.';
 }
@@ -515,6 +515,7 @@ $('admin-tariff-lookup')?.addEventListener('click',()=>{
  const form=$('admin-tariff-draft'),status=$('admin-tariff-status');
  if(!form.elements.reference.reportValidity())return;
  try{
+  tariffRequestVersion++;tariffOnlineResult=null;$('admin-tariff-online-result').textContent='';
   tariffConsultedMonth=null;setTariffActions(false);clearTariffFields(form);
   const r=window.WWSolarEconomia.policy.lookupMonth(form.elements.reference.value);
   if(r.period){
@@ -536,7 +537,8 @@ $('admin-tariff-online')?.addEventListener('click',async()=>{
  if(!ready||!window.WWSolarAneel)return;
  const form=$('admin-tariff-draft'),btn=$('admin-tariff-online'),out=$('admin-tariff-online-result');
  if(!form.elements.reference.reportValidity())return;
- const month=form.elements.reference.value;
+ const month=form.elements.reference.value,version=++tariffRequestVersion;
+ tariffOnlineResult=null;
  btn.disabled=true;out.textContent='Consultando a ANEEL. Nenhuma tarifa será alterada.';
  try{
   const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),25000);
@@ -548,7 +550,7 @@ $('admin-tariff-online')?.addEventListener('click',async()=>{
   if(!response.ok||payload?.ok!==true){const err=new Error(payload?.code??'INVALID_RESPONSE');err.source=payload?.source;err.httpStatus=payload?.httpStatus;throw err;}
   const r=payload.result;
   if(!r||r.month!==month||!Array.isArray(r.periods))throw new Error('INVALID_RESPONSE');
-  if(form.elements.reference.value!==month){out.textContent='';return;}
+  if(version!==tariffRequestVersion||form.elements.reference.value!==month)return;
   out.replaceChildren();
   out.append(element('h3','Consulta online experimental — '+month));
   const local=window.WWSolarEconomia.policy.lookupMonth(month);
@@ -563,10 +565,28 @@ $('admin-tariff-online')?.addEventListener('click',async()=>{
    out.append(element('p',r.periods.length>1?'Mais de uma vigência no mês; revisão do ciclo necessária.':'Sem vigência completa na fonte consultada.'));
   }
   out.append(element('p',r.flag?'Bandeira: '+r.flag.name+' · R$ '+r.flag.rate.toLocaleString('pt-BR',{maximumFractionDigits:6})+'/kWh':'Bandeira sem registro para o mês.'));
-  out.append(element('p','Consulta informativa. Tributos não são obtidos por esta consulta. A base local e o rascunho permanecem inalterados.'));
- }catch(err){if(form.elements.reference.value===month){const labels={UPSTREAM_TIMEOUT:'Tempo limite da ANEEL',UPSTREAM_HTTP:'Resposta HTTP da ANEEL indisponível',UPSTREAM_DATA:'Dados da ANEEL incompletos ou inconsistentes',UPSTREAM_UNAVAILABLE:'Comunicação com a ANEEL indisponível',INVALID_MONTH:'Consulta disponível somente para 2026',DEV_ONLY:'Consulta restrita ao DEV',INVALID_RESPONSE:'Resposta inválida do intermediário'};const detail=labels[err.message]??'Falha na comunicação com o intermediário';const stage={componentes:'Componentes tarifárias',bandeiras:'Bandeiras tarifárias',validacao:'Validação dos dados',consulta:'Consulta'}[err.source];const http=Number.isInteger(err.httpStatus)?' (HTTP '+err.httpStatus+')':'';out.textContent=(stage?stage+' — ':'')+detail+http+'. Utilize a base importada. Nenhuma tarifa foi alterada.';}}
+  out.append(element('p','Consulta informativa. Tributos não são obtidos pela ANEEL nesta consulta. A base local e o rascunho permanecem inalterados.'));
+  if(r.period){
+   tariffOnlineResult={month,result:r,queriedAt:payload.queriedAt};
+   const apply=element('button','Usar dados online no rascunho');apply.type='button';apply.className='button button-outline';apply.addEventListener('click',applyOnlineTariff);out.append(apply);
+  }
+ }catch(err){if(version===tariffRequestVersion&&form.elements.reference.value===month){const labels={UPSTREAM_TIMEOUT:'Tempo limite da ANEEL',UPSTREAM_HTTP:'Resposta HTTP da ANEEL indisponível',UPSTREAM_DATA:'Dados da ANEEL incompletos ou inconsistentes',UPSTREAM_UNAVAILABLE:'Comunicação com a ANEEL indisponível',INVALID_MONTH:'Consulta disponível somente para 2026',DEV_ONLY:'Consulta restrita ao DEV',INVALID_RESPONSE:'Resposta inválida do intermediário'};const detail=labels[err.message]??'Falha na comunicação com o intermediário';const stage={componentes:'Componentes tarifárias',bandeiras:'Bandeiras tarifárias',validacao:'Validação dos dados',consulta:'Consulta'}[err.source];const http=Number.isInteger(err.httpStatus)?' (HTTP '+err.httpStatus+')':'';out.textContent=(stage?stage+' — ':'')+detail+http+'. Utilize a base importada. Nenhuma tarifa foi alterada.';}}
  finally{btn.disabled=false;}
 });
+function applyOnlineTariff(){
+ if(!ready||!tariffOnlineResult)return;
+ const form=$('admin-tariff-draft'),status=$('admin-tariff-status'),snapshot=tariffOnlineResult;
+ if(snapshot.month!==form.elements.reference.value)return;
+ try{
+  const local=window.WWSolarEconomia.policy.lookupMonth(snapshot.month);
+  const d=window.WWSolarEconomia.prepareOnlineDraft(snapshot.result,local.taxes,snapshot.queriedAt);
+  clearTariffFields(form);
+  for(const k of ['te','tusd','fioB','flag','source'])if(d[k]!=null)form.elements[k].value=String(d[k]);
+  if(d.taxes)for(const k of ['icms','pis','cofins'])form.elements[k].value=String(Number((d.taxes[k]*100).toFixed(4)));
+  tariffConsultedMonth=snapshot.month;setTariffActions(true);
+  status.textContent='Rascunho preenchido com dados online da ANEEL. '+(d.taxes?'Tributos da mesma competência, conforme base local. ':'Tributos mensais pendentes. ')+(d.flag?'':'Bandeira pendente. ')+'Nenhuma tarifa ativa foi alterada.';
+ }catch(err){status.textContent=err.message;}
+}
 function tariffDraft(){
  if(!ready||!window.WWSolarEconomia)return null;
  const form=$('admin-tariff-draft');
