@@ -35,7 +35,7 @@ function showPanel(which){
  if(which==='orders')void loadOrders();
  if(which==='kits')void loadKitPreviews();
  if(which==='composer')void loadCompositionCatalog();
- if(which==='tariffs'){renderTariffs();renderOfficialTariffs();void loadCentralTariffs();}
+ if(which==='tariffs'){renderTariffs();renderOfficialTariffs();void loadCentralTariffs();void loadEcr();}
 }
 async function init(){
  if(!/^https:\/\/[a-z0-9-]+\.supabase\.co$/.test(cfg.supabaseUrl||'')
@@ -676,5 +676,48 @@ $('admin-tariff-copy')?.addEventListener('click',async()=>{
  try{const d=tariffDraft();if(!d)return;await navigator.clipboard.writeText(JSON.stringify(d,null,2));$('admin-tariff-status').textContent='Rascunho copiado para revisao. Nao publicado.';}
  catch(err){$('admin-tariff-status').textContent='Nao foi possivel copiar: '+err.message;}
 });
+
+let ecrState=null,ecrBusy=false;
+const ecrStatus=t=>$('admin-ecr-status').textContent=t;
+async function loadEcr(body){
+ if(!ready||!centralHost()||ecrBusy)return;
+ if(body&&!confirm('Confirmar esta operação no cenário ECR DEV? Não altera faturamento oficial.'))return;
+ ecrBusy=true;$('admin-ecr-central').hidden=false;$('admin-ecr-save').disabled=true;$('admin-ecr-refresh').disabled=true;
+ $('admin-ecr-list').replaceChildren();ecrStatus('Consultando banco ECR DEV...');
+ const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),15000);
+ try{
+  const {data,error}=await db.auth.getSession();if(error||!data?.session?.access_token)throw Error('Sessão expirada.');
+  const headers={Authorization:'Bearer '+data.session.access_token};if(body)headers['Content-Type']='application/json';
+  const r=await fetch('/api/ecr-dev',{method:body?'POST':'GET',headers,body:body?JSON.stringify(body):undefined,cache:'no-store',signal:controller.signal});
+  const result=await r.json();if(!r.ok||result?.ok!==true)throw Error('Operação não confirmada ('+(result?.code??r.status)+'). Atualize o histórico antes de repetir.');
+  if(!Number.isSafeInteger(result.state?.revision)||!Array.isArray(result.state?.versions)||!Array.isArray(result.state?.events))throw Error('Resposta inválida.');
+  ecrState=result.state;ecrStatus('Banco ECR DEV conectado · revisão '+ecrState.revision+'.');
+ }catch(e){ecrState=null;ecrStatus(e.message);}
+ finally{clearTimeout(timer);ecrBusy=false;$('admin-ecr-save').disabled=!ecrState;$('admin-ecr-refresh').disabled=false;renderEcrAdmin();}
+}
+function ecrAction(action,id,draft){if(!ecrState||ecrBusy)return;void loadEcr({action,id,draft,expectedRevision:ecrState.revision,requestId:crypto.randomUUID()});}
+function renderEcrAdmin(){
+ const out=$('admin-ecr-list');out.replaceChildren();if(!ecrState||ecrBusy)return;
+ const s=ecrState;out.append(element('p','Cenário de estudo ativo: '+(s.active?s.active.slice(0,8):'referência padrão (52,4%, proposta)')));
+ if(s.active)out.append(button('Restaurar padrão ECR',()=>ecrAction('restore_default',null,null)));
+ for(const v of [...s.versions].reverse()){
+  const d=v.draft,row=element('div',undefined,'eco-sandbox-entry');
+  row.append(element('strong',v.id.slice(0,8)+' · '+(v.id===s.active?'Ativo no estudo DEV':v.state)+' · '+d.regulatoryStatus+' (declarado)'));
+  row.append(element('p','Fator '+(d.factor*100).toLocaleString('pt-BR')+'% | TE SCEE '+d.teScee+' | TUSD SCEE '+d.tusdScee+' | Fio B '+d.fioB+' | '+d.start+' a '+d.end));
+  row.append(element('p','Fonte: '+d.source));
+  if(v.state==='salvo')row.append(button('Aprovar estudo',()=>ecrAction('approve',v.id,null)));
+  if(v.state==='aprovado'&&v.id!==s.active)row.append(button('Ativar estudo DEV',()=>ecrAction('activate',v.id,null)));
+  out.append(row);
+ }
+ if(s.events.length){out.append(element('h3','Histórico ECR'));for(const e of [...s.events].reverse())out.append(element('p',date(e.at)+' · '+e.action+' · '+(e.id?.slice(0,8)??'padrão')));}
+}
+$('admin-ecr-refresh')?.addEventListener('click',()=>void loadEcr());
+$('admin-ecr-draft')?.addEventListener('submit',ev=>{
+ ev.preventDefault();if(!ready||!ecrState||ecrBusy)return;
+ try{const d=Object.fromEntries(new FormData(ev.currentTarget)),ref=window.WWSolarECR.reference;
+ const draft=window.WWSolarECR.validateStudyDraft({year:2027,start:ref.start,end:ref.end,teScee:Number(d.teScee),tusdScee:Number(d.tusdScee),fioB:Number(d.fioB),factor:Number(d.factor)/100,regulatoryStatus:d.regulatoryStatus,source:d.source});
+ ecrAction('save',null,draft);}catch(e){ecrStatus(e.message);}
+});
+
 void init();
 })();
