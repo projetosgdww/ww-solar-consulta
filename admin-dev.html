@@ -9,6 +9,7 @@
   <button id="admin-tab-orders" type="button" aria-pressed="false" data-admin-panel="orders"><span>📋</span><strong>Pedidos</strong><small>Histórico e negociações</small></button>
   <button id="admin-tab-kits" type="button" aria-pressed="false" data-admin-panel="kits"><span>☀️</span><strong>Kits em revisão</strong><small>30 composições em revisão</small></button>
   <button id="admin-tab-composer" type="button" aria-pressed="false" data-admin-panel="composer"><span aria-hidden="true">🧩</span><strong>Composição</strong><small>Montar kits com preços cadastrados</small></button>
+  <button id="admin-tab-tariffs" type="button" aria-pressed="false" data-admin-panel="tariffs"><span aria-hidden="true">⚡</span><strong>Tarifas</strong><small>Referências e revisão</small></button>
 </div>
 <section class="client-login admin-clients-panel" id="admin-clients-panel">
 <h1>Liberação de <em>clientes.</em></h1><p>Informe apenas o e-mail do cliente. Para novos acessos, o sistema gera uma <strong>senha temporária</strong>, mostrada uma única vez. No primeiro login, o cliente deverá substituí-la por uma senha pessoal de no mínimo 12 caracteres.</p><p>Perdeu a senha de um cliente? O cliente pode usar <strong>Esqueci minha senha</strong> para receber um link de recuperação por e-mail. A opção <strong>Reemitir senha</strong> permanece como procedimento administrativo de contingência, sem excluir a conta ou o carrinho.</p>
@@ -73,7 +74,24 @@
   <p class="admin-compose-disclaimer">Composição interna para conferência. Não registra pedido, não publica kits e não altera os preços cadastrados. Valores de custo sujeitos à atualização do fornecedor.</p>
  </div>
 </section>
+<section id="admin-tariffs-panel" class="admin-orders-panel" hidden aria-label="Referências tarifárias">
+ <div class="section-label">WW SOLAR / ECONOMIA SOLAR</div><h2>Gestão tarifária</h2>
+ <p class="client-muted">Enel Ceará · B1 convencional. Referências observadas em faturas; Fio B integral inferido. Não constituem cadastro oficial completo. A referência ativa só muda após revisão técnica e publicação de código.</p>
+ <div class="admin-compose-table-scroll"><table class="admin-compose-table"><thead><tr><th scope="col">Competência</th><th scope="col">TE R$/kWh</th><th scope="col">TUSD R$/kWh</th><th scope="col">Fio B R$/kWh</th><th scope="col">ICMS</th><th scope="col">PIS</th><th scope="col">COFINS</th><th scope="col">Bandeira</th><th scope="col">Situação</th></tr></thead><tbody id="admin-tariffs-rows"></tbody></table></div>
+ <h3>Preparar nova competência</h3><p class="client-muted">Rascunho local para revisão. Não altera a tarifa ativa, não grava no banco e não publica automaticamente. Não inclua dados pessoais de faturas.</p>
+ <form class="client-form" id="admin-tariff-draft"><label>Competência<input name="reference" type="month" required></label>
+ <label>TE (R$/kWh)<input name="te" type="number" step="any" min="0" required></label>
+<label>TUSD (R$/kWh)<input name="tusd" type="number" step="any" min="0" required></label>
+<label>Fio B integral (R$/kWh)<input name="fioB" type="number" step="any" min="0" required></label>
+<label>ICMS (%)<input name="icms" type="number" step="any" min="0" required></label>
+<label>PIS (%)<input name="pis" type="number" step="any" min="0" required></label>
+<label>COFINS (%)<input name="cofins" type="number" step="any" min="0" required></label>
+ <label>Bandeira<select name="flag"><option value="verde">Verde</option><option value="amarela">Amarela</option><option value="vermelha1">Vermelha 1</option><option value="vermelha2">Vermelha 2</option></select></label>
+ <label>Fonte documental (sem dados pessoais)<input name="source" minlength="5" maxlength="300" required></label>
+ <button class="button button-accent" type="submit">Validar rascunho</button><button class="button button-outline" id="admin-tariff-copy" type="button">Copiar para revisão</button></form>
+ <p id="admin-tariff-status" role="status" class="client-status"></p><pre id="admin-tariff-preview" hidden style="white-space:pre-wrap;overflow-wrap:anywhere"></pre>
+ </section>
 </main>
 <footer class="footer"><div class="shell footer-inner"><span><strong>WW</strong>SOLAR</span><span>Administração restrita</span><nav class="legal-footer-links" aria-label="Documentos legais"><a href="./privacidade.html">Política de Privacidade</a><a href="./termos.html">Termos de Uso</a></nav></div></footer>
-<script defer src="./cliente-dev-config.js"></script><script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0/dist/umd/supabase.min.js"></script><script defer src="./kit-line-eight-review.js?v=20261113-geracao-media-v1"></script><script defer src="./admin-composition-core.js?v=20261117-composition-v1"></script><script defer src="./admin-dev.js?v=20261117-composition-v1"></script>
+<script defer src="./cliente-dev-config.js"></script><script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0/dist/umd/supabase.min.js"></script><script defer src="./kit-line-eight-review.js?v=20261113-geracao-media-v1"></script><script defer src="./admin-composition-core.js?v=20261117-composition-v1"></script><script defer src="./economia-solar-tarifas.js"></script><script defer src="./economia-solar-core.js"></script><script defer src="./admin-dev.js?v=20261126-tarifas-v1"></script>
 </body></html>
