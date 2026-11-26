@@ -35,7 +35,7 @@ function showPanel(which){
  if(which==='orders')void loadOrders();
  if(which==='kits')void loadKitPreviews();
  if(which==='composer')void loadCompositionCatalog();
- if(which==='tariffs')renderTariffs();
+ if(which==='tariffs'){renderTariffs();renderOfficialTariffs();}
 }
 async function init(){
  if(!/^https:\/\/[a-z0-9-]+\.supabase\.co$/.test(cfg.supabaseUrl||'')
@@ -451,10 +451,43 @@ function renderTariffs(){
  const fmt=x=>Number(x).toLocaleString('pt-BR',{minimumFractionDigits:5,maximumFractionDigits:5});
  for(const p of Object.values(core.policy.profiles)){
   const row=element('tr');
-  for(const x of [p.reference,fmt(p.te),fmt(p.tusd),fmt(p.fioB),String(p.icms*100)+'%',(p.pis*100).toFixed(2)+'%',(p.cofins*100).toFixed(2)+'%',p.flag,p.reference===core.policy.reference?'Ativa na simulacao':'Historica'])row.append(element('td',x));
+  for(const x of [p.reference,fmt(p.te),fmt(p.tusd),fmt(p.fioB),String(p.icms*100)+'%',(p.pis*100).toFixed(2)+'%',(p.cofins*100).toFixed(2)+'%',p.flag,p.fioBSource,p.reference===core.policy.reference?'Ativa na simulação':'Histórica'])row.append(element('td',x));
   tbody.append(row);
  }
 }
+function renderOfficialTariffs(){
+ if(!ready||!$('admin-official-rows')||!window.WWSolarEconomia)return;
+ const tbody=$('admin-official-rows');tbody.replaceChildren();
+ const fmt=x=>x===null?'Não confirmado':Number(x).toLocaleString('pt-BR',{minimumFractionDigits:5,maximumFractionDigits:9});
+ const dateBR=x=>x.split('-').reverse().join('/');
+ for(const p of window.WWSolarEconomia.policy.periods){
+  const row=element('tr');
+  for(const x of [dateBR(p.start),dateBR(p.end),fmt(p.te),fmt(p.tusd),fmt(p.fioB),p.reh])row.append(element('td',x));
+  tbody.append(row);
+ }
+}
+$('admin-tariff-lookup')?.addEventListener('click',()=>{
+ if(!ready||!window.WWSolarEconomia)return;
+ const form=$('admin-tariff-draft'),status=$('admin-tariff-status');
+ if(!form.elements.reference.reportValidity())return;
+ try{
+  const r=window.WWSolarEconomia.policy.lookupMonth(form.elements.reference.value);
+  for(const key of ['te','tusd','fioB','icms','pis','cofins','flag','source'])form.elements[key].value='';
+  $('admin-tariff-preview').textContent='';$('admin-tariff-preview').hidden=true;
+  if(r.period){
+   for(const k of ['te','tusd','fioB'])if(r.period[k]!==null)form.elements[k].value=String(r.period[k]);
+   form.elements.source.value='CSV ANEEL 26/11/2026; REH '+r.period.reh+(r.taxes?'; tributos observados em fatura da competência':'');
+  }
+  if(r.flag)form.elements.flag.value=r.flag;
+  if(r.taxes)for(const k of ['icms','pis','cofins'])form.elements[k].value=String(Number((r.taxes[k]*100).toFixed(4)));
+  const missing=[];
+  if(!r.period)missing.push(r.reason+' — conferir datas do ciclo');
+  else if(r.period.fioB===null)missing.push('Fio B integral não confirmado');
+  if(!r.flag)missing.push('bandeira sem registro');
+  if(!r.taxes)missing.push('tributos mensais pendentes');
+  status.textContent=missing.length?'Consulta parcial: '+missing.join('; ')+'. Campos pendentes ficam vazios.':'Referências encontradas. Confira e valide o rascunho. Nada foi publicado.';
+ }catch(err){status.textContent=err.message;}
+});
 function tariffDraft(){
  if(!ready||!window.WWSolarEconomia)return null;
  const form=$('admin-tariff-draft');
