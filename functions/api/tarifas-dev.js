@@ -34,10 +34,19 @@ export function replay(rows){
  }
  return {revision,active,versions:[...versions.values()],events:rows.slice(-50).map(e=>({seq:e.seq,action:e.action,id:e.version_id,actor:e.actor_id,at:e.occurred_at}))};
 }
-async function state(db){
+export async function state(db){
  const r=await db.prepare('SELECT seq, action, version_id, expected_seq, actor_id, occurred_at, draft_json FROM tariff_events ORDER BY seq LIMIT 1001').all();
  if(!r.success||r.results.length>1000)throw Error('history_limit');
  return replay(r.results);
+}
+export function sameTariff(a,b){return ['reference','te','tusd','fioB','icms','pis','cofins','flag'].every(k=>a[k]===b[k]);}
+export function publicReference(s){
+ if(s.active===null)return {revision:s.revision,profile:null};
+ const v=s.versions.find(x=>x.id===s.active&&x.state==='aprovado');
+ if(!v)throw Error('invalid_active');
+ const d=core.validateTariffDraft(v.draft);
+ const {reference,te,tusd,fioB,icms,pis,cofins,flag}=d;
+ return {revision:s.revision,profile:{reference,te,tusd,fioB,icms,pis,cofins,flag}};
 }
 export function command(body){
  if(!body||!['save','approve','activate','restore_default'].includes(body.action)||!uuid.test(body.requestId??'')||!Number.isSafeInteger(body.expectedRevision)||body.expectedRevision<0)throw Error('invalid_command');
@@ -66,6 +75,7 @@ export async function handle(request,env,{fetcher=(...args)=>fetch(...args)}={})
   let c;try{c=command(JSON.parse(new TextDecoder().decode(buffer)));}catch{return reply({ok:false,code:'INVALID_COMMAND'},400);}
   const s=await state(db);
   if(s.revision!==c.expectedRevision||s.revision>=1000)return reply({ok:false,code:'REFRESH_REQUIRED'},409);
+  if(c.action==='save'&&s.versions.some(x=>sameTariff(x.draft,c.draft)))return reply({ok:false,code:'DUPLICATE_TARIFF'},409);
   if(c.action==='save'&&s.versions.length>=200)return reply({ok:false,code:'VERSION_LIMIT'},409);
   const v=s.versions.find(x=>x.id===c.id);
   if((c.action==='approve'&&v?.state!=='salvo')||(c.action==='activate'&&(v?.state!=='aprovado'||s.active===c.id))||(c.action==='restore_default'&&s.active===null))return reply({ok:false,code:'INVALID_TRANSITION'},409);
