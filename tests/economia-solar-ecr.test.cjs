@@ -30,3 +30,33 @@ test('estudo separado da fatura e da configuracao tarifaria central',()=>{
  assert.match(html,/id="eco-ecr-study" hidden/);assert.match(html,/Não integra a fatura estimada acima/);assert.match(js,/compensated:r\.compensated/);
  assert.doesNotMatch(js,/r\.after\s*\+=|r\.saving\s*-=|r\.after\s*=.*ecr/);
 });
+
+test('comparacao financeira isolada conserva motor base',()=>{
+ const base=C.calculate(v,2027),e=run({compensated:base.compensated}),copy=JSON.stringify(base);
+ const s=E.sensitivity(base,e.ecr,15000);
+ assert.equal(s.after.toFixed(2),'239.03');assert.equal(s.saving.toFixed(2),'341.72');assert.equal(s.payback.toFixed(2),'3.66');
+ assert.equal(JSON.stringify(base),copy);assert.equal(E.sensitivity(base,base.saving,15000).payback,null);
+});
+test('gestao ECR: validacao, revisao, aprovacao, restauracao e leitura publica sem auditoria',async()=>{
+ const {command,replay,publicReference,handle}=await import('../functions/api/ecr-dev.js');
+ const {handle:read}=await import('../functions/api/ecr-ativo-dev.js');
+ const id='11111111-1111-4111-8111-111111111111',actor='22222222-2222-4222-8222-222222222222';
+ const draft={...E.reference,regulatoryStatus:'proposta',source:'NT 192/2026-STR/ANEEL; Despacho 3324/2026'};
+ const c=command({action:'save',requestId:id,expectedRevision:0,draft});
+ assert.equal(c.draft.teScee,-.02802);assert.equal(c.draft.factor,.524);
+ assert.throws(()=>E.validateStudyDraft({...draft,factor:1.01}));assert.throws(()=>E.validateStudyDraft({...draft,year:2028}));
+ assert.throws(()=>E.validateStudyDraft({...draft,regulatoryStatus:'homologado',source:'Apenas uma proposta'}));
+ const rows=[{seq:1,expected_seq:0,action:'save',version_id:id,draft_json:JSON.stringify(c.draft),actor_id:actor,occurred_at:'2026-11-26'}];
+ assert.throws(()=>replay([...rows,{seq:2,expected_seq:1,action:'activate',version_id:id}]));
+ rows.push({seq:2,expected_seq:1,action:'approve',version_id:id,actor_id:actor},{seq:3,expected_seq:2,action:'activate',version_id:id,actor_id:actor});
+ const p=publicReference(replay(rows));assert.equal(p.revision,3);assert.equal(p.profile.factor,.524);assert.equal(p.profile.regulatoryStatus,'proposta');assert.equal(Object.hasOwn(p.profile,'source'),false);assert.equal(JSON.stringify(p).includes(actor),false);
+ const origin='https://ww-solar-economia-dev.pages.dev',env={TARIFF_AUTH_PUBLISHABLE_KEY:'test',TARIFFS_DEV:{prepare:sql=>{assert.match(sql,/FROM ecr_events/);return {all:async()=>({success:true,results:rows})};}}};
+ assert.equal((await handle(new Request(origin+'/api/ecr-dev'),env)).status,401);
+ const req=new Request(origin+'/api/ecr-dev',{headers:{Authorization:'Bearer '+'a'.repeat(32)}});
+ assert.equal((await handle(req,env,{fetcher:async()=>({ok:true,json:async()=>({id:actor,app_metadata:{wwsolar_role:'client'}})})})).status,403);
+ assert.equal((await read(new Request(origin+'/api/ecr-ativo-dev',{method:'POST'}),env)).status,405);
+ assert.equal((await read(new Request('https://catalogo.wwplatform.com.br/api/ecr-ativo-dev'),env)).status,404);
+ assert.deepEqual(await (await read(new Request(origin+'/api/ecr-ativo-dev'),env)).json(),{ok:true,...p});
+ assert.throws(()=>replay([...rows,{seq:4,expected_seq:1,action:'restore_default'}]));
+ rows.push({seq:4,expected_seq:3,action:'restore_default',actor_id:actor});assert.equal(publicReference(replay(rows)).profile,null);
+});
