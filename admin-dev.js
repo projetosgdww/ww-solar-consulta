@@ -466,14 +466,56 @@ function renderOfficialTariffs(){
   tbody.append(row);
  }
 }
+// Tarifas: o rascunho pertence a uma competencia consultada explicitamente.
+let tariffConsultedMonth=null;
+const tariffFields=['te','tusd','fioB','icms','pis','cofins','flag','source'];
+function clearTariffFields(form){
+ for(const k of tariffFields)form.elements[k].value='';
+ const preview=$('admin-tariff-preview');preview.textContent='';preview.hidden=true;
+}
+function setTariffActions(enabled){
+ const form=$('admin-tariff-draft');
+ if(!form)return;
+ form.querySelector('button[type="submit"]').disabled=!enabled;
+ $('admin-tariff-copy').disabled=!enabled;
+}
+function invalidateTariffMonth(){
+ const form=$('admin-tariff-draft');
+ if(!form)return;
+ tariffConsultedMonth=null;clearTariffFields(form);setTariffActions(false);
+ $('admin-tariff-status').textContent='Competência alterada. Consulte a base novamente antes de validar.';
+}
+function renderTariffPreview(d){
+ const out=$('admin-tariff-preview');out.replaceChildren();
+ const core=window.WWSolarEconomia,active=core.policy.profiles[core.policy.reference];
+ const fmt=(n,max=9)=>Number(n).toLocaleString('pt-BR',{maximumFractionDigits:max});
+ const rows=[['TE (R$/kWh)','te',1],['TUSD (R$/kWh)','tusd',1],['Fio B integral (R$/kWh)','fioB',1],['ICMS (%)','icms',100],['PIS (%)','pis',100],['COFINS (%)','cofins',100]];
+ out.append(element('h3','Rascunho validado — '+d.reference));
+ out.append(element('p','Comparação com a referência ativa: '+active.reference+'. Nenhum valor foi ativado.'));
+ const wrapper=element('div');wrapper.className='admin-compose-table-scroll';
+ const table=element('table');table.className='eco-tariff-table';const head=element('thead'),hr=element('tr');
+ for(const t of ['Parâmetro','Ativo','Rascunho','Diferença'])hr.append(element('th',t));head.append(hr);table.append(head);
+ const body=element('tbody');
+ for(const [label,key,scale] of rows){
+  const tr=element('tr'),delta=(d[key]-active[key])*scale;
+  for(const t of [label,fmt(active[key]*scale),fmt(d[key]*scale),Math.abs(delta)<1e-10?'Sem alteração':(delta>0?'+':'')+fmt(delta)])tr.append(element('td',t));body.append(tr);
+ }
+ const fr=element('tr');for(const t of ['Bandeira',active.flag,d.flag,active.flag===d.flag?'Sem alteração':'Alterada'])fr.append(element('td',t));body.append(fr);
+ table.append(body);wrapper.append(table);out.append(wrapper,element('p','Fonte: '+d.source));out.hidden=false;
+}
+const tariffForm=$('admin-tariff-draft');
+if(tariffForm){
+ setTariffActions(false);
+ tariffForm.elements.reference.addEventListener('input',invalidateTariffMonth);
+ tariffForm.elements.reference.addEventListener('change',()=>{if(tariffConsultedMonth!==tariffForm.elements.reference.value)invalidateTariffMonth();});
+}
 $('admin-tariff-lookup')?.addEventListener('click',()=>{
  if(!ready||!window.WWSolarEconomia)return;
  const form=$('admin-tariff-draft'),status=$('admin-tariff-status');
  if(!form.elements.reference.reportValidity())return;
  try{
+  tariffConsultedMonth=null;setTariffActions(false);clearTariffFields(form);
   const r=window.WWSolarEconomia.policy.lookupMonth(form.elements.reference.value);
-  for(const key of ['te','tusd','fioB','icms','pis','cofins','flag','source'])form.elements[key].value='';
-  $('admin-tariff-preview').textContent='';$('admin-tariff-preview').hidden=true;
   if(r.period){
    for(const k of ['te','tusd','fioB'])if(r.period[k]!==null)form.elements[k].value=String(r.period[k]);
    form.elements.source.value='CSV ANEEL 26/11/2026; REH '+r.period.reh+(r.taxes?'; tributos observados em fatura da competência':'');
@@ -485,12 +527,14 @@ $('admin-tariff-lookup')?.addEventListener('click',()=>{
   else if(r.period.fioB===null)missing.push('Fio B integral não confirmado');
   if(!r.flag)missing.push('bandeira sem registro');
   if(!r.taxes)missing.push('tributos mensais pendentes');
+  tariffConsultedMonth=r.month;setTariffActions(true);
   status.textContent=missing.length?'Consulta parcial: '+missing.join('; ')+'. Campos pendentes ficam vazios.':'Referências encontradas. Confira e valide o rascunho. Nada foi publicado.';
  }catch(err){status.textContent=err.message;}
 });
 function tariffDraft(){
  if(!ready||!window.WWSolarEconomia)return null;
  const form=$('admin-tariff-draft');
+ if(tariffConsultedMonth!==form.elements.reference.value)throw new Error('Consulte a competência selecionada antes de validar.');
  if(!form.reportValidity())return null;
  const data=Object.fromEntries(new FormData(form));
  const d={reference:data.reference,source:data.source,flag:data.flag};
@@ -502,7 +546,7 @@ $('admin-tab-tariffs')?.addEventListener('click',()=>showPanel('tariffs'));
 $('admin-tariff-draft')?.addEventListener('submit',ev=>{
  ev.preventDefault();if(!ready)return;
  const out=$('admin-tariff-preview'),status=$('admin-tariff-status');out.textContent='';out.hidden=true;
- try{const d=tariffDraft();if(!d)return;out.textContent=JSON.stringify(d,null,2);out.hidden=false;status.textContent='Rascunho validado. Nenhuma tarifa ativa foi alterada.';}
+ try{const d=tariffDraft();if(!d)return;renderTariffPreview(d);status.textContent='Rascunho validado. Nenhuma tarifa ativa foi alterada.';}
  catch(err){status.textContent=err.message;}
 });
 $('admin-tariff-draft')?.addEventListener('input',()=>{if(!ready)return;$('admin-tariff-preview').textContent='';$('admin-tariff-preview').hidden=true;$('admin-tariff-status').textContent='Valide novamente apos editar.';});
