@@ -16,6 +16,8 @@ function calculate(v,year=policy.baseYear,competence){
  if(![v.consumo,v.geracao,v.cip,previous,received].every(validEnergy)||!Number.isFinite(v.sim)||v.sim<0||v.sim>100||![30,50,100].includes(v.min)||![1,2].includes(v.gd))throw new RangeError('Parametros invalidos');
  const tariff=tariffFor(year,v.gd,competence);
  if(!tariff)return null;
+ const flag=v.flag??tariff.flag;
+ if(typeof flag!=='string'||!Object.hasOwn(policy.flags,flag))throw new RangeError('Bandeira invalida');
  const federal=1-tariff.pis-tariff.cofins;
  const full=(tariff.te+tariff.tusd)/((1-tariff.icms)*federal);
  const credit=tariff.te/((1-tariff.icms)*federal)+tariff.tusdCredit/federal;
@@ -33,8 +35,13 @@ function calculate(v,year=policy.baseYear,competence){
  const nonCompensatedCost=uncredited*full, residualCost=compensated*residual;
  const raw=nonCompensatedCost+residualCost;
  const floor=v.min*full, energy=Math.max(floor,raw);
- const before=Math.max(v.consumo,v.min)*full+v.cip, after=energy+v.cip;
- return {before,after,saving:before-after,self,grid,injected,compensated,uncredited,excess,usedOwn,usedReceived,usedPrevious,remainingReceived,remainingPrevious,creditBalance:excess+remainingReceived+remainingPrevious,wire:v.gd===2?compensated*transport:0,floorAdjustment:energy-raw,residual:residualCost,nonCompensatedCost,energy,reference:tariff.reference,incidence:tariff.incidence};
+ // Bandeira: scenario with one flag for the entire cycle, no surcharge on compensated kWh.
+ // Minimum billing interaction and tax treatment require validation against non-green invoices.
+ const flagRate=policy.flags[flag]/((1-tariff.icms)*federal);
+ const flagBefore=Math.max(v.consumo,v.min)*flagRate;
+ const flagAfter=(grid<v.min?v.min:uncredited)*flagRate;
+ const before=Math.max(v.consumo,v.min)*full+v.cip+flagBefore, after=energy+v.cip+flagAfter;
+ return {before,after,saving:before-after,self,grid,injected,compensated,uncredited,excess,usedOwn,usedReceived,usedPrevious,remainingReceived,remainingPrevious,creditBalance:excess+remainingReceived+remainingPrevious,wire:v.gd===2?compensated*transport:0,floorAdjustment:energy-raw,residual:residualCost,nonCompensatedCost,energy:energy+flagAfter,flag,flagBefore,flagAfter,reference:tariff.reference,incidence:tariff.incidence};
 }
 // Pure percentage allocation for a hypothetical available surplus; no persistence or transfer.
 // Input percentages must total at most 100; unallocated energy remains with the source.
@@ -45,6 +52,30 @@ function allocateExcess(kwh,percentages){
  const allocations=percentages.map(p=>kwh*p/100);
  return {allocations,remaining:Math.max(0,kwh-allocations.reduce((a,b)=>a+b,0))};
 }
-const api=Object.freeze({policy,tariffFor,calculate,allocateExcess});
+// Draft only: validates a complete monthly reference; never activates or persists it.
+function validateTariffDraft(d){
+ if(!d||typeof d.reference!=='string'||!/^20\\d{2}-(0[1-9]|1[0-2])$/.test(d.reference))throw new RangeError('Competencia invalida');
+ const {te,tusd,fioB,icms,pis,cofins,flag}=d;
+ if(![te,tusd,fioB,icms,pis,cofins].every(Number.isFinite)||te<=0||te>10||tusd<=0||tusd>10||fioB<0||fioB>tusd||icms<0||icms>=.5||pis<0||cofins<0||pis+cofins>=.3||typeof flag!=='string'||!Object.hasOwn(policy.flags,flag))throw new RangeError('Parametros tarifarios fora dos limites');
+ const source=typeof d.source==='string'?d.source.trim():'';
+ if(source.length<5||source.length>300)throw new RangeError('Informe a referencia documental');
+ return {reference:d.reference,te,tusd,fioB,icms,pis,cofins,flag,source,status:'rascunho'};
+}
+// Simulates one generator and beneficiary units, same regime and reference.
+// Only the current generator surplus is allocated; no reallocation of old credits.
+function calculateGroup(generator,beneficiaries,year=policy.baseYear,competence){
+ if(!Array.isArray(beneficiaries)||beneficiaries.length>100)throw new RangeError('Beneficiarias invalidas');
+ const source=calculate(generator,year,competence);
+ if(!source)return null;
+ const distribution=allocateExcess(source.excess,beneficiaries.map(b=>b.percent));
+ const units=beneficiaries.map((b,i)=>{
+  if(b.geracao!==undefined&&b.geracao!==0)throw new RangeError('Beneficiaria com geracao propria nao suportada');
+  if(b.creditsReceived!==undefined&&b.creditsReceived!==0)throw new RangeError('Credito recebido deve vir do rateio');
+  return calculate({...b,gd:generator.gd,geracao:0,sim:0,creditsReceived:distribution.allocations[i],flag:generator.flag},year,competence);
+ });
+ const totals=[source,...units].reduce((a,r)=>({before:a.before+r.before,after:a.after+r.after,saving:a.saving+r.saving}),{before:0,after:0,saving:0});
+ return {source,units,distribution,sourceRemaining:source.creditBalance-(source.excess-distribution.remaining),totals};
+}
+const api=Object.freeze({policy,tariffFor,calculate,allocateExcess,validateTariffDraft,calculateGroup});
 if(typeof module==='object'&&module.exports)module.exports=api;else root.WWSolarEconomia=api;
 })(typeof globalThis==='object'?globalThis:this);
