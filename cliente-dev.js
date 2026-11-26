@@ -418,11 +418,15 @@
   }
   const number=n=>new Intl.NumberFormat('pt-BR',{maximumFractionDigits:0}).format(Number(n)||0);
   const decimal=n=>new Intl.NumberFormat('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}).format(Number(n)||0);
-  function setTarget(v){
+  function setTarget(v,fromEconomia=false){
     const n=Number(v);if(!Number.isFinite(n))return;
     S.target=Math.max(300,Math.min(2200,Math.round(n)));
-    $('client-target').value=S.target;$('client-target-slider').value=S.target;
-    $('client-target-slider').style.setProperty('--range-progress',((S.target-300)/(2200-300)*100)+'%');
+    // A Economia Solar pode solicitar uma geração fora da faixa normal da barra.
+    if(fromEconomia&&Number.isSafeInteger(n)&&n>0&&n<=100000)S.target=n;
+    const field=$('client-target'),slider=$('client-target-slider');
+    field.min=String(Math.min(300,S.target));field.max=String(Math.max(2200,S.target));
+    field.value=S.target;slider.value=Math.max(300,Math.min(2200,S.target));
+    slider.style.setProperty('--range-progress',Math.max(0,Math.min(100,(S.target-300)/(2200-300)*100))+'%');
     renderRecommendation();
     if(S.kind==='kit')renderProducts();
   }
@@ -980,9 +984,25 @@
       'Selecione a faixa correspondente à potência instalada. É possível solicitar apenas o projeto; TRT não inclusa.' :
       'Entre na sua conta para adicionar somente o projeto ao carrinho.';
   }
+  let economiaTargetApplied=false;
+  function applyEconomiaTarget(){
+    if(economiaTargetApplied)return;
+    const raw=new URLSearchParams(window.location.search).get('economia_kwh');
+    if(!raw||!/^\d{1,6}$/.test(raw))return;
+    const target=Number(raw);
+    if(!Number.isSafeInteger(target)||target<1||target>100000)return;
+    economiaTargetApplied=true;
+    S.query='';$('client-search').value='';
+    setKind('kit');setTarget(target,true);
+    const kit=C.recommendedKit(available(),S.target);
+    const card=kit?Array.from($('client-product-grid').children).find(node=>node.dataset.productId===kit.id):null;
+    requestAnimationFrame(()=>requestAnimationFrame(()=>{
+      (card||(kit?$('catalogo'):$('client-custom-kit-cta'))||$('catalogo'))?.scrollIntoView({behavior:'smooth',block:'start'});
+    }));
+  }
   function renderAll(){
     $('client-available-count').textContent=String(available().filter(p=>p.kind==='kit').length);
-    renderRecommendation();renderCategories();renderProducts();renderStandaloneProjects();renderCart();setTarget(S.target);
+    renderRecommendation();renderCategories();renderProducts();renderStandaloneProjects();renderCart();setTarget(S.target,economiaTargetApplied);applyEconomiaTarget();
   }
   async function refreshQuote(){
     if(!S.user&&!GUEST_QUOTE_MODE)return;
