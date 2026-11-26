@@ -68,8 +68,8 @@ function renderRateio(v,year){
  rateioResult.hidden=true;
  const ecrBox=document.getElementById('eco-rateio-ecr');ecrBox.hidden=true;
  if(!rateioEnabled.checked)return;
- const status=document.getElementById('eco-rateio-status');
- for(const id of ['eco-rateio-energy','eco-rateio-bill','eco-rateio-total','eco-rateio-ecr-values'])fillRateio(id,[]);
+ const status=document.getElementById('eco-rateio-status'),dashboard=document.getElementById('eco-rateio-dashboard');dashboard.hidden=true;
+ for(const id of ['eco-rateio-energy','eco-rateio-source','eco-rateio-bill','eco-rateio-total','eco-rateio-ecr-values'])fillRateio(id,[]);
  try{
   const num=id=>Number(document.getElementById(id).value);
   const b={consumo:num('eco-rateio-consumo'),min:num('eco-rateio-min'),cip:num('eco-rateio-cip'),percent:num('eco-rateio-percent')};
@@ -78,15 +78,26 @@ function renderRateio(v,year){
   const u=g.units[0],allocated=g.distribution.allocations[0],t=g.totals;
   const kwh=n=>qty(n)+' kWh',payback=s=>v.invest>0&&s>0?qty(v.invest/(12*s))+' anos':'Não calculado';
   status.textContent=g.available>0?'Excedente líquido disponível para distribuição neste ciclo.':'Não há excedente líquido para rateio neste ciclo.';
+  const put=(id,value,negative=false)=>{const el=document.getElementById('eco-rateio-'+id);el.textContent=value;el.classList.toggle('rateio-negative',negative);};
+  for(const [id,r] of [['source',g.source],['beneficiary',u],['combined',t]]){
+   put('kpi-'+id,money(r.saving),r.saving<0);
+   for(const key of ['before','after','saving'])put(id+'-'+key,money(r[key]),key==='saving'&&r[key]<0);
+  }
+  put('kpi-payback',payback(t.saving));put('annual',money(t.saving*12),t.saving<0);
+  put('mini-available',kwh(g.available));put('mini-percent',qty(b.percent)+'%');put('mini-allocated',kwh(allocated));put('mini-compensated',kwh(u.usedReceived));
+  fillRateio('eco-rateio-source',[
+   ['Fatura estimada sem energia solar',money(g.source.before)],['Fatura estimada com energia solar',money(g.source.after)],['Economia mensal na geradora',money(g.source.saving)],['Economia anual na geradora',money(g.source.saving*12)],['Fio B sem tributos (incluído no residual)',money(g.source.wire)]
+  ]);
   fillRateio('eco-rateio-energy',[
    ['Excedente líquido disponível na geradora',kwh(g.available)],['Percentual destinado',qty(b.percent)+'%'],['Energia destinada à beneficiária',kwh(allocated)],['Energia efetivamente compensada na beneficiária',kwh(u.usedReceived)],['Créditos não utilizados na beneficiária',kwh(u.remainingReceived)],['Excedente líquido não destinado',kwh(g.distribution.remaining)],['Saldo estimado na geradora após rateio',kwh(g.sourceRemaining)],['Consumo não compensado da beneficiária',kwh(u.uncredited)]
   ]);
   fillRateio('eco-rateio-bill',[
-   ['Fatura estimada sem rateio',money(u.before)],['Fatura estimada com rateio',money(u.after)],['Economia mensal na beneficiária',money(u.saving)],['Fio B sem tributos (incluído no residual)',money(u.wire)]
+   ['Fatura estimada sem rateio',money(u.before)],['Fatura estimada com rateio',money(u.after)],['Economia mensal na beneficiária',money(u.saving)],['Economia anual na beneficiária',money(u.saving*12)],['Fio B sem tributos (incluído no residual)',money(u.wire)]
   ]);
   fillRateio('eco-rateio-total',[
    ['Fatura conjunta sem energia solar',money(t.before)],['Fatura conjunta com energia solar',money(t.after)],['Economia mensal conjunta',money(t.saving)],['Economia anual conjunta',money(t.saving*12)],['Payback conjunto (economia constante)',payback(t.saving)]
   ]);
+  dashboard.hidden=false;
   const field=document.getElementById('eco-ecr-factor'),engine=globalThis.WWSolarECR;
   if(year===2027&&v.gd===2&&field.value!==''&&field.checkValidity()){
    const profile=activeProfile??policy.profiles[policy.reference];
@@ -100,7 +111,7 @@ function renderRateio(v,year){
    }
   }
   rateioResult.hidden=false;
- }catch{status.textContent='Rateio indisponível; confira os parâmetros.';rateioResult.hidden=false;}
+ }catch{if(dashboard.hidden)status.textContent='Rateio indisponível; confira os parâmetros.';else status.textContent+=' Projeção ECR indisponível.';rateioResult.hidden=false;}
 }
 function render(){
  rateioFields.hidden=!rateioEnabled.checked;rateioFields.disabled=!rateioEnabled.checked;rateioResult.hidden=true;
