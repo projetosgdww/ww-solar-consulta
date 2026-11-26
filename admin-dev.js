@@ -35,7 +35,7 @@ function showPanel(which){
  if(which==='orders')void loadOrders();
  if(which==='kits')void loadKitPreviews();
  if(which==='composer')void loadCompositionCatalog();
- if(which==='tariffs'){renderTariffs();renderOfficialTariffs();renderTariffSandbox();}
+ if(which==='tariffs'){renderTariffs();renderOfficialTariffs();renderTariffSandbox();void loadCentralTariffs();}
 }
 async function init(){
  if(!/^https:\/\/[a-z0-9-]+\.supabase\.co$/.test(cfg.supabaseUrl||'')
@@ -636,6 +636,69 @@ function addSandboxSave(d,out){
  out.append(b);
 }
 window.addEventListener('storage',e=>{if(e.key===window.WWSolarTariffSandbox?.key&&ready)renderTariffSandbox();});
+// D1 DEV: the server checks the authenticated role for each request.
+let centralState=null,centralBusy=false;
+const centralHost=()=>location.hostname==='ww-solar-economia-dev.pages.dev';
+async function centralRequest(body){
+ const {data,error}=await db.auth.getSession();
+ if(error||!data?.session?.access_token)throw Error('Sessão expirada. Entre novamente.');
+ const headers={Authorization:'Bearer '+data.session.access_token};
+ if(body)headers['Content-Type']='application/json';
+ const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),15000);
+ try{
+  const r=await fetch('/api/tarifas-dev',{method:body?'POST':'GET',headers,body:body?JSON.stringify(body):undefined,signal:controller.signal,cache:'no-store'});
+  const d=await r.json();
+  if(!r.ok||d?.ok!==true){const labels={AUTH_UNAVAILABLE:'Verificação administrativa indisponível.',NOT_AUTHORIZED:'Acesso administrativo não autorizado.',STORAGE_UNAVAILABLE:'Banco DEV ainda não conectado.',REFRESH_REQUIRED:'Outra sessão alterou o histórico. Atualize antes de repetir.',WRITE_NOT_CONFIRMED_REFRESH:'Gravação não confirmada. Atualize o histórico antes de repetir.',INVALID_TRANSITION:'Operação não permitida para esta versão.'};throw Error(labels[d?.code]??'Operação não confirmada. Atualize o histórico antes de repetir.');}
+  if(!Number.isSafeInteger(d.state?.revision)||!Array.isArray(d.state?.versions)||!Array.isArray(d.state?.events))throw Error('Resposta inválida do banco DEV.');
+  return d.state;
+ }finally{clearTimeout(timer);}
+}
+function centralStatus(t){$('admin-tariff-central-status').textContent=t;}
+async function loadCentralTariffs(){
+ const section=$('admin-tariff-central');if(!ready||!centralHost()||!section||centralBusy)return;
+ section.hidden=false;centralBusy=true;centralState=null;renderCentralTariffs();centralStatus('Consultando banco DEV...');
+ try{centralState=await centralRequest();centralStatus('Banco DEV conectado. Referência comercial não alterada.');}
+ catch(err){centralStatus(err.message);}
+ finally{centralBusy=false;renderCentralTariffs();}
+}
+async function centralAction(action,id,draft,expected){
+ if(!ready||!centralHost()||centralBusy||!centralState||centralState.revision!==expected)return;
+ if(!confirm('Confirmar operação no banco de homologação DEV? Não altera a tarifa comercial.'))return;
+ centralBusy=true;renderCentralTariffs();centralStatus('Registrando no banco DEV...');
+ try{centralState=await centralRequest({action,id,draft,expectedRevision:expected,requestId:crypto.randomUUID()});centralStatus('Operação confirmada pelo servidor.');}
+ catch(err){centralState=null;centralStatus(err.message);}
+ finally{centralBusy=false;renderCentralTariffs();}
+}
+function renderCentralTariffs(){
+ const out=$('admin-tariff-central-list');if(!out)return;out.replaceChildren();
+ const s=centralState;if(!s||centralBusy)return;
+ const selected=s.versions.find(v=>v.id===s.active);
+ out.append(element('p','Referência central de teste: '+(selected?selected.draft.reference+' · '+selected.id.slice(0,8):'padrão do código')));
+ if(selected)out.append(button('Restaurar padrão central',()=>void centralAction('restore_default',null,null,s.revision)));
+ if(!s.versions.length)out.append(element('p','Nenhuma versão central salva.'));
+ for(const v of [...s.versions].reverse()){
+  const row=element('div',undefined,'eco-sandbox-entry');
+  row.append(element('strong',v.draft.reference+' · '+v.id.slice(0,8)+' · '+(s.active===v.id?'Ativa no teste central':v.state)));
+  row.append(element('p','TE '+v.draft.te+' | TUSD '+v.draft.tusd+' | Fio B '+v.draft.fioB+' | '+v.draft.flag));
+  row.append(element('p','Fonte: '+v.draft.source));
+  if(v.state==='salvo')row.append(button('Aprovar no banco DEV',()=>void centralAction('approve',v.id,null,s.revision)));
+  if(v.state==='aprovado'&&v.id!==s.active)row.append(button('Ativar / restaurar no banco DEV',()=>void centralAction('activate',v.id,null,s.revision)));
+  out.append(row);
+ }
+ if(s.events.length){out.append(element('h3','Histórico central — últimas 50 ações'));const labels={save:'Salvou',approve:'Aprovou',activate:'Ativou / restaurou',restore_default:'Restaurou padrão'};
+  for(const e of [...s.events].reverse())out.append(element('p',date(e.at)+' · '+labels[e.action]+' · '+(e.id?.slice(0,8)??'padrão')+' · Administrador '+e.actor.slice(0,8)));
+ }
+}
+function addCentralSave(d,out){
+ if(!centralHost())return;
+ const b=button('Salvar versão no banco DEV',()=>{try{
+  if(!centralState||centralBusy)throw Error('Consulte o banco DEV antes de salvar.');
+  const current=tariffDraft();if(!current||JSON.stringify(current)!==JSON.stringify(d))throw Error('Valide novamente o rascunho.');
+  void centralAction('save',null,current,centralState.revision);
+ }catch(err){centralStatus(err.message);}});
+ out.append(b);
+}
+$('admin-tariff-central-refresh')?.addEventListener('click',()=>void loadCentralTariffs());
 function tariffDraft(){
  if(!ready||!window.WWSolarEconomia)return null;
  const form=$('admin-tariff-draft');
@@ -651,7 +714,7 @@ $('admin-tab-tariffs')?.addEventListener('click',()=>showPanel('tariffs'));
 $('admin-tariff-draft')?.addEventListener('submit',ev=>{
  ev.preventDefault();if(!ready)return;
  const out=$('admin-tariff-preview'),status=$('admin-tariff-status');out.textContent='';out.hidden=true;
- try{const d=tariffDraft();if(!d)return;renderTariffPreview(d);addSandboxSave(d,out);status.textContent='Rascunho validado. Nenhuma tarifa ativa foi alterada.';}
+ try{const d=tariffDraft();if(!d)return;renderTariffPreview(d);addSandboxSave(d,out);addCentralSave(d,out);status.textContent='Rascunho validado. Nenhuma tarifa ativa foi alterada.';}
  catch(err){status.textContent=err.message;}
 });
 $('admin-tariff-draft')?.addEventListener('input',()=>{if(!ready)return;$('admin-tariff-preview').textContent='';$('admin-tariff-preview').hidden=true;$('admin-tariff-status').textContent='Valide novamente apos editar.';});
