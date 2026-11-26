@@ -144,3 +144,25 @@ test('rascunho online usa somente tributos da propria competencia e preserva mot
  assert.throws(()=>prepareOnlineDraft({...r,period:{...p,end:'2026-11-15'}},null,time),RangeError);
  assert.deepEqual(calculate(v),before);
 });
+
+test('normalizacao decimal e versoes de homologacao nao alteram simulador comercial',()=>{
+ const core=require('../economia-solar-core.js'),api=require('../economia-solar-tariff-sandbox.js');
+ const data=new Map(),storage={getItem:k=>data.get(k)??null,setItem:(k,v)=>data.set(k,v)};
+ const d=core.validateTariffDraft({...policy.profiles['2026-11'],source:'Teste de homologação',te:0.21325999999999998,tusd:0.48849000000000004});
+ assert.equal(d.te,.21326);assert.equal(d.tusd,.48849);assert.equal(d.fioB,.283714420722);
+ assert.equal(api.allowed('ww-solar-economia-dev.pages.dev'),true);assert.equal(api.allowed('catalogo.wwplatform.com.br'),false);
+ const baseline=core.calculate(v);
+ api.change(storage,'save',{draft:d,newId:'v1'});
+ assert.throws(()=>api.change(storage,'activate',{id:'v1',expected:null}));
+ api.change(storage,'approve',{id:'v1'});api.change(storage,'activate',{id:'v1',expected:null});
+ assert.equal(api.read(storage).active,'v1');
+ near(core.calculateDraft(v,d).saving,baseline.saving);
+ const d2={...d,te:.3};api.change(storage,'save',{draft:d2,newId:'v2'});api.change(storage,'approve',{id:'v2'});
+ assert.throws(()=>api.change(storage,'activate',{id:'v2',expected:null}));
+ api.change(storage,'activate',{id:'v2',expected:'v1'});
+ assert.notEqual(core.calculateDraft(v,d2).saving,baseline.saving);
+ api.change(storage,'activate',{id:'v1',expected:'v2'});
+ assert.equal(api.read(storage).active,'v1');api.change(storage,'restoreDefault',{expected:'v1'});
+ assert.equal(api.read(storage).active,null);assert.equal(api.read(storage).events.length,8);
+ assert.deepEqual(core.calculate(v),baseline);
+});
