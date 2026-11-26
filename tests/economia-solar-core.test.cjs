@@ -53,3 +53,26 @@ test('regressao financeira de cinco cenarios de referencia',()=>{
   assert.ok(Math.abs(r.energy-c.expected)/c.expected<.01);
  }
 });
+
+const {validateTariffDraft,calculateGroup}=require('../economia-solar-core.js');
+test('bandeiras nao oneram energia compensada e verde preserva modelo',()=>{
+ const base=calculate(v),red=calculate({...v,flag:'vermelha2'}),yellow=calculate({...v,flag:'amarela'});
+ near(base.flagBefore,0);near(red.flagAfter,0);near(red.flagBefore,600*.07877/(.8*(1-.0048-.0219)));
+ assert.ok(red.saving>yellow.saving);
+ const partial=calculate({...v,geracao:300,flag:'amarela'});
+ near(partial.flagAfter,partial.uncredited*.01885/(.8*(1-.0048-.0219)));
+ const zero=calculate({...v,geracao:0,flag:'vermelha1'});near(zero.before,zero.after);
+ assert.throws(()=>calculate({...v,flag:'inexistente'}),RangeError);
+});
+test('rascunho validado nao altera referencia vigente',()=>{
+ const d={...policy.profiles['2026-11'],reference:'2026-12',source:'Documento de referencia para teste'};
+ const draft=validateTariffDraft(d);assert.equal(draft.status,'rascunho');assert.equal(tariffFor(2026,2,'2026-12'),null);
+ for(const bad of [{te:0},{fioB:1},{icms:1},{pis:.4},{reference:'2026-13'},{source:''}])assert.throws(()=>validateTariffDraft({...d,...bad}),RangeError);
+});
+test('simulacao conjunta de rateio nao duplica excedentes',()=>{
+ const g=calculateGroup({...v,consumo:200,geracao:1000,sim:0},[{consumo:300,min:30,cip:20,percent:50},{consumo:200,min:30,cip:20,percent:25}]);
+ near(g.sourceRemaining,g.source.creditBalance-g.distribution.allocations.reduce((a,b)=>a+b,0));
+ g.units.forEach((r,i)=>near(r.usedReceived+r.remainingReceived,g.distribution.allocations[i]));
+ near(g.totals.saving,g.totals.before-g.totals.after);
+ assert.throws(()=>calculateGroup(v,[{consumo:100,min:30,cip:0,percent:101}]),RangeError);
+});
