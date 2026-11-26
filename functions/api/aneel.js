@@ -21,9 +21,11 @@ export async function handle(request,{lookup=aneel.lookup,cache=null,waitUntil=n
   return response;
  }catch(err){
   const message=String(err?.message??'');
-  const code=err?.name==='AbortError'?'UPSTREAM_TIMEOUT':/^ANEEL HTTP [0-9]{3}$/.test(message)?'UPSTREAM_HTTP':/incompleta|inválida|conflitante|inconsistente|inválido|reconhecida/.test(message)?'UPSTREAM_DATA':'UPSTREAM_UNAVAILABLE';
-  console.warn('ANEEL lookup failed',month,code);
-  return reply({ok:false,code},502);
+  const source=['componentes','bandeiras','validacao'].includes(err?.source)?err.source:'consulta';
+  const code=err?.name==='AbortError'?'UPSTREAM_TIMEOUT':/^ANEEL HTTP [0-9]{3}$/.test(message)?'UPSTREAM_HTTP':/incomplet|inválid|conflitante|inconsistente|reconhecida/.test(message)?'UPSTREAM_DATA':'UPSTREAM_UNAVAILABLE';
+  const httpStatus=/^ANEEL HTTP ([0-9]{3})$/.exec(message)?.[1];
+  console.warn('ANEEL lookup failed',month,source,code,httpStatus??'',String(err?.name??'Error'));
+  return reply({ok:false,code,source,...(httpStatus?{httpStatus:Number(httpStatus)}:{})},502);
  }
 }
 export function onRequest(context){
