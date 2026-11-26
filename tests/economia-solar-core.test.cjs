@@ -2,7 +2,7 @@ const test=require('node:test');const assert=require('node:assert/strict');const
 const v={consumo:600,geracao:600,sim:30,gd:2,min:30,cip:40};
 const near=(a,b)=>assert.ok(Math.abs(a-b)<1e-7, a+' != '+b);
 test('progressao 2026 a 2028 e GD I',()=>{for(const [year,p] of [[2026,.60],[2027,.75],[2028,.90]]){near(tariffFor(year,2).incidence,p);near(tariffFor(year,1).incidence,0);}assert.equal(tariffFor(2029,2),null);});
-test('balanco energetico e fio B',()=>{const r=calculate(v);near(r.self,180);near(r.grid,420);near(r.injected,420);near(r.compensated,420);near(r.wire,71.5008);});
+test('balanco energetico e fio B',()=>{const r=calculate(v);near(r.self,180);near(r.grid,420);near(r.injected,420);near(r.compensated,420);near(r.wire,420*.283714420722*.60);});
 test('GD I preserva minimo de cada ligacao',()=>{for(const min of [30,50,100]){const r=calculate({...v,gd:1,min});near(r.uncredited,min);near(r.excess,min);near(r.wire,0);}});
 test('GD II respeita piso sem duplicar transporte',()=>{const r=calculate({...v,consumo:100,geracao:100,sim:0,min:100});near(r.compensated,0);near(r.before,r.after);const s=calculate({...v,consumo:150,geracao:150,sim:0,min:100});near(s.uncredited*(policy.te+policy.tusd)+s.wire,100*(policy.te+policy.tusd));});
 test('geracao zero e consumo zero',()=>{const r=calculate({...v,geracao:0});near(r.before,r.after);const s=calculate({...v,consumo:0});near(s.self,0);near(s.compensated,0);near(s.before,s.after);});
@@ -14,7 +14,7 @@ test('conservacao de energia e composicao financeira',()=>{for(const gd of [1,2]
 const {allocateExcess}=require('../economia-solar-core.js');
 test('competencia explicita sem substituicao silenciosa',()=>{
  const mar=tariffFor(2026,2,'2026-03'), nov=tariffFor(2026,2,'2026-11');
- near(mar.te,.24519);near(mar.tusdCredit,.28985);near(mar.pis,.0117);near(nov.tusdCredit,.31825);near(nov.cofins,.0219);
+ near(mar.te,.24519);near(mar.tusdCredit,.28985);near(mar.pis,.0117);near(nov.tusdCredit,.48849-.283714420722*.60);near(nov.cofins,.0219);
  assert.equal(tariffFor(2026,2,'2026-04'),null);assert.equal(tariffFor(2027,2,'2026-03'),null);
  assert.equal(tariffFor(2027,2).scenario,true);
 });
@@ -75,4 +75,14 @@ test('simulacao conjunta de rateio nao duplica excedentes',()=>{
  g.units.forEach((r,i)=>near(r.usedReceived+r.remainingReceived,g.distribution.allocations[i]));
  near(g.totals.saving,g.totals.before-g.totals.after);
  assert.throws(()=>calculateGroup(v,[{consumo:100,min:30,cip:0,percent:101}]),RangeError);
+});
+
+test('snapshot ANEEL seleciona vigencia sem inventar dados mensais',()=>{
+ const nov=policy.lookupMonth('2026-11');near(nov.period.fioB,.283714420722);near(nov.period.te,.21326);assert.equal(nov.flag,'verde');assert.equal(nov.taxes.pis,.0048);
+ const may=policy.lookupMonth('2026-05');near(may.period.te,.26099);assert.equal(may.flag,'amarela');assert.equal(may.taxes,null);
+ for(const month of ['2026-04','2026-08']){const r=policy.lookupMonth(month);assert.equal(r.period,null);assert.equal(r.periods.length,2);}
+ const mar=policy.lookupMonth('2026-03');assert.equal(mar.period.fioB,null);
+ const dec=policy.lookupMonth('2026-12');assert.equal(dec.flag,null);assert.equal(dec.taxes,null);
+ assert.equal(policy.lookupMonth('2027-05').period,null);
+ assert.throws(()=>policy.lookupMonth('2026-13'),RangeError);
 });
