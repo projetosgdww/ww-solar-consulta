@@ -195,3 +195,17 @@ test('API central valida comandos e reconstrução do histórico',async()=>{
  assert.equal(replay(rows).active,id);assert.equal(replay(rows).revision,3);
  assert.throws(()=>replay([...rows,{seq:4,expected_seq:1,action:'restore_default'}]));
 });
+
+test('falha de autenticacao central e classificada sem acessar banco',async()=>{
+ const {handle}=await import('../functions/api/tarifas-dev.js');
+ const req=new Request('https://ww-solar-economia-dev.pages.dev/api/tarifas-dev',{headers:{Authorization:'Bearer '+'a'.repeat(32)}});
+ let touches=0;
+ const env={TARIFF_AUTH_PUBLISHABLE_KEY:'test',TARIFFS_DEV:{prepare(){touches++;throw Error('unexpected');}}};
+ const cases=[
+  [async()=>({ok:false,status:503}),'AUTH_HTTP'],
+  [async()=>{throw Error('network');},'AUTH_NETWORK'],
+  [async()=>({ok:true,json:async()=>{throw Error('invalid JSON');}}),'AUTH_RESPONSE']
+ ];
+ for(const [fetcher,code] of cases){const r=await handle(req,env,{fetcher});assert.equal(r.status,503);assert.equal((await r.json()).code,code);}
+ assert.equal(touches,0);
+});
