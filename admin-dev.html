@@ -1,4 +1,4 @@
-<!doctype html><html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><meta name="theme-color" content="#0e2023"><title>WW Solar | Clientes e Pedidos</title><link rel="icon" href="./favicon.svg?v=20261115-limao-v1" type="image/svg+xml"><link rel="stylesheet" href="./styles.css?v=20261114-legal-v1"><link rel="stylesheet" href="./cliente-dev.css?v=20261115-nav-right-v2"><link rel="stylesheet" href="./admin-dev.css?v=20261117-composition-simple-v1"><link rel="stylesheet" href="./palette-wwsolar.css?v=20261115-paleta01-admin-v2"></head><body>
+<!doctype html><html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><meta name="theme-color" content="#0e2023"><title>WW Solar | Clientes e Pedidos</title><link rel="icon" href="./favicon.svg?v=20261115-limao-v1" type="image/svg+xml"><link rel="stylesheet" href="./styles.css?v=20261114-legal-v1"><link rel="stylesheet" href="./cliente-dev.css?v=20261115-nav-right-v2"><link rel="stylesheet" href="./admin-dev.css?v=20261126-economia-rc"><link rel="stylesheet" href="./palette-wwsolar.css?v=20261115-paleta01-admin-v2"></head><body>
 <header class="header"><div class="shell header-inner"><a class="brand" href="./cliente-dev.html"><span class="brand-symbol" aria-hidden="true"><svg viewBox="0 0 44 44" fill="none"><circle cx="22" cy="22" r="12" stroke="currentColor" stroke-width="4"/><path d="M22 2v7M22 35v7M2 22h7M35 22h7M8 8l5 5M31 31l5 5M36 8l-5 5M13 31l-5 5" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/></svg></span><span class="brand-copy"><strong>WW<span>SOLAR</span></strong><small>PAINEL COMERCIAL</small></span></a><nav class="nav"><a href="./cliente-dev.html">Voltar ao catálogo</a></nav></div></header>
 <main class="shell client-main">
 <div class="section-label">WW SOLAR / ADMINISTRAÇÃO</div>
@@ -18,6 +18,7 @@
 <div id="admin-tabs" class="admin-tabs" role="group" aria-label="Seções do painel" hidden>
   <button id="admin-tab-sales" class="active" type="button" aria-pressed="true" data-admin-panel="sales"><span aria-hidden="true">▣</span><strong>Vendas</strong><small>Registrar venda fechada</small></button>
   <button id="admin-tab-composer" type="button" aria-pressed="false" data-admin-panel="composer"><span aria-hidden="true">▤</span><strong>Composição</strong><small>Montar kits com custos privados</small></button>
+  <button id="admin-tab-tariffs" type="button" aria-pressed="false" data-admin-panel="tariffs"><span aria-hidden="true">⚡</span><strong>Tarifas</strong><small>Economia Solar</small></button>
 </div>
 <section id="admin-sales-panel" class="admin-orders-panel" hidden>
  <div class="admin-section-row"><div><h2>Registrar <em>venda</em></h2><p>Preencha apenas quando a negociação estiver concluída. Cotação pelo WhatsApp não é venda.</p></div></div>
@@ -59,7 +60,28 @@
   <p class="admin-compose-disclaimer">Composição interna para conferência. Não registra pedido, não publica kits e não altera os preços cadastrados. Valores de custo sujeitos à atualização do fornecedor.</p>
  </div>
 </section>
+<section id="admin-tariffs-panel" class="admin-orders-panel" hidden aria-label="Referências tarifárias">
+ <div class="section-label">WW SOLAR / ECONOMIA SOLAR</div><h2>Gestão tarifária</h2>
+ <p class="client-muted">Enel Ceará · B1 convencional. TE e TUSD conferidas na ANEEL; Fio B oficial a partir de 22/04/2026. Tributos observados em faturas. A referência do simulador comercial muda após aprovação e ativação no banco; A ativação exige confirmação administrativa.</p>
+ <h3>Referências padrão e históricas do motor</h3><div class="admin-compose-table-scroll"><table class="eco-tariff-table"><thead><tr><th scope="col">Competência</th><th scope="col">TE R$/kWh</th><th scope="col">TUSD R$/kWh</th><th scope="col">Fio B R$/kWh</th><th scope="col">ICMS</th><th scope="col">PIS</th><th scope="col">COFINS</th><th scope="col">Bandeira</th><th scope="col">Fonte Fio B</th><th scope="col">Situação</th></tr></thead><tbody id="admin-tariffs-rows"></tbody></table></div>
+ <h3>Vigências oficiais — ANEEL</h3><p class="client-muted">Base local importada dos CSVs gerados em 26/11/2026. Valores sem tributos, em R$/kWh.</p>
+ <div class="admin-compose-table-scroll"><table class="eco-tariff-table"><thead><tr><th>Início</th><th>Fim</th><th>TE</th><th>TUSD</th><th>Fio B integral</th><th>REH (CSV)</th></tr></thead><tbody id="admin-official-rows"></tbody></table></div>
+ <p class="client-muted"><a href="https://dadosabertos.aneel.gov.br/dataset/tarifas-distribuidoras-energia-eletrica" target="_blank" rel="noopener noreferrer">Tarifas ANEEL</a> · <a href="https://dadosabertos.aneel.gov.br/dataset/componentes-tarifarias" target="_blank" rel="noopener noreferrer">Componentes</a> · <a href="https://dadosabertos.aneel.gov.br/dataset/bandeiras-tarifarias" target="_blank" rel="noopener noreferrer">Bandeiras</a></p>
+ <h3>Preparar nova competência</h3><p class="client-muted">Rascunho local para revisão. Não altera a tarifa ativa, não grava no banco e não publica automaticamente. Não inclua dados pessoais de faturas.</p>
+ <form class="client-form" id="admin-tariff-draft"><label>Competência<input name="reference" type="month" required></label><button id="admin-tariff-lookup" class="button button-outline" type="button">Consultar base oficial importada</button>
+ <label>TE (R$/kWh)<input name="te" type="number" step="any" min="0" required></label>
+<label>TUSD (R$/kWh)<input name="tusd" type="number" step="any" min="0" required></label>
+<label>Fio B integral (R$/kWh)<input name="fioB" type="number" step="any" min="0" required></label>
+<label>ICMS (%)<input name="icms" type="number" step="any" min="0" required></label>
+<label>PIS (%)<input name="pis" type="number" step="any" min="0" required></label>
+<label>COFINS (%)<input name="cofins" type="number" step="any" min="0" required></label>
+ <label>Bandeira<select name="flag" required><option value="">Selecione</option><option value="verde">Verde</option><option value="amarela">Amarela</option><option value="vermelha1">Vermelha 1</option><option value="vermelha2">Vermelha 2</option></select></label>
+ <label>Fonte documental (sem dados pessoais)<input name="source" minlength="5" maxlength="300" required></label>
+ <button class="button button-accent" type="submit" disabled>Validar rascunho</button><button class="button button-outline" id="admin-tariff-copy" type="button" disabled>Copiar para revisão</button></form>
+ <button type="button" class="button button-outline" id="admin-tariff-online">Consultar ANEEL online</button><div id="admin-tariff-online-result" role="status" aria-live="polite"></div><p id="admin-tariff-status" role="status" class="client-status"></p><div id="admin-tariff-preview" hidden aria-live="polite"></div>
+ <section id="admin-tariff-central" hidden><h3>Gestão centralizada</h3><p class="client-muted">Ativação e restauração alteram a referência comercial. Não informe dados pessoais.</p><button type="button" class="button button-outline" id="admin-tariff-central-refresh">Atualizar histórico central</button><p id="admin-tariff-central-status" role="status"></p><div id="admin-tariff-central-list"></div></section>
+ </section>
 </main>
 <footer class="footer"><div class="shell footer-inner"><span><strong>WW</strong>SOLAR</span><span>Administração restrita</span><nav class="legal-footer-links" aria-label="Documentos legais"><a href="./privacidade.html">Política de Privacidade</a><a href="./termos.html">Termos de Uso</a></nav></div></footer>
-<script defer src="./cliente-dev-config.js"></script><script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0/dist/umd/supabase.min.js"></script><script defer src="./kit-line-eight-review.js?v=20261113-geracao-media-v1"></script><script defer src="./admin-composition-core.js?v=20261117-composition-v1"></script><script defer src="./admin-dev.js?v=20261117-composition-v1"></script>
+<script defer src="./cliente-dev-config.js"></script><script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0/dist/umd/supabase.min.js"></script><script defer src="./kit-line-eight-review.js?v=20261113-geracao-media-v1"></script><script defer src="./admin-composition-core.js?v=20261117-composition-v1"></script><script defer src="./economia-solar-tarifas.js"></script><script defer src="./economia-solar-core.js"></script><script defer src="./economia-solar-aneel.js"></script><script defer src="./admin-dev.js?v=20261126-economia-rc"></script>
 </body></html>
