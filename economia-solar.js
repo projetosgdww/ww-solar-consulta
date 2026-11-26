@@ -8,13 +8,21 @@ let activeProfile=null,referenceState=isCommercial?'loading':'default',revision=
 const money = n => n.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
 const qty = n => n.toLocaleString('pt-BR',{maximumFractionDigits:2});
 const form = document.getElementById('form');
+const kitLink=document.getElementById('eco-kit-link');
+function updateKitLink(generation){
+ const target=Math.ceil(generation);
+ const valid=Number.isSafeInteger(target)&&target>0&&target<=100000;
+ kitLink.hidden=!valid;kitLink.setAttribute('aria-disabled',String(!valid));
+ if(valid)kitLink.href='./?economia_kwh='+target+'#catalogo';
+ else kitLink.removeAttribute('href');
+}
 function render(){
- if(!form.checkValidity()) return;
+ if(!form.checkValidity()){updateKitLink(0);return;}
  const v=Object.fromEntries([...new FormData(form)].map(([k,x])=>[k,Number(x)]));
- if(Object.values(v).some(n=>!Number.isFinite(n)||n<0)) return;
+ if(Object.values(v).some(n=>!Number.isFinite(n)||n<0)){updateKitLink(0);return;}
  const year=Number(document.getElementById('eco-year').value);
  const r=activeProfile?calculateDraft(v,activeProfile,year):calculate(v,year);
- if(!r)return;
+ if(!r){updateKitLink(0);return;}
  const ref=activeProfile?.reference??policy.reference;
  const month=ref.slice(5)+'/'+ref.slice(0,4);
  const messages={loading:'Consultando referência central; cálculo provisório.',central:'Tarifa aprovada · revisão '+revision+'.',default:'Referência padrão do código.',unavailable:'Consulta tarifária indisponível: estimativa com referência de contingência; confirme antes de usar.'};
@@ -24,6 +32,7 @@ function render(){
  if(form.elements.atual.value!=='')rows.push(['Fatura atual informada (não usada no cálculo)',money(v.atual)]);
  const dl=document.getElementById('details');dl.replaceChildren();
  for(const [label,value] of rows){const dt=document.createElement('dt'),dd=document.createElement('dd');dt.textContent=label;dd.textContent=value;dl.append(dt,dd);}
+ updateKitLink(v.geracao);
  document.getElementById('kit').textContent='Potência de referência: '+qty(v.geracao/132)+' kWp (produtividade hipotética de 132 kWh/kWp/mês).';
 }
 async function refreshReference(){
