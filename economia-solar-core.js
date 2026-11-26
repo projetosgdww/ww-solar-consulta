@@ -76,6 +76,21 @@ function calculateGroup(generator,beneficiaries,year=policy.baseYear,competence)
  const totals=[source,...units].reduce((a,r)=>({before:a.before+r.before,after:a.after+r.after,saving:a.saving+r.saving}),{before:0,after:0,saving:0});
  return {source,units,distribution,sourceRemaining:source.creditBalance-(source.excess-distribution.remaining),totals};
 }
-const api=Object.freeze({policy,tariffFor,calculate,allocateExcess,validateTariffDraft,calculateGroup});
+// Online source is a draft only. Never substitutes taxes from another month.
+function prepareOnlineDraft(r,monthlyTaxes,queriedAt){
+ if(!r||typeof r.month!=='string'||!/^20[0-9]{2}-(0[1-9]|1[0-2])$/.test(r.month)||!r.period||!Array.isArray(r.periods)||r.periods.length!==1)throw new RangeError('Vigência online incompleta ou ambígua');
+ const p=r.period,year=Number(r.month.slice(0,4)),m=Number(r.month.slice(5));
+ const start=r.month+'-01',end=r.month+'-'+String(new Date(Date.UTC(year,m,0)).getUTCDate()).padStart(2,'0');
+ if(![p.te,p.tusd,p.fioB].every(Number.isFinite)||p.te<=0||p.te>10||p.tusd<=0||p.tusd>10||p.fioB<0||p.fioB>p.tusd||typeof p.start!=='string'||typeof p.end!=='string'||p.start>start||p.end<end||p.start!==r.periods[0].start||p.end!==r.periods[0].end||typeof p.reh!=='string'||!p.reh.trim())throw new RangeError('Referência online inválida');
+ const date=new Date(queriedAt);
+ if(!Number.isFinite(date.getTime()))throw new RangeError('Data da consulta inválida');
+ const flag=r.flag?.name??null;
+ if(flag!==null&&(!Object.hasOwn(policy.flags,flag)||!Number.isFinite(r.flag.rate)||Math.abs(r.flag.rate-policy.flags[flag])>1e-9))throw new RangeError('Adicional da bandeira exige revisão técnica');
+ // Only same-month taxes from the configured reference are trusted.
+ const taxes=policy.taxes[r.month]??null;
+ const source=('ANEEL online '+date.toISOString().slice(0,10)+'; '+p.reh+(taxes?'; tributos observados em fatura da mesma competência':'')).slice(0,300);
+ return {reference:r.month,te:p.te,tusd:p.tusd,fioB:p.fioB,flag,taxes,source,status:'rascunho'};
+}
+const api=Object.freeze({policy,tariffFor,calculate,allocateExcess,validateTariffDraft,calculateGroup,prepareOnlineDraft});
 if(typeof module==='object'&&module.exports)module.exports=api;else root.WWSolarEconomia=api;
 })(typeof globalThis==='object'?globalThis:this);
