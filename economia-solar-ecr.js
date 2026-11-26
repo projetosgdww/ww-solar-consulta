@@ -23,6 +23,15 @@ function sensitivity(base,ecr,investment){
  if(!base||![base.before,base.after,base.saving,ecr,investment].every(Number.isFinite)||ecr<0||investment<0)throw RangeError('Comparacao invalida');
  const saving=base.saving-ecr;return {after:base.after+ecr,saving,annual:saving*12,payback:investment>0&&saving>0?investment/(12*saving):null};
 }
+function impact(base,ecr,investment){
+ const comparison=sensitivity(base,ecr,investment);
+ const annualBefore=base.saving*12,annualAfter=comparison.annual,annualLoss=ecr*12;
+ const paybackBefore=investment>0&&base.saving>0?investment/(12*base.saving):null;
+ const paybackMonths=paybackBefore!==null&&comparison.payback!==null?(comparison.payback-paybackBefore)*12:null;
+ const ratio=(a,b)=>b>0&&Number.isFinite(a/b)?a/b*100:null;
+ const scale=Math.max(0,annualBefore,annualAfter);
+ return {annualBefore,annualAfter,annualLoss,savingReduction:ratio(ecr,base.saving),billIncrease:ratio(ecr,base.after),paybackMonths,paybackIncrease:paybackBefore!==null&&comparison.payback!==null?ratio(comparison.payback-paybackBefore,paybackBefore):null,barBefore:scale>0?Math.max(0,annualBefore)/scale*100:0,barAfter:scale>0?Math.max(0,annualAfter)/scale*100:0};
+}
 function estimate({year,gd,compensated,profile},scenario=reference){
  if(!Number.isInteger(year)||![1,2].includes(gd)||!Number.isFinite(compensated)||compensated<0||compensated>1e9)throw RangeError('Cenario ECR invalido');
  if(year<2027)return {status:'not-applicable',reason:'Anterior a 2027',ecr:0};
@@ -36,6 +45,6 @@ function estimate({year,gd,compensated,profile},scenario=reference){
  const wire=compensated*wireRate,benefit=compensated*benefitRate,ecr=compensated*ecrRate;
  return {status:'provisional',year,compensated,scee,wireRate,benefitRate,ecrRate,wire,benefit,ecr,remainingBenefit:benefit-ecr,combined:wire+ecr,factor:p.factor,reference:p,limitations:['Sem tributos do ECR','Energia compensada do modelo atual, sem revalidacao do limite do art. 310-A §3','Nao altera a fatura ou payback do motor base','Vigencia congelada; nao constitui previsao de reajuste']};
 }
-const api=Object.freeze({reference,validateScenario,validateStudyDraft,estimate,sensitivity});
+const api=Object.freeze({reference,validateScenario,validateStudyDraft,estimate,sensitivity,impact});
 if(typeof module==='object'&&module.exports)module.exports=api;else root.WWSolarECR=api;
 })(typeof globalThis==='object'?globalThis:this);
