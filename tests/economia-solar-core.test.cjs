@@ -104,3 +104,19 @@ test('consulta online rejeita resposta truncada, sem gravar dados',async()=>{
  const fake=async()=>({ok:true,json:async()=>({success:true,result:{total:501,records:[]}})});
  await assert.rejects(()=>aneel.lookup('2026-11',fake),/incompleta/);
 });
+
+test('intermediario ANEEL DEV somente leitura e parametros limitados',async()=>{
+ const {handle}=await import('../functions/api/aneel.js');
+ let calls=0;
+ const lookup=async month=>{calls++;return {month,period:null,periods:[],flag:null};};
+ const host='https://ww-solar-economia-dev.pages.dev/api/aneel';
+ const run=(url,method='GET')=>handle(new Request(url,{method}),{lookup});
+ assert.equal((await run(host+'?month=2026-11','POST')).status,405);
+ assert.equal((await run(host+'?month=2026-11&url=example.com')).status,400);
+ assert.equal((await run(host+'?month=2027-01')).status,400);
+ assert.equal((await run('https://catalogo.wwplatform.com.br/api/aneel?month=2026-11')).status,404);
+ assert.equal(calls,0);
+ const ok=await run(host+'?month=2026-11');assert.equal(ok.status,200);assert.equal((await ok.json()).result.month,'2026-11');assert.equal(calls,1);
+ const failed=await handle(new Request(host+'?month=2026-11'),{lookup:async()=>{throw new Error('ANEEL HTTP 503');}});
+ assert.equal(failed.status,502);assert.equal((await failed.json()).code,'UPSTREAM_HTTP');assert.equal(failed.headers.get('Cache-Control'),'no-store');
+});
