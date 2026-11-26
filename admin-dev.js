@@ -19,13 +19,14 @@ const date=iso=>{
 };
 function showPanel(which){
  if(!ready)return;
- for(const name of ['sales','composer']){
+ for(const name of ['sales','composer','tariffs']){
   $('admin-'+name+'-panel').hidden=which!==name;
   $('admin-tab-'+name).classList.toggle('active',which===name);
   $('admin-tab-'+name).setAttribute('aria-pressed',String(which===name));
  }
  if(which==='sales')void loadSales();
  if(which==='composer')void loadCompositionCatalog();
+ if(which==='tariffs'){renderTariffs();renderOfficialTariffs();void loadCentralTariffs();}
 }
 async function init(){
  if(!/^https:\/\/[a-z0-9-]+\.supabase\.co$/.test(cfg.supabaseUrl||'')||
@@ -78,6 +79,7 @@ async function signOutAdmin(){
  $('admin-session-actions').hidden=true;
  $('admin-sales-panel').hidden=true;
  $('admin-composer-panel').hidden=true;
+ $('admin-tariffs-panel').hidden=true;centralState=null;$('admin-tariff-central-list').replaceChildren();
  $('admin-signin').hidden=false;
  $('admin-signin-password').value='';
  $('admin-signin-status').textContent='Sessão encerrada.';
@@ -339,6 +341,240 @@ $('admin-compose-refresh').addEventListener('click',()=>void loadCompositionCata
 $('admin-compose-add').addEventListener('click',()=>{if(composerLines.length>=80){composeStatus('Limite de 80 linhas atingido.');return;}composerLines.push({sku:'',quantity:1});renderComposition();$('admin-compose-rows').querySelector('tr:last-child select')?.focus();});
 $('admin-compose-clear').addEventListener('click',()=>{if(composerLines.some(x=>x.sku)&&!window.confirm('Limpar esta composição?'))return;composerLines=[{sku:'',quantity:1}];renderComposition();composeStatus('Composição limpa. Custos cadastrados preservados.');});
 $('admin-compose-copy').addEventListener('click',async()=>{const txt=composeCore()?.summary(composerLines,composerCatalog);if(!txt){composeStatus('Selecione ao menos um equipamento antes de copiar.');return;}try{await navigator.clipboard.writeText(txt);composeStatus('Composição copiada. Você pode enviar o resumo para revisão.');}catch(_){composeStatus('Não foi possível copiar automaticamente neste navegador.');}});
+
+function renderTariffs(){
+ if(!ready||!$('admin-tariffs-rows'))return;
+ const core=window.WWSolarEconomia;
+ if(!core){$('admin-tariff-status').textContent='Motor tarifario indisponivel. Atualize a pagina.';return;}
+ const tbody=$('admin-tariffs-rows');tbody.replaceChildren();
+ const fmt=x=>Number(x).toLocaleString('pt-BR',{minimumFractionDigits:5,maximumFractionDigits:5});
+ for(const p of Object.values(core.policy.profiles)){
+  const row=element('tr');
+  for(const x of [p.reference,fmt(p.te),fmt(p.tusd),fmt(p.fioB),String(p.icms*100)+'%',(p.pis*100).toFixed(2)+'%',(p.cofins*100).toFixed(2)+'%',p.flag,p.fioBSource,p.reference===core.policy.reference?'Referência padrão':'Histórica'])row.append(element('td',x));
+  tbody.append(row);
+ }
+}
+function renderOfficialTariffs(){
+ if(!ready||!$('admin-official-rows')||!window.WWSolarEconomia)return;
+ const tbody=$('admin-official-rows');tbody.replaceChildren();
+ const fmt=x=>x===null?'Não confirmado':Number(x).toLocaleString('pt-BR',{minimumFractionDigits:5,maximumFractionDigits:9});
+ const dateBR=x=>x.split('-').reverse().join('/');
+ for(const p of window.WWSolarEconomia.policy.periods){
+  const row=element('tr');
+  for(const x of [dateBR(p.start),dateBR(p.end),fmt(p.te),fmt(p.tusd),fmt(p.fioB),p.reh])row.append(element('td',x));
+  tbody.append(row);
+ }
+}
+// Tarifas: o rascunho pertence a uma competencia consultada explicitamente.
+let tariffConsultedMonth=null,tariffOnlineResult=null,tariffRequestVersion=0;
+const tariffFields=['te','tusd','fioB','icms','pis','cofins','flag','source'];
+function clearTariffFields(form){
+ for(const k of tariffFields)form.elements[k].value='';
+ const preview=$('admin-tariff-preview');preview.textContent='';preview.hidden=true;
+}
+function setTariffActions(enabled){
+ const form=$('admin-tariff-draft');
+ if(!form)return;
+ form.querySelector('button[type="submit"]').disabled=!enabled;
+ $('admin-tariff-copy').disabled=!enabled;
+}
+function invalidateTariffMonth(){
+ const form=$('admin-tariff-draft');
+ if(!form)return;
+ tariffRequestVersion++;tariffOnlineResult=null;tariffConsultedMonth=null;clearTariffFields(form);setTariffActions(false);
+ if($('admin-tariff-online-result'))$('admin-tariff-online-result').textContent='';
+ $('admin-tariff-status').textContent='Competência alterada. Consulte a base novamente antes de validar.';
+}
+function renderTariffPreview(d){
+ const out=$('admin-tariff-preview');out.replaceChildren();
+ const core=window.WWSolarEconomia,active=centralState?.versions.find(v=>v.id===centralState.active)?.draft??core.policy.profiles[core.policy.reference];
+ const fmt=(n,max=12)=>Number(n).toLocaleString('pt-BR',{maximumFractionDigits:max});
+ const rows=[['TE (R$/kWh)','te',1],['TUSD (R$/kWh)','tusd',1],['Fio B integral (R$/kWh)','fioB',1],['ICMS (%)','icms',100],['PIS (%)','pis',100],['COFINS (%)','cofins',100]];
+ out.append(element('h3','Rascunho validado — '+d.reference));
+ out.append(element('p','Comparação com '+(centralState?'a referência atual do simulador comercial':'a referência padrão (banco não confirmado)')+': '+active.reference+'. Nenhum valor foi ativado.'));
+ const wrapper=element('div');wrapper.className='admin-compose-table-scroll';
+ const table=element('table');table.className='eco-tariff-table';const head=element('thead'),hr=element('tr');
+ for(const t of ['Parâmetro','Ativo','Rascunho','Diferença'])hr.append(element('th',t));head.append(hr);table.append(head);
+ const body=element('tbody');
+ for(const [label,key,scale] of rows){
+  const tr=element('tr'),delta=(d[key]-active[key])*scale;
+  for(const t of [label,fmt(active[key]*scale),fmt(d[key]*scale),Math.abs(delta)<1e-10?'Sem alteração':(delta>0?'+':'')+fmt(delta)])tr.append(element('td',t));body.append(tr);
+ }
+ const fr=element('tr');for(const t of ['Bandeira',active.flag,d.flag,active.flag===d.flag?'Sem alteração':'Alterada'])fr.append(element('td',t));body.append(fr);
+ table.append(body);wrapper.append(table);out.append(wrapper,element('p','Fonte: '+d.source));out.hidden=false;
+}
+const tariffForm=$('admin-tariff-draft');
+if(tariffForm){
+ setTariffActions(false);
+ tariffForm.elements.reference.addEventListener('input',invalidateTariffMonth);
+ tariffForm.elements.reference.addEventListener('change',()=>{if(tariffConsultedMonth!==tariffForm.elements.reference.value)invalidateTariffMonth();});
+}
+$('admin-tariff-lookup')?.addEventListener('click',()=>{
+ if(!ready||!window.WWSolarEconomia)return;
+ const form=$('admin-tariff-draft'),status=$('admin-tariff-status');
+ if(!form.elements.reference.reportValidity())return;
+ try{
+  tariffRequestVersion++;tariffOnlineResult=null;$('admin-tariff-online-result').textContent='';
+  tariffConsultedMonth=null;setTariffActions(false);clearTariffFields(form);
+  const r=window.WWSolarEconomia.policy.lookupMonth(form.elements.reference.value);
+  if(r.period){
+   for(const k of ['te','tusd','fioB'])if(r.period[k]!==null)form.elements[k].value=String(r.period[k]);
+   form.elements.source.value='CSV ANEEL 26/11/2026; REH '+r.period.reh+(r.taxes?'; tributos observados em fatura da competência':'');
+  }
+  if(r.flag)form.elements.flag.value=r.flag;
+  if(r.taxes)for(const k of ['icms','pis','cofins'])form.elements[k].value=String(Number((r.taxes[k]*100).toFixed(4)));
+  const missing=[];
+  if(!r.period)missing.push(r.reason+' — conferir datas do ciclo');
+  else if(r.period.fioB===null)missing.push('Fio B integral não confirmado');
+  if(!r.flag)missing.push('bandeira sem registro');
+  if(!r.taxes)missing.push('tributos mensais pendentes');
+  tariffConsultedMonth=r.month;setTariffActions(true);
+  status.textContent=missing.length?'Consulta parcial: '+missing.join('; ')+'. Campos pendentes ficam vazios.':'Referências encontradas. Confira e valide o rascunho. Nada foi publicado.';
+ }catch(err){status.textContent=err.message;}
+});
+$('admin-tariff-online')?.addEventListener('click',async()=>{
+ if(!ready||!window.WWSolarAneel)return;
+ const form=$('admin-tariff-draft'),btn=$('admin-tariff-online'),out=$('admin-tariff-online-result');
+ if(!form.elements.reference.reportValidity())return;
+ const month=form.elements.reference.value,version=++tariffRequestVersion;
+ tariffOnlineResult=null;
+ btn.disabled=true;out.textContent='Consultando a ANEEL. Nenhuma tarifa será alterada.';
+ try{
+  const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),25000);
+  let response,payload;
+  try{
+   response=await fetch('/api/aneel?month='+encodeURIComponent(month),{signal:controller.signal,credentials:'omit'});
+   payload=await response.json();
+  }finally{clearTimeout(timer);}
+  if(!response.ok||payload?.ok!==true){const err=new Error(payload?.code??'INVALID_RESPONSE');err.source=payload?.source;err.httpStatus=payload?.httpStatus;throw err;}
+  const r=payload.result;
+  if(!r||r.month!==month||!Array.isArray(r.periods))throw new Error('INVALID_RESPONSE');
+  if(version!==tariffRequestVersion||form.elements.reference.value!==month)return;
+  out.replaceChildren();
+  out.append(element('h3','Consulta online experimental — '+month));
+  const local=window.WWSolarEconomia.policy.lookupMonth(month);
+  if(r.period){
+   const fmt=n=>Number(n).toLocaleString('pt-BR',{maximumFractionDigits:12});
+   for(const [label,k] of [['TE','te'],['TUSD','tusd'],['Fio B integral','fioB']]){
+    const prev=local.period?.[k],same=typeof prev==='number'&&Math.abs(prev-r.period[k])<1e-9;
+    out.append(element('p',label+': R$ '+fmt(r.period[k])+'/kWh · '+(prev==null?'Sem referência local':same?'Igual à base local':'Base local: R$ '+fmt(prev)+'/kWh')));
+   }
+   const br=x=>x.split('-').reverse().join('/');
+   out.append(element('p','Vigência: '+br(r.period.start)+' a '+br(r.period.end)+' · '+r.period.reh));
+  }else{
+   out.append(element('p',r.periods.length>1?'Mais de uma vigência no mês; revisão do ciclo necessária.':'Sem vigência completa na fonte consultada.'));
+  }
+  out.append(element('p',r.flag?'Bandeira: '+r.flag.name+' · R$ '+r.flag.rate.toLocaleString('pt-BR',{maximumFractionDigits:6})+'/kWh':'Bandeira sem registro para o mês.'));
+  out.append(element('p','Consulta informativa. Tributos não são obtidos pela ANEEL nesta consulta. A base local e o rascunho permanecem inalterados.'));
+  if(r.period){
+   tariffOnlineResult={month,result:r,queriedAt:payload.queriedAt};
+   const apply=element('button','Usar dados online no rascunho');apply.type='button';apply.className='button button-outline';apply.addEventListener('click',applyOnlineTariff);out.append(apply);
+  }
+ }catch(err){if(version===tariffRequestVersion&&form.elements.reference.value===month){const labels={UPSTREAM_TIMEOUT:'Tempo limite da ANEEL',UPSTREAM_HTTP:'Resposta HTTP da ANEEL indisponível',UPSTREAM_DATA:'Dados da ANEEL incompletos ou inconsistentes',UPSTREAM_UNAVAILABLE:'Comunicação com a ANEEL indisponível',INVALID_MONTH:'Consulta disponível somente para 2026',PROD_ONLY:'Consulta restrita ao catálogo oficial',INVALID_RESPONSE:'Resposta inválida do intermediário'};const detail=labels[err.message]??'Falha na comunicação com o intermediário';const stage={componentes:'Componentes tarifárias',bandeiras:'Bandeiras tarifárias',validacao:'Validação dos dados',consulta:'Consulta'}[err.source];const http=Number.isInteger(err.httpStatus)?' (HTTP '+err.httpStatus+')':'';out.textContent=(stage?stage+' — ':'')+detail+http+'. Utilize a base importada. Nenhuma tarifa foi alterada.';}}
+ finally{btn.disabled=false;}
+});
+function applyOnlineTariff(){
+ if(!ready||!tariffOnlineResult)return;
+ const form=$('admin-tariff-draft'),status=$('admin-tariff-status'),snapshot=tariffOnlineResult;
+ if(snapshot.month!==form.elements.reference.value)return;
+ try{
+  const local=window.WWSolarEconomia.policy.lookupMonth(snapshot.month);
+  const d=window.WWSolarEconomia.prepareOnlineDraft(snapshot.result,local.taxes,snapshot.queriedAt);
+  clearTariffFields(form);
+  for(const k of ['te','tusd','fioB','flag','source'])if(d[k]!=null)form.elements[k].value=typeof d[k]==='number'?String(Number(d[k].toFixed(12))):String(d[k]);
+  if(d.taxes)for(const k of ['icms','pis','cofins'])form.elements[k].value=String(Number((d.taxes[k]*100).toFixed(4)));
+  tariffConsultedMonth=snapshot.month;setTariffActions(true);
+  status.textContent='Rascunho preenchido com dados online da ANEEL. '+(d.taxes?'Tributos da mesma competência, conforme base local. ':'Tributos mensais pendentes. ')+(d.flag?'':'Bandeira pendente. ')+'Nenhuma tarifa ativa foi alterada.';
+ }catch(err){status.textContent=err.message;}
+}
+// D1 PROD: the server checks the authenticated role for each request.
+let centralState=null,centralBusy=false;
+const centralHost=()=>location.hostname==='catalogo.wwplatform.com.br';
+async function centralRequest(body){
+ const {data,error}=await db.auth.getSession();
+ if(error||!data?.session?.access_token)throw Error('Sessão expirada. Entre novamente.');
+ const headers={Authorization:'Bearer '+data.session.access_token};
+ if(body)headers['Content-Type']='application/json';
+ const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),15000);
+ try{
+  const r=await fetch('/api/tarifas-prod',{method:body?'POST':'GET',headers,body:body?JSON.stringify(body):undefined,signal:controller.signal,cache:'no-store'});
+  const d=await r.json();
+  if(!r.ok||d?.ok!==true){const labels={AUTH_UNAVAILABLE:'Verificação administrativa indisponível.',AUTH_CONFIG:'Configuração de autenticação ausente no deploy.',AUTH_HTTP:'Supabase retornou erro HTTP na validação.',AUTH_TIMEOUT:'Tempo limite na validação Supabase.',AUTH_NETWORK:'Falha de conexão com Supabase.',AUTH_RESPONSE:'Resposta de autenticação inválida.',NOT_AUTHORIZED:'Acesso administrativo não autorizado.',STORAGE_UNAVAILABLE:'Banco tarifário ainda não conectado.',REFRESH_REQUIRED:'Outra sessão alterou o histórico. Atualize antes de repetir.',WRITE_NOT_CONFIRMED_REFRESH:'Gravação não confirmada. Atualize o histórico antes de repetir.',INVALID_TRANSITION:'Operação não permitida para esta versão.',DUPLICATE_TARIFF:'Já existe uma versão com os mesmos parâmetros. Utilize a versão cadastrada.'};throw Error((labels[d?.code]??'Operação não confirmada. Atualize o histórico antes de repetir.')+(Number.isInteger(d?.httpStatus)?' HTTP '+d.httpStatus:''));}
+  if(!Number.isSafeInteger(d.state?.revision)||!Array.isArray(d.state?.versions)||!Array.isArray(d.state?.events))throw Error('Resposta inválida do banco tarifário.');
+  return d.state;
+ }finally{clearTimeout(timer);}
+}
+function centralStatus(t){$('admin-tariff-central-status').textContent=t;}
+async function loadCentralTariffs(){
+ const section=$('admin-tariff-central');if(!ready||!centralHost()||!section||centralBusy)return;
+ section.hidden=false;centralBusy=true;centralState=null;renderCentralTariffs();centralStatus('Consultando banco tarifário...');
+ try{centralState=await centralRequest();centralStatus('Banco tarifário conectado. A referência ativa é utilizada somente pelo simulador comercial.');}
+ catch(err){centralStatus(err.message);}
+ finally{centralBusy=false;renderCentralTariffs();}
+}
+async function centralAction(action,id,draft,expected){
+ if(!ready||!centralHost()||centralBusy||!centralState||centralState.revision!==expected)return;
+ if(!confirm('Confirmar operação? Ativar ou restaurar muda a referência utilizada nas novas simulações comerciais.'))return;
+ centralBusy=true;renderCentralTariffs();centralStatus('Registrando no banco tarifário...');
+ try{centralState=await centralRequest({action,id,draft,expectedRevision:expected,requestId:crypto.randomUUID()});centralStatus('Operação confirmada pelo servidor.');}
+ catch(err){centralState=null;centralStatus(err.message);}
+ finally{centralBusy=false;renderCentralTariffs();}
+}
+function renderCentralTariffs(){
+ const out=$('admin-tariff-central-list');if(!out)return;out.replaceChildren();
+ const s=centralState;if(!s||centralBusy)return;
+ const selected=s.versions.find(v=>v.id===s.active);
+ out.append(element('p','Referência ativa do simulador comercial: '+(selected?selected.draft.reference+' · '+selected.id.slice(0,8):'padrão do código')));
+ if(selected)out.append(button('Restaurar padrão central',()=>void centralAction('restore_default',null,null,s.revision)));
+ if(!s.versions.length)out.append(element('p','Nenhuma versão central salva.'));
+ for(const v of [...s.versions].reverse()){
+  const row=element('div',undefined,'eco-sandbox-entry');
+  row.append(element('strong',v.draft.reference+' · '+v.id.slice(0,8)+' · '+(s.active===v.id?'Ativa no simulador comercial':v.state)));
+  row.append(element('p','TE '+v.draft.te+' | TUSD '+v.draft.tusd+' | Fio B '+v.draft.fioB+' | '+v.draft.flag));
+  row.append(element('p','Fonte: '+v.draft.source));
+  if(v.state==='salvo')row.append(button('Aprovar no banco tarifário',()=>void centralAction('approve',v.id,null,s.revision)));
+  if(v.state==='aprovado'&&v.id!==s.active)row.append(button('Ativar / restaurar no banco tarifário',()=>void centralAction('activate',v.id,null,s.revision)));
+  out.append(row);
+ }
+ if(s.events.length){out.append(element('h3','Histórico central — últimas 50 ações'));const labels={save:'Salvou',approve:'Aprovou',activate:'Ativou / restaurou',restore_default:'Restaurou padrão'};
+  for(const e of [...s.events].reverse())out.append(element('p',date(e.at)+' · '+labels[e.action]+' · '+(e.id?.slice(0,8)??'padrão')+' · Administrador '+e.actor.slice(0,8)));
+ }
+}
+function addCentralSave(d,out){
+ if(!centralHost())return;
+ const b=button('Salvar versão no banco tarifário',()=>{try{
+  if(!centralState||centralBusy)throw Error('Consulte o banco tarifário antes de salvar.');
+  if(centralState.versions.some(v=>['reference','te','tusd','fioB','icms','pis','cofins','flag'].every(k=>v.draft[k]===d[k])))throw Error('Já existe uma versão com os mesmos parâmetros. Utilize a versão cadastrada.');
+  const current=tariffDraft();if(!current||JSON.stringify(current)!==JSON.stringify(d))throw Error('Valide novamente o rascunho.');
+  void centralAction('save',null,current,centralState.revision);
+ }catch(err){centralStatus(err.message);$('admin-tariff-status').textContent=err.message;}});
+ out.append(b);
+}
+$('admin-tariff-central-refresh')?.addEventListener('click',()=>void loadCentralTariffs());
+function tariffDraft(){
+ if(!ready||!window.WWSolarEconomia)return null;
+ const form=$('admin-tariff-draft');
+ if(tariffConsultedMonth!==form.elements.reference.value)throw new Error('Consulte a competência selecionada antes de validar.');
+ if(!form.reportValidity())return null;
+ const data=Object.fromEntries(new FormData(form));
+ const d={reference:data.reference,source:data.source,flag:data.flag};
+ for(const key of ['te','tusd','fioB'])d[key]=Number(data[key]);
+ for(const key of ['icms','pis','cofins'])d[key]=Number(data[key])/100;
+ return window.WWSolarEconomia.validateTariffDraft(d);
+}
+$('admin-tab-tariffs')?.addEventListener('click',()=>showPanel('tariffs'));
+$('admin-tariff-draft')?.addEventListener('submit',ev=>{
+ ev.preventDefault();if(!ready)return;
+ const out=$('admin-tariff-preview'),status=$('admin-tariff-status');out.textContent='';out.hidden=true;
+ try{const d=tariffDraft();if(!d)return;renderTariffPreview(d);addCentralSave(d,out);status.textContent='Rascunho validado. Nenhuma tarifa ativa foi alterada.';}
+ catch(err){status.textContent=err.message;}
+});
+$('admin-tariff-draft')?.addEventListener('input',()=>{if(!ready)return;$('admin-tariff-preview').textContent='';$('admin-tariff-preview').hidden=true;$('admin-tariff-status').textContent='Valide novamente apos editar.';});
+$('admin-tariff-copy')?.addEventListener('click',async()=>{
+ if(!ready)return;
+ try{const d=tariffDraft();if(!d)return;await navigator.clipboard.writeText(JSON.stringify(d,null,2));$('admin-tariff-status').textContent='Rascunho copiado para revisao. Nao publicado.';}
+ catch(err){$('admin-tariff-status').textContent='Nao foi possivel copiar: '+err.message;}
+});
 
 void init();
 })();
