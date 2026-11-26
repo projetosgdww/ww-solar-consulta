@@ -26,7 +26,7 @@ function clearCredentials(){
 function showPanel(which){
  if(!ready)return;
  clearCredentials();
- for(const name of ['clients','orders','kits','composer']){
+ for(const name of ['clients','orders','kits','composer','tariffs'].filter(n=>$('admin-tab-'+n)&&$('admin-'+n+'-panel'))){
    $('admin-'+name+'-panel').hidden=which!==name;
    $('admin-tab-'+name).classList.toggle('active',which===name);
    $('admin-tab-'+name).setAttribute('aria-pressed',String(which===name));
@@ -35,6 +35,7 @@ function showPanel(which){
  if(which==='orders')void loadOrders();
  if(which==='kits')void loadKitPreviews();
  if(which==='composer')void loadCompositionCatalog();
+ if(which==='tariffs')renderTariffs();
 }
 async function init(){
  if(!/^https:\/\/[a-z0-9-]+\.supabase\.co$/.test(cfg.supabaseUrl||'')
@@ -442,5 +443,40 @@ $('admin-kit-status-filter').addEventListener('change',renderKitPreviews);
 $('admin-refresh-clients').addEventListener('click',()=>void loadClients());
 $('admin-refresh-orders').addEventListener('click',()=>void loadOrders());
 $('admin-order-filter').addEventListener('change',renderOrders);
+function renderTariffs(){
+ if(!ready||!$('admin-tariffs-rows'))return;
+ const core=window.WWSolarEconomia;
+ if(!core){$('admin-tariff-status').textContent='Motor tarifario indisponivel. Atualize a pagina.';return;}
+ const tbody=$('admin-tariffs-rows');tbody.replaceChildren();
+ const fmt=x=>Number(x).toLocaleString('pt-BR',{minimumFractionDigits:5,maximumFractionDigits:5});
+ for(const p of Object.values(core.policy.profiles)){
+  const row=element('tr');
+  for(const x of [p.reference,fmt(p.te),fmt(p.tusd),fmt(p.fioB),String(p.icms*100)+'%',(p.pis*100).toFixed(2)+'%',(p.cofins*100).toFixed(2)+'%',p.flag,p.reference===core.policy.reference?'Ativa na simulacao':'Historica'])row.append(element('td',x));
+  tbody.append(row);
+ }
+}
+function tariffDraft(){
+ if(!ready||!window.WWSolarEconomia)return null;
+ const form=$('admin-tariff-draft');
+ if(!form.reportValidity())return null;
+ const data=Object.fromEntries(new FormData(form));
+ const d={reference:data.reference,source:data.source,flag:data.flag};
+ for(const key of ['te','tusd','fioB'])d[key]=Number(data[key]);
+ for(const key of ['icms','pis','cofins'])d[key]=Number(data[key])/100;
+ return window.WWSolarEconomia.validateTariffDraft(d);
+}
+$('admin-tab-tariffs')?.addEventListener('click',()=>showPanel('tariffs'));
+$('admin-tariff-draft')?.addEventListener('submit',ev=>{
+ ev.preventDefault();if(!ready)return;
+ const out=$('admin-tariff-preview'),status=$('admin-tariff-status');out.textContent='';out.hidden=true;
+ try{const d=tariffDraft();if(!d)return;out.textContent=JSON.stringify(d,null,2);out.hidden=false;status.textContent='Rascunho validado. Nenhuma tarifa ativa foi alterada.';}
+ catch(err){status.textContent=err.message;}
+});
+$('admin-tariff-draft')?.addEventListener('input',()=>{if(!ready)return;$('admin-tariff-preview').textContent='';$('admin-tariff-preview').hidden=true;$('admin-tariff-status').textContent='Valide novamente apos editar.';});
+$('admin-tariff-copy')?.addEventListener('click',async()=>{
+ if(!ready)return;
+ try{const d=tariffDraft();if(!d)return;await navigator.clipboard.writeText(JSON.stringify(d,null,2));$('admin-tariff-status').textContent='Rascunho copiado para revisao. Nao publicado.';}
+ catch(err){$('admin-tariff-status').textContent='Nao foi possivel copiar: '+err.message;}
+});
 void init();
 })();
