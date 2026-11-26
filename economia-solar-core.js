@@ -54,7 +54,7 @@ function allocateExcess(kwh,percentages){
 }
 // Draft only: validates a complete monthly reference; never activates or persists it.
 function validateTariffDraft(d){
- if(!d||typeof d.reference!=='string'||!/^20\\d{2}-(0[1-9]|1[0-2])$/.test(d.reference))throw new RangeError('Competencia invalida');
+ if(!d||typeof d.reference!=='string'||!/^20[0-9]{2}-(0[1-9]|1[0-2])$/.test(d.reference))throw new RangeError('Competencia invalida');
  const {te,tusd,fioB,icms,pis,cofins,flag}=d;
  if(![te,tusd,fioB,icms,pis,cofins].every(Number.isFinite)||te<=0||te>10||tusd<=0||tusd>10||fioB<0||fioB>tusd||icms<0||icms>=.5||pis<0||cofins<0||pis+cofins>=.3||typeof flag!=='string'||!Object.hasOwn(policy.flags,flag))throw new RangeError('Parametros tarifarios fora dos limites');
  const source=typeof d.source==='string'?d.source.trim():'';
