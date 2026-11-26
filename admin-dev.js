@@ -483,6 +483,7 @@ function invalidateTariffMonth(){
  const form=$('admin-tariff-draft');
  if(!form)return;
  tariffConsultedMonth=null;clearTariffFields(form);setTariffActions(false);
+ if($('admin-tariff-online-result'))$('admin-tariff-online-result').textContent='';
  $('admin-tariff-status').textContent='Competência alterada. Consulte a base novamente antes de validar.';
 }
 function renderTariffPreview(d){
@@ -530,6 +531,33 @@ $('admin-tariff-lookup')?.addEventListener('click',()=>{
   tariffConsultedMonth=r.month;setTariffActions(true);
   status.textContent=missing.length?'Consulta parcial: '+missing.join('; ')+'. Campos pendentes ficam vazios.':'Referências encontradas. Confira e valide o rascunho. Nada foi publicado.';
  }catch(err){status.textContent=err.message;}
+});
+$('admin-tariff-online')?.addEventListener('click',async()=>{
+ if(!ready||!window.WWSolarAneel)return;
+ const form=$('admin-tariff-draft'),btn=$('admin-tariff-online'),out=$('admin-tariff-online-result');
+ if(!form.elements.reference.reportValidity())return;
+ const month=form.elements.reference.value;
+ btn.disabled=true;out.textContent='Consultando a ANEEL. Nenhuma tarifa será alterada.';
+ try{
+  const r=await window.WWSolarAneel.lookup(month);
+  if(form.elements.reference.value!==month){out.textContent='';return;}
+  out.replaceChildren();
+  out.append(element('h3','Consulta online experimental — '+month));
+  const local=window.WWSolarEconomia.policy.lookupMonth(month);
+  if(r.period){
+   const fmt=n=>Number(n).toLocaleString('pt-BR',{maximumFractionDigits:12});
+   for(const [label,k] of [['TE','te'],['TUSD','tusd'],['Fio B integral','fioB']]){
+    const prev=local.period?.[k],same=typeof prev==='number'&&Math.abs(prev-r.period[k])<1e-9;
+    out.append(element('p',label+': R$ '+fmt(r.period[k])+'/kWh · '+(prev==null?'Sem referência local':same?'Igual à base local':'Base local: R$ '+fmt(prev)+'/kWh')));
+   }
+   out.append(element('p','Vigência: '+r.period.start+' a '+r.period.end+' · '+r.period.reh));
+  }else{
+   out.append(element('p',r.periods.length>1?'Mais de uma vigência no mês; revisão do ciclo necessária.':'Sem vigência completa na fonte consultada.'));
+  }
+  out.append(element('p',r.flag?'Bandeira: '+r.flag.name+' · R$ '+r.flag.rate.toLocaleString('pt-BR',{maximumFractionDigits:6})+'/kWh':'Bandeira sem registro para o mês.'));
+  out.append(element('p','Consulta informativa. Tributos não são obtidos por esta consulta. A base local e o rascunho permanecem inalterados.'));
+ }catch(err){if(form.elements.reference.value===month)out.textContent='Não foi possível confirmar os dados online da ANEEL. Utilize a base importada. Nenhuma tarifa foi alterada.';}
+ finally{btn.disabled=false;}
 });
 function tariffDraft(){
  if(!ready||!window.WWSolarEconomia)return null;
