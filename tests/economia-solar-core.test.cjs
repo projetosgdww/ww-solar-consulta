@@ -120,3 +120,13 @@ test('intermediario ANEEL DEV somente leitura e parametros limitados',async()=>{
  const failed=await handle(new Request(host+'?month=2026-11'),{lookup:async()=>{throw new Error('ANEEL HTTP 503');}});
  assert.equal(failed.status,502);assert.equal((await failed.json()).code,'UPSTREAM_HTTP');assert.equal(failed.headers.get('Cache-Control'),'no-store');
 });
+
+test('diagnostico distingue indisponibilidade de cada fonte e erro JSON',async()=>{
+ const onlyFlagsFail=async url=>new URL(url).searchParams.get('resource_id')===aneel.resources.flags?{ok:false,status:503}:{ok:true,json:async()=>({success:true,result:{total:0,records:[]}})};
+ await assert.rejects(()=>aneel.lookup('2026-11',onlyFlagsFail),err=>err.source==='bandeiras'&&err.message==='ANEEL HTTP 503');
+ const badJSON=async url=>new URL(url).searchParams.get('resource_id')===aneel.resources.components?{ok:true,json:async()=>{throw new SyntaxError('invalid JSON');}}:{ok:true,json:async()=>({success:true,result:{total:0,records:[]}})};
+ await assert.rejects(()=>aneel.lookup('2026-11',badJSON),err=>err.source==='componentes'&&err.message==='Resposta JSON ANEEL inválida');
+ const {handle}=await import('../functions/api/aneel.js');
+ const response=await handle(new Request('https://ww-solar-economia-dev.pages.dev/api/aneel?month=2026-11'),{lookup:async()=>{const err=new Error('ANEEL HTTP 503');err.source='bandeiras';throw err;}});
+ const body=await response.json();assert.equal(body.code,'UPSTREAM_HTTP');assert.equal(body.source,'bandeiras');assert.equal(body.httpStatus,503);
+});
