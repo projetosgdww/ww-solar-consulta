@@ -86,3 +86,21 @@ test('snapshot ANEEL seleciona vigencia sem inventar dados mensais',()=>{
  assert.equal(policy.lookupMonth('2027-05').period,null);
  assert.throws(()=>policy.lookupMonth('2026-13'),RangeError);
 });
+
+const aneel=require('../economia-solar-aneel.js');
+test('consulta ANEEL valida unidade, duplicatas, vigencia e bandeira',()=>{
+ const make=(a,b,k,v)=>({...aneel.filters,DatInicioVigencia:a,DatFimVigencia:b,DscResolucaoHomologatoria:'REH teste',DscComponenteTarifario:k,VlrComponenteTarifario:v});
+ const rows=[make('2026-08-26','2027-04-21','TE','213,26'),make('2026-08-26','2027-04-21','TUSD','488,49'),make('2026-08-26','2027-04-21','TUSD_FioB','283,714420722')];
+ const flag=[{DatCompetencia:'2026-11-01',NomBandeiraAcionada:'Verde',VlrAdicionalBandeira:',00'}];
+ const r=aneel.summarize('2026-11',[...rows,rows[0]],flag);
+ near(r.period.te,.21326);near(r.period.fioB,.283714420722);near(r.flag.rate,0);
+ assert.equal(aneel.summarize('2026-08',rows,[]).period,null);
+ assert.equal(aneel.summarize('2026-12',rows,[]).flag,null);
+ assert.throws(()=>aneel.summarize('2026-11',rows.slice(0,2),flag));
+ assert.throws(()=>aneel.summarize('2026-11',[...rows,{...rows[0],VlrComponenteTarifario:'999'}],flag));
+ assert.throws(()=>aneel.summarize('2027-01',rows,flag));
+});
+test('consulta online rejeita resposta truncada, sem gravar dados',async()=>{
+ const fake=async()=>({ok:true,json:async()=>({success:true,result:{total:501,records:[]}})});
+ await assert.rejects(()=>aneel.lookup('2026-11',fake),/incompleta/);
+});
