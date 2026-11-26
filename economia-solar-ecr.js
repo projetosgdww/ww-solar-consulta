@@ -16,7 +16,7 @@ function estimate({year,gd,compensated,profile},scenario=reference){
  if(year!==2027)return {status:'unavailable',reason:'Fator ECR nao definido para este ano',ecr:null};
  const p=validateScenario(scenario);
  // Recuse misturar referencia SCEE congelada com uma tarifa convencional diferente.
- if(!profile||profile.reference!=='2026-11'||Math.abs(profile.te-.21326)>1e-8||Math.abs(profile.tusd-p.tusdScee)>1e-8||Math.abs(profile.fioB-p.fioB)>1e-8)return {status:'unavailable',reason:'Referencia tarifaria diferente da base SCEE de estudo',ecr:null};
+ if(!profile||![profile.te,profile.tusd,profile.fioB].every(Number.isFinite)||profile.reference!=='2026-11'||Math.abs(profile.te-.21326)>1e-8||Math.abs(profile.tusd-p.tusdScee)>1e-8||Math.abs(profile.fioB-p.fioB)>1e-8)return {status:'unavailable',reason:'Referencia tarifaria diferente da base SCEE de estudo',ecr:null};
  // Precisao de tarifa de 5 casas para reproduzir o demonstrativo de estudo.
  const rate=n=>Number(n.toFixed(5)),scee=rate(p.teScee+p.tusdScee),wireRate=rate(p.fioB*.75),benefitRate=Math.max(0,rate(scee-wireRate)),ecrRate=benefitRate*p.factor;
  const wire=compensated*wireRate,benefit=compensated*benefitRate,ecr=compensated*ecrRate;
