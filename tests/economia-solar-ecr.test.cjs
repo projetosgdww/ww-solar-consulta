@@ -60,3 +60,24 @@ test('gestao ECR: validacao, revisao, aprovacao, restauracao e leitura publica s
  assert.throws(()=>replay([...rows,{seq:4,expected_seq:1,action:'restore_default'}]));
  rows.push({seq:4,expected_seq:3,action:'restore_default',actor_id:actor});assert.equal(publicReference(replay(rows)).profile,null);
 });
+
+test('quadro ECR deriva os quatro indicadores sem arredondar prematuramente',()=>{
+ const base=C.calculate(v,2027),e=run({compensated:base.compensated}),i=E.impact(base,e.ecr,15000);
+ assert.equal(i.annualBefore.toFixed(2),'4754.76');assert.equal(i.annualAfter.toFixed(2),'4100.65');assert.equal(i.annualLoss.toFixed(2),'654.11');
+ assert.equal(i.savingReduction.toFixed(2),'13.76');assert.equal(i.paybackMonths.toFixed(1),'6.0');
+ near(i.billIncrease,e.ecr/base.after*100);near(i.paybackIncrease,e.ecr/(base.saving-e.ecr)*100);
+ near(i.barBefore,100);near(i.barAfter,100-i.savingReduction);
+});
+test('quadro ECR trata ausencia de economia, fatura zero e investimento zero',()=>{
+ const base={before:100,after:100,saving:0};
+ const x=E.impact(base,0,0);assert.equal(x.savingReduction,null);assert.equal(x.paybackMonths,null);assert.equal(x.paybackIncrease,null);assert.equal(x.barBefore,0);assert.equal(x.barAfter,0);
+ const y=E.impact({before:100,after:90,saving:10},20,1000);assert.equal(y.annualAfter,-120);assert.equal(y.savingReduction,200);assert.equal(y.barAfter,0);assert.equal(y.paybackMonths,null);
+ const z=E.impact({before:100,after:0,saving:100},0,0);assert.equal(z.billIncrease,null);assert.equal(z.paybackIncrease,null);assert.equal(z.barBefore,100);assert.equal(z.barAfter,100);
+});
+test('quadro ECR usa renderizacao dinamica e fica oculto sem estudo disponivel',()=>{
+ const fs=require('node:fs'),html=fs.readFileSync('economia-solar.html','utf8'),js=fs.readFileSync('economia-solar.js','utf8');
+ assert.match(html,/id="eco-ecr-impact" class="eco-ecr-impact" hidden/);
+ assert.match(js,/renderEcrImpact\(r,result.ecr,v.invest\)/);
+ assert.match(js,/eco-ecr-impact'\).hidden=true/);
+ assert.match(js,/style.width=impact.barAfter/);
+});
