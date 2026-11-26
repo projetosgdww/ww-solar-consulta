@@ -130,3 +130,17 @@ test('diagnostico distingue indisponibilidade de cada fonte e erro JSON',async()
  const response=await handle(new Request('https://ww-solar-economia-dev.pages.dev/api/aneel?month=2026-11'),{lookup:async()=>{const err=new Error('ANEEL HTTP 503');err.source='bandeiras';throw err;}});
  const body=await response.json();assert.equal(body.code,'UPSTREAM_HTTP');assert.equal(body.source,'bandeiras');assert.equal(body.httpStatus,503);
 });
+
+test('rascunho online usa somente tributos da propria competencia e preserva motor',()=>{
+ const {prepareOnlineDraft}=require('../economia-solar-core.js');
+ const p={start:'2026-08-26',end:'2027-04-21',te:.21326,tusd:.48849,fioB:.283714420722,reh:'REH 3324/2026'};
+ const r={month:'2026-11',period:p,periods:[p],flag:{name:'verde',rate:0}};
+ const time='2026-11-26T15:00:00Z', before=calculate(v);
+ const d=prepareOnlineDraft(r,null,time);near(d.taxes.pis,.0048);near(d.fioB,p.fioB);assert.equal(d.status,'rascunho');
+ const july={...p,start:'2026-04-22',end:'2026-08-25',te:.26099,tusd:.48878};
+ const j=prepareOnlineDraft({month:'2026-07',period:july,periods:[july],flag:{name:'amarela',rate:.01885}},d.taxes,time);assert.equal(j.taxes,null);
+ assert.throws(()=>prepareOnlineDraft({...r,periods:[p,july]},null,time),RangeError);
+ assert.throws(()=>prepareOnlineDraft({...r,flag:{name:'verde',rate:.1}},null,time),RangeError);
+ assert.throws(()=>prepareOnlineDraft({...r,period:{...p,end:'2026-11-15'}},null,time),RangeError);
+ assert.deepEqual(calculate(v),before);
+});
