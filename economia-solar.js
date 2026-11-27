@@ -3,6 +3,7 @@
 // Preliminary empirical tariff model; not a validated regulatory billing engine.
 // Public tariff reference, not a future tariff forecast.
 const {calculate,calculateDraft,validateTariffDraft,policy}=globalThis.WWSolarEconomia;
+const generationFactor=globalThis.WWSolarClienteCore?.GENERATION_FACTOR??128;
 const isCommercial=location.hostname==='catalogo.wwplatform.com.br';
 let activeProfile=null,referenceState=isCommercial?'loading':'default',revision=null,requestVersion=0;
 const money = n => n.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
@@ -213,18 +214,20 @@ function selectBudgetKits(rows,target,budget){
  if(!Number.isFinite(target)||target<=0||!Number.isFinite(budget)||budget<=0)return [];
  const cents=n=>Math.round(n*100),cost=(a,b)=>cents(a.price)-cents(b.price)||Math.abs(a.generation-target)-Math.abs(b.generation-target)||a.id.localeCompare(b.id);
  const close=(a,b)=>Math.abs(a.generation-target)-Math.abs(b.generation-target)||cost(a,b);
- const fits=rows.filter(p=>cents(p.price)<=cents(budget)),meets=rows.filter(p=>p.generation>=target);
- const within=fits.filter(p=>p.generation>=target).sort(close)[0]||fits.filter(p=>p.generation<target).sort((a,b)=>b.generation-a.generation||cost(a,b))[0];
+ // Keep only economically non-dominated options; never suggest paying more for less energy.
+ const viable=rows.filter(p=>!rows.some(q=>q!==p&&cents(q.price)<=cents(p.price)&&q.generation>=p.generation&&(cents(q.price)<cents(p.price)||q.generation>p.generation)));
+ const fits=viable.filter(p=>cents(p.price)<=cents(budget)),meets=viable.filter(p=>p.generation>=target);
  const full=meets.slice().sort(cost)[0];
+ const within=fits.filter(p=>p.generation>=target).sort(cost)[0]||fits.filter(p=>p.generation<target).sort((a,b)=>b.generation-a.generation||cost(a,b))[0];
  const out=[],seen=new Set();
  const add=(p,label)=>{if(p&&!seen.has(p.id)){out.push({...p,label});seen.add(p.id);}};
  add(within,within?.generation>=target?'Atende à geração dentro do orçamento':'Melhor geração dentro do orçamento');
  if(!within||within.generation<target){
-  const higher=rows.filter(p=>cents(p.price)>cents(budget)&&p.generation> (within?.generation??0)&&p.generation<target).sort((a,b)=>Math.abs(a.generation-target)-Math.abs(b.generation-target)||cost(a,b))[0];
-  add(higher,'Alternativa intermediária');
+  const higher=viable.filter(p=>cents(p.price)>cents(budget)&&p.generation>(within?.generation??0)&&p.generation<target&&(!full||cents(p.price)<cents(full.price))).sort((a,b)=>b.generation-a.generation||cost(a,b))[0];
+  add(higher,full?'Alternativa intermediária':'Maior geração disponível');
  }
  add(full,'Menor preço que atende à geração');
- if(out.length===0)add(rows.slice().sort(close)[0],'Opção mais próxima da geração');
+ if(out.length===0)add(viable.slice().sort(close)[0],'Opção mais próxima da geração');
  return out.slice(0,3);
 }
 const kitEl=(tag,txt,cls)=>{const el=document.createElement(tag);if(txt!==undefined)el.textContent=txt;if(cls)el.className=cls;return el;};
@@ -346,7 +349,7 @@ function drawFlow(v,r,g){
   if(p.n>0){const seg=document.createElement('span');seg.style.width=pct+'%';seg.style.backgroundColor=p.color;seg.textContent=pct>=16?qty(p.n)+' kWh':'';bar.append(seg);}
   const d=document.createElement('div'),small=document.createElement('small'),i=document.createElement('i'),strong=document.createElement('strong'),foot=document.createElement('small');i.style.backgroundColor=p.color;small.append(i,document.createTextNode(p.label));strong.textContent=qty(p.n)+' kWh';foot.textContent=qty(pct)+'% da geração';d.append(small,strong,foot);leg.append(d);
  }
- fillRateio('eco-dash-balance',[['Geração mensal',qty(total)+' kWh'],['Consumo da rede',qty(r.grid)+' kWh'],['Energia injetada',qty(r.injected)+' kWh'],['Energia não compensada na geradora',qty(r.uncredited)+' kWh'],['Excedente líquido disponível para rateio',qty(Math.min(r.excess,Math.max(0,r.injected-r.grid)))+' kWh'],['Potência de referência',qty(v.geracao/132)+' kWp'],...(u?[['Compensado nas beneficiárias (do destinado)',qty(u.usedReceived)+' kWh'],['Créditos não utilizados nas beneficiárias (do destinado)',qty(u.remainingReceived)+' kWh']]:[])]);
+ fillRateio('eco-dash-balance',[['Geração mensal',qty(total)+' kWh'],['Consumo da rede',qty(r.grid)+' kWh'],['Energia injetada',qty(r.injected)+' kWh'],['Energia não compensada na geradora',qty(r.uncredited)+' kWh'],['Excedente líquido disponível para rateio',qty(Math.min(r.excess,Math.max(0,r.injected-r.grid)))+' kWh'],['Potência de referência',qty(v.geracao/generationFactor)+' kWp'],...(u?[['Compensado nas beneficiárias (do destinado)',qty(u.usedReceived)+' kWh'],['Créditos não utilizados nas beneficiárias (do destinado)',qty(u.remainingReceived)+' kWh']]:[])]);
 }
 function dashboard(v,year,r,g){
  lastDashboard={v,year,r,g};if(!g||!g.units.length)dashScope='source';
@@ -391,7 +394,7 @@ function render(){
  dashboard(v,year,r,g);
  byId('eco-dash-content').hidden=false;byId('eco-dash-invalid').hidden=true;
  updateKitLink(v.geracao);
- document.getElementById('kit').textContent='Potência de referência: '+qty(v.geracao/132)+' kWp (produtividade hipotética de 132 kWh/kWp/mês).';
+ document.getElementById('kit').textContent='Potência de referência: '+qty(v.geracao/generationFactor)+' kWp (produtividade estimada do catálogo: '+qty(generationFactor)+' kWh/kWp/mês).';
 }
 async function refreshReference(){
  if(!isCommercial)return;
