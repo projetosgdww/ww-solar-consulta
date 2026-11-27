@@ -339,4 +339,17 @@ test('dashboard principal executa com o motor real, troca escopo e conserva flux
  get('eco-rateio-enabled').checked=false;form.events.input();assert.equal(get('eco-tab-rateio').hidden,true);assert.equal(get('eco-panel-overview').hidden,false);assert.equal(get('saving').textContent,money(source.saving));
  assert.equal(get('eco-dash-bill-label').textContent,'Fatura com energia solar');
  get('eco-year').value='2026';get('eco-year').events.change();assert.equal(get('eco-tab-ecr').hidden,true);
+ Object.assign(data,{consumo:0,geracao:0,sim:0,cip:0,invest:0});
+ form.events.input();assert.equal(get('after').textContent,money(0));assert.equal(get('saving').textContent,money(0));assert.equal(get('before').textContent,money(0));
+ assert.equal(get('eco-kit-link').hidden,true);
+ get('eco-rateio-enabled').checked=true;
+ for(const id of ['eco-rateio-consumo','eco-rateio-cip','eco-rateio-percent'])get(id).value='0';
+ form.events.input();assert.equal(get('eco-rateio-kpi-beneficiary').textContent,money(0));
+ scopes[1].events.click();assert.equal(get('after').textContent,money(0));
+ Object.assign(data,{consumo:10});
+ form.events.input();assert.equal(get('after').textContent,money(C.calculate(data,2026).after));
+ assert.equal(get('eco-rateio-beneficiary-after').textContent,money(0));
+ assert.ok(C.calculate({...data,consumo:0},2026).after>0,'motor preserva disponibilidade');
+ for(const name of ['consumo','geracao','sim','cip','invest'])assert.match(html,new RegExp('name="'+name+'"[^>]*value="0"'));
+ for(const id of ['eco-rateio-consumo','eco-rateio-cip','eco-rateio-percent'])assert.match(html,new RegExp('id="'+id+'"[^>]*value="0"'));
 });
