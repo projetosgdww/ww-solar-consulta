@@ -353,3 +353,23 @@ test('dashboard principal executa com o motor real, troca escopo e conserva flux
  for(const name of ['consumo','geracao','sim','cip','invest'])assert.match(html,new RegExp('name="'+name+'"[^>]*value="0"'));
  for(const id of ['eco-rateio-consumo','eco-rateio-cip','eco-rateio-percent'])assert.match(html,new RegExp('id="'+id+'"[^>]*value="0"'));
 });
+
+test('recomendacao por orcamento utiliza apenas kits publicos e geracao real do catalogo',()=>{
+ const fs=require('node:fs'),vm=require('node:vm'),C=require('../cliente-core.js');
+ const js=fs.readFileSync('economia-solar.js','utf8'),html=fs.readFileSync('economia-solar.html','utf8');
+ const start=js.indexOf('function normalizeBudgetKits'),end=js.indexOf('const kitEl=',start);
+ assert.ok(start>=0&&end>start);const ctx={C};
+ vm.runInNewContext(js.slice(start,end)+'\nthis.normalize=normalizeBudgetKits;this.select=selectBudgetKits;',ctx);
+ const row=(id,kwp,price,extra={})=>({id,kind:'kit',active:true,approved:true,price,payload:{potenciaKwp:kwp,custo:1},...extra});
+ const rows=ctx.normalize([row('K-1',4,8000),row('K-2',6,12000),row('K-3',8,14000),row('K-4',8,16000),row('K-X',8,1,{approved:false}),row('K-Y',8,2,{active:false}),row('K-Z',8,3,{kind:'piece'})],C);
+ assert.equal(rows.length,4);assert.equal(rows[0].generation,512);assert.equal(rows[0].custo,undefined);assert.equal(rows[0].payload,undefined);
+ const ids=(target,budget)=>Array.from(ctx.select(rows,target,budget),x=>x.id);
+ assert.deepEqual(ids(1000,10000),['K-1','K-2','K-3']);
+ assert.deepEqual(ids(1000,15000),['K-3']);
+ assert.deepEqual(ids(2000,10000),['K-1','K-3']);
+ assert.deepEqual(ids(0,10000),[]);assert.deepEqual(ids(1000,0),[]);
+ assert.match(html,/id="eco-tab-kits"/);assert.match(html,/id="eco-panel-kits"/);
+ assert.match(js,/wwsolar_public_catalog_v2/);assert.match(js,/body:'\{\}'/);
+ assert.match(js,/form\.elements\.geracao\.value=String\(p\.generation\)/);
+ assert.doesNotMatch(js,/form\.elements\.invest\.value\s*=/);
+});
