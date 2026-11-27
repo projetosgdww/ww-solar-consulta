@@ -63,9 +63,20 @@ function updateKitLink(generation){
  const target=Math.ceil(generation);
  const valid=Number.isSafeInteger(target)&&target>0&&target<=100000;
  kitLink.hidden=!valid;kitLink.setAttribute('aria-disabled',String(!valid));
- if(valid)kitLink.href='./?economia_kwh='+target+'#catalogo';
+ if(valid)kitLink.href='#eco-panel-kits';
  else kitLink.removeAttribute('href');
 }
+function openKitRecommendations(event){
+ event.preventDefault();
+ if(kitLink.hidden||!lastDashboard)return;
+ openTab('kits');
+ const tab=byId('eco-tab-kits');
+ tab.focus({preventScroll:true});
+ const panel=tab.closest('.dash-results');
+ if(panel&&panel.scrollHeight>panel.clientHeight)panel.scrollTop=0;
+ if(window.matchMedia('(max-width:820px), (max-height:479px)').matches)tab.scrollIntoView({block:'start',behavior:'auto'});
+}
+kitLink.addEventListener('click',openKitRecommendations);
 const rateioEnabled=document.getElementById('eco-rateio-enabled');
 const rateioFields=document.getElementById('eco-rateio-fields');
 const rateioResult=document.getElementById('eco-rateio-result');
