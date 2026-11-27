@@ -65,18 +65,21 @@ function validateTariffDraft(d){
 }
 // Simulates one generator and beneficiary units, same regime and reference.
 // Only the current generator surplus is allocated; no reallocation of old credits.
-function calculateGroup(generator,beneficiaries,year=policy.baseYear,competence){
+function calculateGroup(generator,beneficiaries,year=policy.baseYear,competence,profile=null){
  if(!Array.isArray(beneficiaries)||beneficiaries.length>100)throw new RangeError('Beneficiarias invalidas');
- const source=calculate(generator,year,competence);
+ const calc=v=>profile?calculateDraft(v,profile,year):calculate(v,year,competence);
+ const source=calc(generator);
  if(!source)return null;
- const distribution=allocateExcess(source.excess,beneficiaries.map(b=>b.percent));
+ // Autoconsumo remoto: Lei 14.300, art. 1 VIII. Nao distribuir saldo por limite de disponibilidade.
+ const available=Math.min(source.excess,Math.max(0,source.injected-source.grid));
+ const distribution=allocateExcess(available,beneficiaries.map(b=>b.percent));
  const units=beneficiaries.map((b,i)=>{
   if(b.geracao!==undefined&&b.geracao!==0)throw new RangeError('Beneficiaria com geracao propria nao suportada');
   if(b.creditsReceived!==undefined&&b.creditsReceived!==0)throw new RangeError('Credito recebido deve vir do rateio');
-  return calculate({...b,gd:generator.gd,geracao:0,sim:0,creditsReceived:distribution.allocations[i],flag:generator.flag},year,competence);
+  return calc({...b,gd:generator.gd,geracao:0,sim:0,creditsReceived:distribution.allocations[i],flag:generator.flag});
  });
  const totals=[source,...units].reduce((a,r)=>({before:a.before+r.before,after:a.after+r.after,saving:a.saving+r.saving}),{before:0,after:0,saving:0});
- return {source,units,distribution,sourceRemaining:source.creditBalance-(source.excess-distribution.remaining),totals};
+ return {source,units,available,distribution,sourceRemaining:Math.max(0,source.creditBalance-(available-distribution.remaining)),totals};
 }
 // Online source is a draft only. Never substitutes taxes from another month.
 function prepareOnlineDraft(r,monthlyTaxes,queriedAt){
