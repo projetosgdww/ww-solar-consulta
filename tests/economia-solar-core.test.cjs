@@ -287,7 +287,7 @@ test('interface de rateio inicia desativada e nao interfere em FormData da gerad
  assert.match(html,/id="eco-rateio-fields" hidden disabled/);
  assert.match(html,/id="eco-rateio-result" class="eco-rateio-result" hidden/);
  assert.match(js,/if\(!rateioEnabled.checked\)return/);
- assert.match(js,/calculateGroup\(v,\[b\],year,undefined,activeProfile\)/);
+ assert.match(js,/calculateGroup\(v,beneficiaries,year,undefined,activeProfile\)/);
  assert.match(js,/g.source.compensated\+u.compensated/);
 });
 
@@ -311,7 +311,7 @@ test('dashboard de rateio preserva indicadores individuais, comparativo e detalh
 test('dashboard principal executa com o motor real, troca escopo e conserva fluxo e ECR',()=>{
  const fs=require('node:fs'),vm=require('node:vm'),html=fs.readFileSync('economia-solar.html','utf8'),js=fs.readFileSync('economia-solar.js','utf8'),C=require('../economia-solar-core.js'),E=require('../economia-solar-ecr.js');
  const ids=new Map();
- function el(id=''){return {id,children:[],attrs:{},style:{},dataset:{},hidden:false,disabled:false,value:'',textContent:'',checked:false,classList:{toggle(){}},events:{},setAttribute(k,v){this.attrs[k]=String(v)},removeAttribute(k){delete this.attrs[k]},replaceChildren(...x){this.children=x},append(...x){this.children.push(...x)},addEventListener(k,f){this.events[k]=f},checkValidity(){return true},focus(){}}}
+ function el(id=''){return {id,children:[],attrs:{},style:{},dataset:{},hidden:false,disabled:false,value:'',textContent:'',checked:false,classList:{toggle(){}},events:{},setAttribute(k,v){this.attrs[k]=String(v)},removeAttribute(k){delete this.attrs[k]},replaceChildren(...x){this.children=x},append(...x){this.children.push(...x)},addEventListener(k,f){this.events[k]=f},checkValidity(){return true},focus(){},showModal(){this.open=true},close(){this.open=false}}}
  for(const [,id] of html.matchAll(/id="([^"]+)"/g)){assert.ok(!ids.has(id),id);ids.set(id,el(id));}
  const get=id=>{assert.ok(ids.has(id),'ID ausente '+id);return ids.get(id);};
  const data={consumo:600,geracao:1000,sim:30,gd:2,min:30,cip:40,invest:15000,atual:''};
@@ -323,7 +323,20 @@ test('dashboard principal executa com o motor real, troca escopo e conserva flux
  const document={getElementById:get,createElement:()=>el(),createElementNS:()=>el(),createTextNode:s=>s,querySelectorAll:s=>s==='[data-eco-scope]'?scopes:tabs};
  class FormData{constructor(){} *[Symbol.iterator](){yield*Object.entries(data);}}
  vm.runInNewContext(js,{document,FormData,location:{hostname:'test'},window:{addEventListener(){}},WWSolarEconomia:C,WWSolarECR:E});
- const source=C.calculate(data,2027),group=C.calculateGroup(data,[{consumo:400,min:30,cip:25,percent:50}],2027),money=n=>n.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+ const add=(name,consumo,min,cip,percent)=>{
+  get('eco-rateio-add').events.click();
+  for(const [key,value] of Object.entries({name,consumo,min,cip,percent}))get('eco-rateio-'+key).value=String(value);
+  get('eco-rateio-dialog-form').events.submit({preventDefault(){}});
+ };
+ add('Casa A',400,30,25,50);
+ add('Casa B',100,50,15,30);
+ add('Excesso',100,30,0,25);
+ assert.match(get('eco-rateio-modal-error').textContent,/100%/);
+ assert.equal(get('eco-rateio-dialog').open,true);
+ get('eco-rateio-cancel').events.click();
+ assert.equal(get('eco-rateio-list').children.length,2);
+ assert.match(get('eco-rateio-allocation').textContent,/80%.*20%/);
+ const source=C.calculate(data,2027),group=C.calculateGroup(data,[{consumo:400,min:30,cip:25,percent:50},{consumo:100,min:50,cip:15,percent:30}],2027),money=n=>n.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
  assert.equal(get('saving').textContent,money(source.saving));
  assert.equal(get('eco-dash-bill-label').textContent,'Fatura com energia solar');
  assert.equal(get('eco-dash-content').hidden,false);
@@ -333,9 +346,12 @@ test('dashboard principal executa com o motor real, troca escopo e conserva flux
  scopes[1].events.click();assert.equal(get('saving').textContent,money(group.totals.saving));
  assert.equal(get('eco-dash-bill-label').textContent,'Fatura conjunta com solar e rateio');
  assert.equal(get('after').textContent,money(group.totals.after));
- const e=E.estimate({year:2027,gd:2,compensated:group.source.compensated+group.units[0].compensated,profile:C.policy.profiles['2026-11']});
+ const e=E.estimate({year:2027,gd:2,compensated:group.source.compensated+group.units.reduce((sum,u)=>sum+u.compensated,0),profile:C.policy.profiles['2026-11']});
  assert.equal(get('eco-impact-after').textContent,money(E.sensitivity(group.totals,e.ecr,data.invest).annual));
- tabs[2].events.click();assert.equal(get('eco-panel-rateio').hidden,false);
+ tabs[2].events.click();assert.equal(get('eco-panel-rateio').hidden,false);assert.equal(get('eco-rateio-unit-results').children.length,2);
+ get('eco-rateio-list').children[1].children[2].children[0].events.click();get('eco-rateio-percent').value='40';get('eco-rateio-dialog-form').events.submit({preventDefault(){}});assert.match(get('eco-rateio-allocation').textContent,/90%.*10%/);
+ get('eco-rateio-list').children[1].children[2].children[1].events.click();assert.match(get('eco-rateio-allocation').textContent,/50%.*50%/);
+ get('eco-rateio-list').children[0].children[2].children[1].events.click();assert.match(get('eco-rateio-allocation').textContent,/0%.*100%/);
  get('eco-rateio-enabled').checked=false;form.events.input();assert.equal(get('eco-tab-rateio').hidden,true);assert.equal(get('eco-panel-overview').hidden,false);assert.equal(get('saving').textContent,money(source.saving));
  assert.equal(get('eco-dash-bill-label').textContent,'Fatura com energia solar');
  get('eco-year').value='2026';get('eco-year').events.change();assert.equal(get('eco-tab-ecr').hidden,true);
