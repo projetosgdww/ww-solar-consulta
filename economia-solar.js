@@ -136,13 +136,93 @@ const byId=id=>document.getElementById(id);
 const colors={before:'#85938e',solar:'#196541',rateio:'#416f0c',ecr:'#d97000',direct:'#c33700',balance:'#52635f'};
 let dashScope='source',dashTab='overview',lastDashboard=null;
 const setText=(id,value)=>{byId(id).textContent=value;};
+
+/* Read only: catalogo publico aprovado. Nenhum dado do formulario e enviado ao banco. */
+let kitRows=null,kitLoading=false,kitError=false,kitFetchedAt=0;
+function normalizeBudgetKits(rows,C){
+ if(!Array.isArray(rows)||rows.length>200)throw Error('Catalogo invalido');
+ const ids=new Set(),clean=[];
+ for(const p of rows){
+  if(p?.kind!=='kit'||p.active!==true||p.approved!==true)continue;
+  const id=p.id,price=Number(p.price),generation=C.estimatedGeneration(p),kwp=C.kitKwp(p);
+  if(typeof id!=='string'||!/^[-A-Za-z0-9]{1,100}$/.test(id)||ids.has(id)||!Number.isFinite(price)||price<=0||!Number.isSafeInteger(Math.round(price*100))||!Number.isFinite(generation)||generation<=0||generation>100000||!Number.isFinite(kwp)||kwp<=0)continue;
+  ids.add(id);
+  clean.push({id,price:Math.round(price*100)/100,generation,kwp,inverter:typeof p.payload?.inversor==='string'?p.payload.inversor.slice(0,200):''});
+ }
+ return clean;
+}
+function selectBudgetKits(rows,target,budget){
+ if(!Number.isFinite(target)||target<=0||!Number.isFinite(budget)||budget<=0)return [];
+ const cents=n=>Math.round(n*100),cost=(a,b)=>cents(a.price)-cents(b.price)||Math.abs(a.generation-target)-Math.abs(b.generation-target)||a.id.localeCompare(b.id);
+ const close=(a,b)=>Math.abs(a.generation-target)-Math.abs(b.generation-target)||cost(a,b);
+ const fits=rows.filter(p=>cents(p.price)<=cents(budget)),meets=rows.filter(p=>p.generation>=target);
+ const within=fits.filter(p=>p.generation>=target).sort(close)[0]||fits.filter(p=>p.generation<target).sort((a,b)=>b.generation-a.generation||cost(a,b))[0];
+ const full=meets.slice().sort(cost)[0];
+ const out=[],seen=new Set();
+ const add=(p,label)=>{if(p&&!seen.has(p.id)){out.push({...p,label});seen.add(p.id);}};
+ add(within,within?.generation>=target?'Atende à geração dentro do orçamento':'Melhor geração dentro do orçamento');
+ if(!within||within.generation<target){
+  const higher=rows.filter(p=>cents(p.price)>cents(budget)&&p.generation> (within?.generation??0)&&p.generation<target).sort((a,b)=>Math.abs(a.generation-target)-Math.abs(b.generation-target)||cost(a,b))[0];
+  add(higher,'Alternativa intermediária');
+ }
+ add(full,'Menor preço que atende à geração');
+ if(out.length===0)add(rows.slice().sort(close)[0],'Opção mais próxima da geração');
+ return out.slice(0,3);
+}
+const kitEl=(tag,txt,cls)=>{const el=document.createElement(tag);if(txt!==undefined)el.textContent=txt;if(cls)el.className=cls;return el;};
+function renderBudgetKits(){
+ const status=byId('eco-kits-status'),results=byId('eco-kits-results'),summary=byId('eco-kits-summary');
+ results.replaceChildren();summary.replaceChildren();
+ const v=lastDashboard?.v;
+ if(!v||v.geracao<=0||v.invest<=0){status.textContent='Informe a geração desejada e o investimento total para consultar os kits.';return;}
+ for(const [label,value] of [['Geração desejada',qty(v.geracao)+' kWh/mês'],['Investimento informado',money(v.invest)]]){
+  const d=kitEl('div');d.append(kitEl('small',label),kitEl('strong',value));summary.append(d);
+ }
+ if(kitLoading){status.textContent='Consultando preços atuais do catálogo…';return;}
+ if(kitError||kitRows===null){status.textContent='Catálogo indisponível no momento. Atualize os preços para tentar novamente.';return;}
+ const choices=selectBudgetKits(kitRows,v.geracao,v.invest);
+ status.textContent=choices.length?(choices.some(p=>p.price<=v.invest)?'Opções disponíveis conforme geração e investimento.':'Nenhum kit encontrado dentro do investimento informado. Veja as alternativas disponíveis.'):'Nenhum kit ativo e aprovado disponível para recomendação.';
+ for(const p of choices){
+  const card=kitEl('article',undefined,'eco-kit-option'),delta=v.invest-p.price,pct=p.generation/v.geracao*100,fit=delta>=-0.000001;
+  card.append(kitEl('span',p.label,'eco-kit-role'),kitEl('h4','Kit solar '+qty(p.kwp)+' kWp'),kitEl('strong',money(p.price),'eco-kit-price'),kitEl('p',qty(p.generation)+' kWh/mês · '+qty(pct)+'% da geração desejada','eco-hint'));
+  if(p.inverter)card.append(kitEl('p',p.inverter,'eco-hint'));
+  card.append(kitEl('p','SKU: '+p.id,'eco-hint'));
+  const progress=kitEl('progress');progress.max=100;progress.value=Math.min(100,pct);progress.setAttribute('aria-label','Atendimento da geração desejada');card.append(progress);
+  card.append(kitEl('strong',fit?'Saldo para demais custos: '+money(Math.max(0,delta)):'Acima do investimento: '+money(-delta),fit?'eco-kit-fit':'eco-kit-over'));
+  const actions=kitEl('div',undefined,'eco-kit-actions'),simulate=kitEl('button','Simular com este kit','button button-accent'),link=kitEl('a','Consultar kit no catálogo','button button-dark');
+  simulate.type='button';simulate.addEventListener('click',()=>{form.elements.geracao.value=String(p.generation);render();openTab('overview',true);});
+  link.href='./?economia_kwh='+Math.max(1,Math.floor(p.generation))+'&economia_sku='+encodeURIComponent(p.id)+'#catalogo';
+  actions.append(simulate,link);card.append(actions);results.append(card);
+ }
+}
+async function refreshBudgetKits(){
+ if(kitLoading)return;
+ kitLoading=true;kitError=false;renderBudgetKits();byId('eco-kits-refresh').disabled=true;
+ const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),8000);
+ try{
+  const cfg=globalThis.WWSOLAR_CLIENTE_CONFIG||{},C=globalThis.WWSolarClienteCore;
+  if(cfg.publicQuoteEnabled!==true||!/^https:\/\/[a-z0-9-]+\.supabase\.co$/.test(cfg.supabaseUrl||'')||typeof cfg.publishableKey!=='string'||!C)throw Error('Catalogo nao configurado');
+  const headers={'apikey':cfg.publishableKey,'Content-Type':'application/json'};
+  if(cfg.publishableKey.startsWith('eyJ'))headers.Authorization='Bearer '+cfg.publishableKey;
+  const response=await fetch(cfg.supabaseUrl+'/rest/v1/rpc/wwsolar_public_catalog_v2',{method:'POST',headers,body:'{}',signal:controller.signal,cache:'no-store',credentials:'omit'});
+  if(!response.ok)throw Error('Catalogo indisponivel');
+  kitRows=normalizeBudgetKits(await response.json(),C);kitFetchedAt=Date.now();
+ }catch{kitRows=null;kitError=true;}
+ finally{clearTimeout(timer);kitLoading=false;byId('eco-kits-refresh').disabled=false;renderBudgetKits();}
+}
+function showBudgetKits(){
+ renderBudgetKits();
+ if(lastDashboard?.v.geracao>0&&lastDashboard?.v.invest>0&&!kitLoading&&!kitError&&(!kitRows||Date.now()-kitFetchedAt>300000))void refreshBudgetKits();
+}
+
 function openTab(tab,focus=false){
  if(!byId('eco-tab-'+tab)||byId('eco-tab-'+tab).hidden)tab='overview';
  dashTab=tab;
- for(const key of ['overview','flow','rateio','ecr']){
+ for(const key of ['overview','flow','rateio','ecr','kits']){
   const b=byId('eco-tab-'+key),active=key===tab;b.setAttribute('aria-selected',String(active));b.tabIndex=active?0:-1;byId('eco-panel-'+key).hidden=!active;
  }
  if(focus)byId('eco-tab-'+tab).focus();
+ if(tab==='kits')showBudgetKits();
 }
 const ns='http://www.w3.org/2000/svg';
 function svgNode(name,attrs={},text){const el=document.createElementNS(ns,name);for(const [k,v] of Object.entries(attrs))el.setAttribute(k,String(v));if(text!==undefined)el.textContent=text;return el;}
@@ -272,6 +352,7 @@ document.getElementById('eco-ecr-factor').addEventListener('input',render);
 // Public ECR factor is maintained centrally; no range editing.
 document.querySelectorAll('[data-eco-scope]').forEach(b=>b.addEventListener('click',()=>{dashScope=b.dataset.ecoScope;if(lastDashboard){const {v,year,r,g}=lastDashboard;dashboard(v,year,r,g);}}));
 document.querySelectorAll('[role="tab"]').forEach(b=>{b.addEventListener('click',()=>openTab(b.id.replace('eco-tab-','')));b.addEventListener('keydown',e=>{if(!['ArrowLeft','ArrowRight','Home','End'].includes(e.key))return;e.preventDefault();const tabs=[...document.querySelectorAll('[role="tab"]')].filter(t=>!t.hidden),i=tabs.indexOf(b),n=e.key==='Home'?0:e.key==='End'?tabs.length-1:(i+(e.key==='ArrowRight'?1:-1)+tabs.length)%tabs.length;openTab(tabs[n].id.replace('eco-tab-',''),true);});});
+byId('eco-kits-refresh').addEventListener('click',()=>{if(lastDashboard?.v.geracao>0&&lastDashboard?.v.invest>0)void refreshBudgetKits();else renderBudgetKits();});
 byId('eco-reset').addEventListener('click',()=>{form.reset();byId('eco-year').selectedIndex=0;byId('eco-ecr-factor').value=String(Number(((centralEcr?.factor??globalThis.WWSolarECR.reference.factor)*100).toFixed(12)));dashScope='source';dashTab='overview';render();});
 form.addEventListener('submit',e=>{e.preventDefault();render();void refreshReference();});form.addEventListener('input',render);document.getElementById('eco-year').addEventListener('change',render);render();void refreshReference();void refreshEcr();window.addEventListener('pageshow',e=>{if(e.persisted){void refreshReference();void refreshEcr();}});
 })();
