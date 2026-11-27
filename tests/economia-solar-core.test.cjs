@@ -238,9 +238,9 @@ test('Economia Solar transmite geração e abre o kit compatível, sem adicionar
  const eco=fs.readFileSync('economia-solar.js','utf8');
  const client=fs.readFileSync('cliente-dev.js','utf8');
  const link={hidden:true,setAttribute(){},removeAttribute(k){delete this[k];}};
- vm.runInNewContext(eco.slice(eco.indexOf('function updateKitLink('),eco.indexOf('const rateioEnabled',eco.indexOf('function updateKitLink(')))+'\nupdateKitLink(599.1)',{kitLink:link});
- assert.equal(link.href,'./?economia_kwh=600#catalogo');assert.equal(link.hidden,false);
- vm.runInNewContext(eco.slice(eco.indexOf('function updateKitLink('),eco.indexOf('const rateioEnabled',eco.indexOf('function updateKitLink(')))+'\nupdateKitLink(0)',{kitLink:link});
+ vm.runInNewContext(eco.slice(eco.indexOf('function updateKitLink('),eco.indexOf('function openKitRecommendations',eco.indexOf('function updateKitLink(')))+'\nupdateKitLink(599.1)',{kitLink:link});
+ assert.equal(link.href,'#eco-panel-kits');assert.equal(link.hidden,false);
+ vm.runInNewContext(eco.slice(eco.indexOf('function updateKitLink('),eco.indexOf('function openKitRecommendations',eco.indexOf('function updateKitLink(')))+'\nupdateKitLink(0)',{kitLink:link});
  assert.equal(link.href,undefined);assert.equal(link.hidden,true);
  const src=client.slice(client.indexOf('let economiaTargetApplied=false'),client.indexOf('function renderAll()'));
  for(const [query,expected,match] of [['?economia_kwh=600',600,true],['?economia_kwh=2500',2500,false],['?economia_kwh=0',null,false],['?economia_kwh=1e3',null,false]]){
@@ -372,4 +372,22 @@ test('recomendacao por orcamento utiliza apenas kits publicos e geracao real do 
  assert.match(js,/wwsolar_public_catalog_v2/);assert.match(js,/body:'\{\}'/);
  assert.match(js,/form\.elements\.geracao\.value=String\(p\.generation\)/);
  assert.doesNotMatch(js,/form\.elements\.invest\.value\s*=/);
+});
+
+test('botao de kits abre recomendacoes no proprio simulador e painel acompanha rolagem no desktop',()=>{
+ const fs=require('node:fs'),vm=require('node:vm');
+ const js=fs.readFileSync('economia-solar.js','utf8'),html=fs.readFileSync('economia-solar.html','utf8');
+ const source=js.slice(js.indexOf('function openKitRecommendations('),js.indexOf("kitLink.addEventListener('click',openKitRecommendations)"));
+ for(const mobile of [false,true]){
+  let opened='',prevented=false,focused=false,scrolled=false;
+  const panel={scrollHeight:1000,clientHeight:500,scrollTop:200};
+  const tab={focus(o){focused=o.preventScroll;},closest(s){assert.equal(s,'.dash-results');return panel;},scrollIntoView(){scrolled=true;}};
+  const ctx={kitLink:{hidden:false},lastDashboard:{v:{geracao:600,invest:8000}},openTab(t){opened=t;},byId(id){assert.equal(id,'eco-tab-kits');return tab;},window:{matchMedia(){return {matches:mobile};}},event:{preventDefault(){prevented=true;}}};
+  vm.runInNewContext(source+'\nopenKitRecommendations(event)',ctx);
+  assert.equal(opened,'kits');assert.equal(prevented,true);assert.equal(focused,true);assert.equal(panel.scrollTop,0);assert.equal(scrolled,mobile);
+ }
+ assert.match(js,/kitLink\.addEventListener\('click',openKitRecommendations\)/);
+ assert.match(html,/@media\(min-width:821px\) and \(min-height:480px\)/);
+ assert.match(html,/\.eco-grid>\.dash-results\{position:sticky;top:96px/);
+ assert.match(html,/overflow-y:auto;scrollbar-width:thin/);
 });
