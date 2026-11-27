@@ -994,7 +994,9 @@
     economiaTargetApplied=true;
     S.query='';$('client-search').value='';
     setKind('kit');setTarget(target,true);
-    const kit=C.recommendedKit(available(),S.target);
+    const sku=new URLSearchParams(window.location.search).get('economia_sku');
+    const exact=sku&&/^[-A-Za-z0-9]{1,100}$/.test(sku)?available().find(p=>p.id===sku&&p.kind==='kit'&&C.estimatedGeneration(p)>=target):null;
+    const kit=exact||C.recommendedKit(available(),S.target);
     const card=kit?Array.from($('client-product-grid').children).find(node=>node.dataset.productId===kit.id):null;
     requestAnimationFrame(()=>requestAnimationFrame(()=>{
       (card||(kit?$('catalogo'):$('client-custom-kit-cta'))||$('catalogo'))?.scrollIntoView({behavior:'smooth',block:'start'});
