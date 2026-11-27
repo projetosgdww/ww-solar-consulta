@@ -384,6 +384,20 @@ test('recomendacao por orcamento utiliza apenas kits publicos e geracao real do 
  assert.deepEqual(ids(1000,15000),['K-3']);
  assert.deepEqual(ids(2000,10000),['K-1','K-3']);
  assert.deepEqual(ids(0,10000),[]);assert.deepEqual(ids(1000,0),[]);
+ const actual=ctx.normalize([row('FOTUS-2400',2.4,5356.37),row('SAJ-5625',5.625,11324.64),row('SAJ-7800',7.8,14864.56),row('DEYE-8125',8.125,14659.67)],C);
+ const actualIds=b=>Array.from(ctx.select(actual,1000,b),x=>x.id);
+ assert.deepEqual(actualIds(8000),['FOTUS-2400','SAJ-5625','DEYE-8125']);
+ assert.deepEqual(actualIds(12000),['SAJ-5625','DEYE-8125']);
+ assert.deepEqual(actualIds(15000),['DEYE-8125']);
+ assert.deepEqual(actualIds(100),['SAJ-5625','DEYE-8125']);
+ const noFull=actual.filter(x=>x.generation<1000);
+ assert.deepEqual(Array.from(ctx.select(noFull,1000,12000),x=>x.id),['SAJ-5625','SAJ-7800']);
+ const tie=[{id:'a',price:100,generation:10},{id:'b',price:100,generation:20},{id:'c',price:150,generation:20}];
+ assert.deepEqual(Array.from(ctx.select(tie,20,100),x=>x.id),['b']);
+ assert.match(js,/WWSolarClienteCore\?\.GENERATION_FACTOR\?\?128/);
+ assert.doesNotMatch(js,/v\.geracao\/132/);
+ assert.equal(C.GENERATION_FACTOR,128);
+
  assert.match(html,/id="eco-tab-kits"/);assert.match(html,/id="eco-panel-kits"/);
  assert.match(js,/wwsolar_public_catalog_v2/);assert.match(js,/body:'\{\}'/);
  assert.match(js,/form\.elements\.geracao\.value=String\(p\.generation\)/);
