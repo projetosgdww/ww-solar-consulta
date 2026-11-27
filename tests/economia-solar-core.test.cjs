@@ -255,3 +255,88 @@ test('Economia Solar transmite geração e abre o kit compatível, sem adicionar
  }
  assert.match(client,/if\(fromEconomia&&Number\.isSafeInteger\(n\)&&n>0&&n<=100000\)S\.target=n/);
 });
+
+test('autoconsumo remoto distribui somente excedente liquido e conserva energia',()=>{
+ const b={consumo:400,min:30,cip:25,percent:100};
+ for(const gd of [1,2])for(const min of [30,50,100]){
+  const equal=calculateGroup({...v,gd,min},[b],2026);
+  near(equal.available,0);near(equal.distribution.allocations[0],0);near(equal.units[0].saving,0);
+  const g=calculateGroup({...v,gd,min,geracao:1000},[b],2026);
+  near(g.available,400);near(g.distribution.allocations[0],400);
+  near(g.sourceRemaining+g.units[0].usedReceived+g.units[0].remainingReceived,g.source.creditBalance);
+  near(g.totals.saving,g.source.saving+g.units[0].saving);
+  const half=calculateGroup({...v,gd,min,geracao:1000},[{...b,percent:50}],2026);
+  near(half.distribution.allocations[0],200);near(half.distribution.remaining,200);
+  const deficit=calculateGroup({...v,gd,min,geracao:300},[b],2026);near(deficit.available,0);
+ }
+});
+test('rateio usa mesma tarifa central em ambas unidades e ECR somente sobre compensacao',()=>{
+ const C=require('../economia-solar-core.js'),E=require('../economia-solar-ecr.js');
+ const p={...policy.profiles['2026-11'],source:'referencia de teste'};
+ const b={consumo:400,min:30,cip:25,percent:100},gen={...v,geracao:1000};
+ const g=C.calculateGroup(gen,[b],2027,undefined,p);
+ const expected=C.calculateDraft({...b,gd:2,geracao:0,sim:0,creditsReceived:400},p,2027);
+ near(g.units[0].after,expected.after);near(g.source.after,C.calculateDraft(gen,p,2027).after);
+ const e=E.estimate({year:2027,gd:2,compensated:g.source.compensated+g.units[0].compensated,profile:p});
+ assert.equal(e.status,'provisional');near(e.ecr,(g.source.compensated+g.units[0].compensated)*.24768*.524);
+ near(E.sensitivity(g.totals,e.ecr,15000).saving,g.totals.saving-e.ecr);
+});
+test('interface de rateio inicia desativada e nao interfere em FormData da geradora',()=>{
+ const fs=require('node:fs'),html=fs.readFileSync('economia-solar.html','utf8'),js=fs.readFileSync('economia-solar.js','utf8');
+ assert.match(html,/id="eco-rateio-enabled" type="checkbox">/);
+ assert.match(html,/id="eco-rateio-fields" hidden disabled/);
+ assert.match(html,/id="eco-rateio-result" class="eco-rateio-result" hidden/);
+ assert.match(js,/if\(!rateioEnabled.checked\)return/);
+ assert.match(js,/calculateGroup\(v,\[b\],year,undefined,activeProfile\)/);
+ assert.match(js,/g.source.compensated\+u.compensated/);
+});
+
+test('dashboard de rateio preserva indicadores individuais, comparativo e detalhes',()=>{
+ const fs=require('node:fs'),html=fs.readFileSync('economia-solar.html','utf8'),js=fs.readFileSync('economia-solar.js','utf8');
+ const ids=['dashboard','kpi-source','kpi-beneficiary','kpi-combined','kpi-payback','annual','mini-available','mini-percent','mini-allocated','mini-compensated','energy','source','bill','total','ecr','ecr-values'];
+ for(const unit of ['source','beneficiary','combined'])for(const field of ['before','after','saving'])ids.push(unit+'-'+field);
+ for(const id of ids)assert.equal((html.match(new RegExp('id="eco-rateio-'+id+'"','g'))||[]).length,1,id);
+ assert.match(html,/<details><summary>Detalhes técnicos do rateio/);
+ assert.match(html,/<details><summary>Premissas e observações regulatórias/);
+ assert.match(html,/<details id="eco-rateio-ecr" hidden>/);
+ assert.match(js,/\['source',g\.source\],\['beneficiary',u\],\['combined',t\]/);
+ assert.match(js,/put\('kpi-payback',payback\(t\.saving\)\)/);
+ assert.match(js,/money\(g\.source\.saving\*12\)/);
+ assert.match(js,/money\(u\.saving\*12\)/);
+ assert.match(js,/dashboard\.hidden=true/);
+ assert.match(js,/dashboard\.hidden=false/);
+ new (require('node:vm').Script)(js);
+});
+
+test('dashboard principal executa com o motor real, troca escopo e conserva fluxo e ECR',()=>{
+ const fs=require('node:fs'),vm=require('node:vm'),html=fs.readFileSync('economia-solar.html','utf8'),js=fs.readFileSync('economia-solar.js','utf8'),C=require('../economia-solar-core.js'),E=require('../economia-solar-ecr.js');
+ const ids=new Map();
+ function el(id=''){return {id,children:[],attrs:{},style:{},dataset:{},hidden:false,disabled:false,value:'',textContent:'',checked:false,classList:{toggle(){}},events:{},setAttribute(k,v){this.attrs[k]=String(v)},removeAttribute(k){delete this.attrs[k]},replaceChildren(...x){this.children=x},append(...x){this.children.push(...x)},addEventListener(k,f){this.events[k]=f},checkValidity(){return true},focus(){}}}
+ for(const [,id] of html.matchAll(/id="([^"]+)"/g)){assert.ok(!ids.has(id),id);ids.set(id,el(id));}
+ const get=id=>{assert.ok(ids.has(id),'ID ausente '+id);return ids.get(id);};
+ const data={consumo:600,geracao:1000,sim:30,gd:2,min:30,cip:40,invest:15000,atual:''};
+ const form=get('form');form.elements={atual:{value:''}};form.reset=()=>{};
+ for(const [id,value] of Object.entries({'eco-year':'2027','eco-ecr-factor':'52.4','eco-rateio-consumo':'400','eco-rateio-min':'30','eco-rateio-cip':'25','eco-rateio-percent':'50'}))get(id).value=value;
+ get('eco-rateio-enabled').checked=true;
+ const tabs=['overview','flow','rateio','ecr'].map(id=>get('eco-tab-'+id));
+ const scopes=['source','combined'].map(id=>{const b=el();b.dataset.ecoScope=id;return b;});
+ const document={getElementById:get,createElement:()=>el(),createElementNS:()=>el(),createTextNode:s=>s,querySelectorAll:s=>s==='[data-eco-scope]'?scopes:tabs};
+ class FormData{constructor(){} *[Symbol.iterator](){yield*Object.entries(data);}}
+ vm.runInNewContext(js,{document,FormData,location:{hostname:'test'},window:{addEventListener(){}},WWSolarEconomia:C,WWSolarECR:E});
+ const source=C.calculate(data,2027),group=C.calculateGroup(data,[{consumo:400,min:30,cip:25,percent:50}],2027),money=n=>n.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+ assert.equal(get('saving').textContent,money(source.saving));
+ assert.equal(get('eco-dash-bill-label').textContent,'Fatura com energia solar');
+ assert.equal(get('eco-dash-content').hidden,false);
+ assert.equal(get('eco-dash-flow').children.length,4);
+ near(get('eco-dash-flow').children.reduce((sum,x)=>sum+parseFloat(x.style.width),0),100);
+ assert.equal(get('eco-dash-payback-legend').children.length,4);
+ scopes[1].events.click();assert.equal(get('saving').textContent,money(group.totals.saving));
+ assert.equal(get('eco-dash-bill-label').textContent,'Fatura conjunta com solar e rateio');
+ assert.equal(get('after').textContent,money(group.totals.after));
+ const e=E.estimate({year:2027,gd:2,compensated:group.source.compensated+group.units[0].compensated,profile:C.policy.profiles['2026-11']});
+ assert.equal(get('eco-impact-after').textContent,money(E.sensitivity(group.totals,e.ecr,data.invest).annual));
+ tabs[2].events.click();assert.equal(get('eco-panel-rateio').hidden,false);
+ get('eco-rateio-enabled').checked=false;form.events.input();assert.equal(get('eco-tab-rateio').hidden,true);assert.equal(get('eco-panel-overview').hidden,false);assert.equal(get('saving').textContent,money(source.saving));
+ assert.equal(get('eco-dash-bill-label').textContent,'Fatura com energia solar');
+ get('eco-year').value='2026';get('eco-year').events.change();assert.equal(get('eco-tab-ecr').hidden,true);
+});
