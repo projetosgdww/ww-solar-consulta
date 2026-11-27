@@ -80,6 +80,55 @@ kitLink.addEventListener('click',openKitRecommendations);
 const rateioEnabled=document.getElementById('eco-rateio-enabled');
 const rateioFields=document.getElementById('eco-rateio-fields');
 const rateioResult=document.getElementById('eco-rateio-result');
+let beneficiaries=[],editingBeneficiary=-1;
+const rateioSum=(rows,key)=>rows.reduce((sum,row)=>sum+(row[key]||0),0);
+const totalPercent=()=>rateioSum(beneficiaries,'percent');
+const rateioUnits=g=>g?.beneficiaryTotals;
+function aggregateRateioUnits(units){
+ return Object.fromEntries(['before','after','saving','wire','compensated','usedReceived','remainingReceived','uncredited'].map(key=>[key,rateioSum(units,key)]));
+}
+function openBeneficiary(index=-1){
+ const existing=beneficiaries[index];editingBeneficiary=existing?index:-1;
+ byId('eco-rateio-dialog-title').textContent=existing?'Editar beneficiária':'Adicionar beneficiária';
+ const b=existing||{name:'',consumo:0,min:30,cip:0,percent:Math.min(100,Math.max(0,Math.round((100-totalPercent())*100)/100))};
+ for(const key of ['name','consumo','min','cip','percent'])byId('eco-rateio-'+key).value=String(b[key]);
+ byId('eco-rateio-modal-error').textContent='';
+ byId('eco-rateio-modal-available').textContent='Limite disponível para esta unidade: '+qty(Math.max(0,100-totalPercent()+(existing?.percent??0)))+'%.';
+ byId('eco-rateio-dialog').showModal();
+ byId('eco-rateio-name').focus();
+}
+function saveBeneficiary(event){
+ event.preventDefault();
+ const error=byId('eco-rateio-modal-error'),name=byId('eco-rateio-name').value.trim(),b={name};
+ for(const key of ['consumo','min','cip','percent'])b[key]=Number(byId('eco-rateio-'+key).value);
+ const old=beneficiaries[editingBeneficiary];
+ if(!name||name.length>80||!byId('eco-rateio-dialog-form').checkValidity()||![b.consumo,b.cip].every(n=>Number.isFinite(n)&&n>=0&&n<=100000)||![30,50,100].includes(b.min)||!Number.isFinite(b.percent)||b.percent<=0||b.percent>100||Math.abs(b.percent*100-Math.round(b.percent*100))>1e-7){error.textContent='Confira os dados e informe um percentual maior que zero, com até duas casas decimais.';return;}
+ if(Math.round((totalPercent()-(old?.percent??0)+b.percent)*100)>10000){error.textContent='O total do rateio não pode ultrapassar 100%.';return;}
+ if(!old&&beneficiaries.length>=100){error.textContent='Limite de 100 beneficiárias por simulação.';return;}
+ if(old)beneficiaries[editingBeneficiary]=b;else beneficiaries.push(b);
+ byId('eco-rateio-dialog').close();editingBeneficiary=-1;render();
+}
+function rateioActions(index){
+ const actions=kitEl('div',undefined,'rateio-unit-actions'),edit=kitEl('button','Editar','dash-reset'),remove=kitEl('button','Remover','dash-reset');
+ edit.type=remove.type='button';edit.setAttribute('aria-label','Editar '+beneficiaries[index].name);remove.setAttribute('aria-label','Remover '+beneficiaries[index].name);
+ edit.addEventListener('click',()=>openBeneficiary(index));remove.addEventListener('click',()=>{beneficiaries.splice(index,1);render();});actions.append(edit,remove);return actions;
+}
+function renderBeneficiaries(g=null){
+ const list=byId('eco-rateio-list'),result=byId('eco-rateio-unit-results'),total=totalPercent(),remaining=Math.max(0,100-total),label='Percentual alocado: '+qty(total)+'% · Disponível: '+qty(remaining)+'%';
+ list.replaceChildren();result.replaceChildren();byId('eco-rateio-allocation').textContent=label;byId('eco-rateio-result-allocation').textContent=label;
+ for(const id of ['eco-rateio-add','eco-rateio-add-result'])byId(id).disabled=remaining<0.01-1e-9||beneficiaries.length>=100;
+ if(!beneficiaries.length){list.append(kitEl('p','Nenhuma beneficiária cadastrada.','eco-hint'));result.append(kitEl('p','Adicione uma beneficiária para simular o rateio.','eco-hint'));return;}
+ beneficiaries.forEach((b,i)=>{
+  const card=kitEl('article',undefined,'rateio-unit-card');card.append(kitEl('h5',b.name),kitEl('p',qty(b.consumo)+' kWh/mês · '+qty(b.percent)+'%','eco-hint'),rateioActions(i));list.append(card);
+  if(!g)return;
+  const u=g.units[i],detail=kitEl('article',undefined,'rateio-unit-card'),dl=kitEl('dl');
+  detail.append(kitEl('h5',b.name));
+  for(const [k,val] of [['Consumo',qty(b.consumo)+' kWh/mês'],['Percentual',qty(b.percent)+'%'],['Energia destinada',qty(g.distribution.allocations[i])+' kWh'],['Energia compensada',qty(u.usedReceived)+' kWh'],['Crédito não utilizado',qty(u.remainingReceived)+' kWh'],['Fatura sem rateio',money(u.before)],['Fatura com rateio',money(u.after)],['Economia mensal',money(u.saving)]]){
+   dl.append(kitEl('dt',k),kitEl('dd',val));
+  }
+  detail.append(dl,rateioActions(i));result.append(detail);
+ });
+}
 function fillRateio(id,rows){
  const dl=document.getElementById(id);dl.replaceChildren();
  for(const [label,value] of rows){const dt=document.createElement('dt'),dd=document.createElement('dd');dt.textContent=label;dd.textContent=value;dl.append(dt,dd);}
@@ -95,32 +144,30 @@ function renderRateio(v,year){
  const status=document.getElementById('eco-rateio-status'),dashboard=document.getElementById('eco-rateio-dashboard');dashboard.hidden=true;
  for(const id of ['eco-rateio-energy','eco-rateio-source','eco-rateio-bill','eco-rateio-total','eco-rateio-ecr-values'])fillRateio(id,[]);
  try{
-  const num=id=>Number(document.getElementById(id).value);
-  const b={consumo:num('eco-rateio-consumo'),min:num('eco-rateio-min'),cip:num('eco-rateio-cip'),percent:num('eco-rateio-percent')};
-  const g=globalThis.WWSolarEconomia.calculateGroup(v,[b],year,undefined,activeProfile);
+  const g=globalThis.WWSolarEconomia.calculateGroup(v,beneficiaries,year,undefined,activeProfile);
   if(!g)throw Error('Referência indisponível');
-  const beneficiaryPending=b.consumo===0&&b.cip===0&&b.percent===0;
   if(sourcePending(v))g.source=pendingBill(g.source);
-  if(beneficiaryPending)g.units[0]=pendingBill(g.units[0]);
-  const u=g.units[0],allocated=g.distribution.allocations[0];
+  const u=g.beneficiaryTotals=aggregateRateioUnits(g.units),allocated=g.distribution.allocations.reduce((a,b)=>a+b,0);
+  g.beneficiaryCip=rateioSum(beneficiaries,'cip');
+  renderBeneficiaries(g);
   const t=g.totals={before:g.source.before+u.before,after:g.source.after+u.after,saving:g.source.saving+u.saving};
   const kwh=n=>qty(n)+' kWh',payback=s=>v.invest>0&&s>0?qty(v.invest/(12*s))+' anos':'Não calculado';
-  status.textContent=beneficiaryPending?'Preencha os dados da beneficiária para estimar sua fatura.':g.available>0?'Excedente líquido disponível para distribuição neste ciclo.':'Não há excedente líquido para rateio neste ciclo.';
+  status.textContent=!beneficiaries.length?'Adicione as beneficiárias para simular a distribuição.':g.available>0?'Excedente líquido disponível para distribuição neste ciclo.':'Não há excedente líquido para rateio neste ciclo.';
   const put=(id,value,negative=false)=>{const el=document.getElementById('eco-rateio-'+id);el.textContent=value;el.classList.toggle('rateio-negative',negative);};
   for(const [id,r] of [['source',g.source],['beneficiary',u],['combined',t]]){
    put('kpi-'+id,money(r.saving),r.saving<0);
    for(const key of ['before','after','saving'])put(id+'-'+key,money(r[key]),key==='saving'&&r[key]<0);
   }
   put('kpi-payback',payback(t.saving));put('annual',money(t.saving*12),t.saving<0);
-  put('mini-available',kwh(g.available));put('mini-percent',qty(b.percent)+'%');put('mini-allocated',kwh(allocated));put('mini-compensated',kwh(u.usedReceived));
+  put('mini-available',kwh(g.available));put('mini-percent',qty(totalPercent())+'%');put('mini-allocated',kwh(allocated));put('mini-compensated',kwh(u.usedReceived));
   fillRateio('eco-rateio-source',[
    ['Fatura estimada sem energia solar',money(g.source.before)],['Fatura estimada com energia solar',money(g.source.after)],['Economia mensal na geradora',money(g.source.saving)],['Economia anual na geradora',money(g.source.saving*12)],['Fio B sem tributos (incluído no residual)',money(g.source.wire)]
   ]);
   fillRateio('eco-rateio-energy',[
-   ['Excedente líquido disponível na geradora',kwh(g.available)],['Percentual destinado',qty(b.percent)+'%'],['Energia destinada à beneficiária',kwh(allocated)],['Energia efetivamente compensada na beneficiária',kwh(u.usedReceived)],['Créditos não utilizados na beneficiária',kwh(u.remainingReceived)],['Excedente líquido não destinado',kwh(g.distribution.remaining)],['Saldo estimado na geradora após rateio',kwh(g.sourceRemaining)],['Consumo não compensado da beneficiária',kwh(u.uncredited)]
+   ['Excedente líquido disponível na geradora',kwh(g.available)],['Percentual destinado',qty(totalPercent())+'%'],['Energia destinada às beneficiárias',kwh(allocated)],['Energia efetivamente compensada nas beneficiárias',kwh(u.usedReceived)],['Créditos não utilizados nas beneficiárias',kwh(u.remainingReceived)],['Excedente líquido não destinado',kwh(g.distribution.remaining)],['Saldo estimado na geradora após rateio',kwh(g.sourceRemaining)],['Consumo não compensado das beneficiárias',kwh(u.uncredited)]
   ]);
   fillRateio('eco-rateio-bill',[
-   ['Fatura estimada sem rateio',money(u.before)],['Fatura estimada com rateio',money(u.after)],['Economia mensal na beneficiária',money(u.saving)],['Economia anual na beneficiária',money(u.saving*12)],['Fio B sem tributos (incluído no residual)',money(u.wire)]
+   ['Fatura estimada sem rateio',money(u.before)],['Fatura estimada com rateio',money(u.after)],['Economia mensal nas beneficiárias',money(u.saving)],['Economia anual nas beneficiárias',money(u.saving*12)],['Fio B sem tributos (incluído no residual)',money(u.wire)]
   ]);
   fillRateio('eco-rateio-total',[
    ['Fatura conjunta sem energia solar',money(t.before)],['Fatura conjunta com energia solar',money(t.after)],['Economia mensal conjunta',money(t.saving)],['Economia anual conjunta',money(t.saving*12)],['Payback conjunto (economia constante)',payback(t.saving)]
@@ -282,7 +329,7 @@ function drawPayback(v,year,r,g){
  if(g)lines.push({name:'Com rateio',saving:g.totals.saving,color:colors.rateio,dash:false});
  const a=estimateEcr(v,year,r.compensated),E=globalThis.WWSolarECR;
  if(a)lines.push({name:'Geradora + ECR',saving:E.sensitivity(r,a.ecr,v.invest).saving,color:colors.ecr,dash:true});
- if(g){const e=estimateEcr(v,year,r.compensated+g.units[0].compensated);if(e)lines.push({name:'Rateio + ECR',saving:E.sensitivity(g.totals,e.ecr,v.invest).saving,color:colors.balance,dash:true});}
+ if(g){const e=estimateEcr(v,year,r.compensated+rateioUnits(g).compensated);if(e)lines.push({name:'Rateio + ECR',saving:E.sensitivity(g.totals,e.ecr,v.invest).saving,color:colors.balance,dash:true});}
  const points=lines.flatMap(l=>[0,5].map(a=>-v.invest+l.saving*12*a)),min=Math.min(0,...points),max=Math.max(0,...points),span=Math.max(1,max-min),x=a=>78+a*76,y=a=>178-(a-min)/span*153;
  const svg=svgChart('eco-dash-payback',480,218,'Saldo acumulado estimado, cinco anos; '+lines.map(l=>l.name+' '+paybackLabel(l.saving,v.invest)).join('; '));
  for(let i=0;i<=4;i++){const n=min+span*i/4,yy=y(n);svg.append(svgNode('line',{x1:78,x2:458,y1:yy,y2:yy,stroke:'#dce5da'}));chartText(svg,72,yy+4,qty(n/1000)+' mil',{'text-anchor':'end','font-size':10});}
@@ -292,29 +339,29 @@ function drawPayback(v,year,r,g){
  legend('eco-dash-payback-legend',lines.map(l=>({label:l.name+(l.dash?' (provisório)':'')+': '+paybackLabel(l.saving,v.invest),color:l.color})));
 }
 function drawFlow(v,r,g){
- const u=g?.units[0],allocated=g?.distribution.allocations[0]??0,total=v.geracao;
- const parts=[{label:'Autoconsumo direto',n:r.self,color:colors.direct},{label:'Compensado na geradora',n:r.usedOwn,color:colors.solar},...(g?[{label:'Destinado à beneficiária',n:allocated,color:colors.rateio}]:[]),{label:'Saldo na geradora',n:Math.max(0,r.excess-allocated),color:colors.balance}];
+ const u=rateioUnits(g),allocated=g?g.distribution.allocations.reduce((a,b)=>a+b,0):0,total=v.geracao;
+ const parts=[{label:'Autoconsumo direto',n:r.self,color:colors.direct},{label:'Compensado na geradora',n:r.usedOwn,color:colors.solar},...(g?[{label:'Destinado às beneficiárias',n:allocated,color:colors.rateio}]:[]),{label:'Saldo na geradora',n:Math.max(0,r.excess-allocated),color:colors.balance}];
  const bar=byId('eco-dash-flow'),leg=byId('eco-dash-flow-legend');bar.replaceChildren();leg.replaceChildren();bar.setAttribute('role','img');bar.setAttribute('aria-label','Geração '+qty(total)+' kWh: '+parts.map(p=>p.label+' '+qty(p.n)+' kWh').join('; '));
  for(const p of parts){const pct=total>0?p.n/total*100:0;
   if(p.n>0){const seg=document.createElement('span');seg.style.width=pct+'%';seg.style.backgroundColor=p.color;seg.textContent=pct>=16?qty(p.n)+' kWh':'';bar.append(seg);}
   const d=document.createElement('div'),small=document.createElement('small'),i=document.createElement('i'),strong=document.createElement('strong'),foot=document.createElement('small');i.style.backgroundColor=p.color;small.append(i,document.createTextNode(p.label));strong.textContent=qty(p.n)+' kWh';foot.textContent=qty(pct)+'% da geração';d.append(small,strong,foot);leg.append(d);
  }
- fillRateio('eco-dash-balance',[['Geração mensal',qty(total)+' kWh'],['Consumo da rede',qty(r.grid)+' kWh'],['Energia injetada',qty(r.injected)+' kWh'],['Energia não compensada na geradora',qty(r.uncredited)+' kWh'],['Excedente líquido disponível para rateio',qty(Math.min(r.excess,Math.max(0,r.injected-r.grid)))+' kWh'],['Potência de referência',qty(v.geracao/132)+' kWp'],...(u?[['Compensado na beneficiária (do destinado)',qty(u.usedReceived)+' kWh'],['Créditos não utilizados na beneficiária (do destinado)',qty(u.remainingReceived)+' kWh']]:[])]);
+ fillRateio('eco-dash-balance',[['Geração mensal',qty(total)+' kWh'],['Consumo da rede',qty(r.grid)+' kWh'],['Energia injetada',qty(r.injected)+' kWh'],['Energia não compensada na geradora',qty(r.uncredited)+' kWh'],['Excedente líquido disponível para rateio',qty(Math.min(r.excess,Math.max(0,r.injected-r.grid)))+' kWh'],['Potência de referência',qty(v.geracao/132)+' kWp'],...(u?[['Compensado nas beneficiárias (do destinado)',qty(u.usedReceived)+' kWh'],['Créditos não utilizados nas beneficiárias (do destinado)',qty(u.remainingReceived)+' kWh']]:[])]);
 }
 function dashboard(v,year,r,g){
- lastDashboard={v,year,r,g};if(!g)dashScope='source';
- byId('eco-dash-scope').hidden=!g;byId('eco-tab-rateio').hidden=!g;byId('eco-tab-ecr').hidden=year<2027;
+ lastDashboard={v,year,r,g};if(!g||!g.units.length)dashScope='source';
+ byId('eco-dash-scope').hidden=!g||g.units.length===0;byId('eco-tab-rateio').hidden=!g;byId('eco-tab-ecr').hidden=year<2027;
  document.querySelectorAll('[data-eco-scope]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.ecoScope===dashScope)));openTab(dashTab);
- const combined=dashScope==='combined'&&g,base=combined?{...g.totals,compensated:r.compensated+g.units[0].compensated}:r,caption=combined?'Consolidado — duas unidades':'Unidade geradora';
+ const combined=dashScope==='combined'&&g,base=combined?{...g.totals,compensated:r.compensated+rateioUnits(g).compensated}:r,caption=combined?'Consolidado — '+(g.units.length+1)+' unidades':'Unidade geradora';
  setText('eco-dash-bill-label',combined?'Fatura conjunta com solar e rateio':'Fatura com energia solar');
  setText('eco-dash-year','('+year+')');setText('before',money(base.before));setText('after',money(base.after));setText('saving',money(base.saving));setText('eco-dash-before','Antes: '+money(base.before)+(base.before>0?' · Redução '+qty(base.saving/base.before*100)+'%':''));
  setText('eco-dash-saving-sub',caption);setText('eco-dash-annual',money(base.saving*12));setText('eco-dash-annual-sub','12 meses · '+caption);setText('eco-dash-payback-value',paybackLabel(base.saving,v.invest));setText('eco-dash-payback-sub','Investimento '+money(v.invest));
  for(const id of ['saving','eco-dash-annual'])byId(id).classList.toggle('dash-negative',base.saving<0);
- const cip=v.cip+(combined?Number(byId('eco-rateio-cip').value):0),wire=r.wire+(combined?g.units[0].wire:0);
+ const cip=v.cip+(combined?g.beneficiaryCip:0),wire=r.wire+(combined?rateioUnits(g).wire:0);
  verticalBills('eco-dash-bill',[{label:caption,before:base.before,after:base.after}],[{value:cip,color:'#52635f'},{value:wire,color:'#d97000'},{value:Math.max(0,base.after-cip-wire),color:'#196541'}],Boolean(combined));
  fillRateio('eco-dash-composition',[['Iluminação pública',money(cip)],['Fio B sem tributos (dentro da fatura)',money(wire)],['Demais custos estimados',money(base.after-cip-wire)],['Total da fatura estimada',money(base.after)]]);
  drawPayback(v,year,r,g);drawFlow(v,r,g);
- if(g)verticalBills('eco-dash-rateio-chart',[{label:'Geradora',...g.source},{label:'Beneficiária',...g.units[0]},{label:'Conjunto',...g.totals}]);
+ if(g)verticalBills('eco-dash-rateio-chart',[{label:'Geradora',...g.source},{label:'Beneficiárias',...rateioUnits(g)},{label:'Conjunto',...g.totals}]);
  setText('eco-ecr-scope',caption);renderEcr(v,year,base);
  const e=estimateEcr(v,year,base.compensated);
  if(e){const c=globalThis.WWSolarECR.sensitivity(base,e.ecr,v.invest);barPairs('eco-ecr-bill-chart',[{label:'Fatura mensal — sem / com ECR',before:base.after,after:c.after}],'Impacto provisório na fatura mensal');}else byId('eco-ecr-bill-chart').replaceChildren();
@@ -323,7 +370,7 @@ function dashboard(v,year,r,g){
 
 function render(){
  lastDashboard=null;updateKitLink(0);byId('eco-dash-content').hidden=true;byId('eco-dash-invalid').hidden=false;
- rateioFields.hidden=!rateioEnabled.checked;rateioFields.disabled=!rateioEnabled.checked;rateioResult.hidden=true;
+ rateioFields.hidden=!rateioEnabled.checked;rateioFields.disabled=!rateioEnabled.checked;rateioResult.hidden=true;renderBeneficiaries();
  if(!form.checkValidity()){document.getElementById('eco-ecr-study').hidden=true;return;}
  const v=Object.fromEntries([...new FormData(form)].map(([k,x])=>[k,Number(x)]));
  if(Object.values(v).some(n=>!Number.isFinite(n)||n<0)){document.getElementById('eco-ecr-study').hidden=true;return;}
@@ -364,6 +411,9 @@ document.getElementById('eco-ecr-factor').addEventListener('input',render);
 document.querySelectorAll('[data-eco-scope]').forEach(b=>b.addEventListener('click',()=>{dashScope=b.dataset.ecoScope;if(lastDashboard){const {v,year,r,g}=lastDashboard;dashboard(v,year,r,g);}}));
 document.querySelectorAll('[role="tab"]').forEach(b=>{b.addEventListener('click',()=>openTab(b.id.replace('eco-tab-','')));b.addEventListener('keydown',e=>{if(!['ArrowLeft','ArrowRight','Home','End'].includes(e.key))return;e.preventDefault();const tabs=[...document.querySelectorAll('[role="tab"]')].filter(t=>!t.hidden),i=tabs.indexOf(b),n=e.key==='Home'?0:e.key==='End'?tabs.length-1:(i+(e.key==='ArrowRight'?1:-1)+tabs.length)%tabs.length;openTab(tabs[n].id.replace('eco-tab-',''),true);});});
 byId('eco-kits-refresh').addEventListener('click',()=>{if(lastDashboard?.v.geracao>0&&lastDashboard?.v.invest>0)void refreshBudgetKits();else renderBudgetKits();});
-byId('eco-reset').addEventListener('click',()=>{form.reset();byId('eco-year').selectedIndex=0;byId('eco-ecr-factor').value=String(Number(((centralEcr?.factor??globalThis.WWSolarECR.reference.factor)*100).toFixed(12)));dashScope='source';dashTab='overview';render();});
+for(const id of ['eco-rateio-add','eco-rateio-add-result'])byId(id).addEventListener('click',()=>openBeneficiary());
+for(const id of ['eco-rateio-close','eco-rateio-cancel'])byId(id).addEventListener('click',()=>byId('eco-rateio-dialog').close());
+byId('eco-rateio-dialog-form').addEventListener('submit',saveBeneficiary);
+byId('eco-reset').addEventListener('click',()=>{form.reset();beneficiaries=[];editingBeneficiary=-1;byId('eco-year').selectedIndex=0;byId('eco-ecr-factor').value=String(Number(((centralEcr?.factor??globalThis.WWSolarECR.reference.factor)*100).toFixed(12)));dashScope='source';dashTab='overview';render();});
 form.addEventListener('submit',e=>{e.preventDefault();render();void refreshReference();});form.addEventListener('input',render);document.getElementById('eco-year').addEventListener('change',render);render();void refreshReference();void refreshEcr();window.addEventListener('pageshow',e=>{if(e.persisted){void refreshReference();void refreshEcr();}});
 })();
