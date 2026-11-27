@@ -73,6 +73,9 @@ function fillRateio(id,rows){
  const dl=document.getElementById(id);dl.replaceChildren();
  for(const [label,value] of rows){const dt=document.createElement('dt'),dd=document.createElement('dd');dt.textContent=label;dd.textContent=value;dl.append(dt,dd);}
 }
+// Estado inicial de apresentação, não uma previsão de faturamento para uma UC ativa.
+const sourcePending=v=>v.consumo===0&&v.geracao===0&&v.cip===0;
+const pendingBill=r=>({...r,before:0,after:0,saving:0,wire:0,floorAdjustment:0,residual:0,nonCompensatedCost:0,energy:0,flagBefore:0,flagAfter:0});
 function renderRateio(v,year){
  rateioResult.hidden=true;
  const ecrBox=document.getElementById('eco-rateio-ecr');ecrBox.hidden=true;
@@ -85,9 +88,13 @@ function renderRateio(v,year){
   const b={consumo:num('eco-rateio-consumo'),min:num('eco-rateio-min'),cip:num('eco-rateio-cip'),percent:num('eco-rateio-percent')};
   const g=globalThis.WWSolarEconomia.calculateGroup(v,[b],year,undefined,activeProfile);
   if(!g)throw Error('Referência indisponível');
-  const u=g.units[0],allocated=g.distribution.allocations[0],t=g.totals;
+  const beneficiaryPending=b.consumo===0&&b.cip===0&&b.percent===0;
+  if(sourcePending(v))g.source=pendingBill(g.source);
+  if(beneficiaryPending)g.units[0]=pendingBill(g.units[0]);
+  const u=g.units[0],allocated=g.distribution.allocations[0];
+  const t=g.totals={before:g.source.before+u.before,after:g.source.after+u.after,saving:g.source.saving+u.saving};
   const kwh=n=>qty(n)+' kWh',payback=s=>v.invest>0&&s>0?qty(v.invest/(12*s))+' anos':'Não calculado';
-  status.textContent=g.available>0?'Excedente líquido disponível para distribuição neste ciclo.':'Não há excedente líquido para rateio neste ciclo.';
+  status.textContent=beneficiaryPending?'Preencha os dados da beneficiária para estimar sua fatura.':g.available>0?'Excedente líquido disponível para distribuição neste ciclo.':'Não há excedente líquido para rateio neste ciclo.';
   const put=(id,value,negative=false)=>{const el=document.getElementById('eco-rateio-'+id);el.textContent=value;el.classList.toggle('rateio-negative',negative);};
   for(const [id,r] of [['source',g.source],['beneficiary',u],['combined',t]]){
    put('kpi-'+id,money(r.saving),r.saving<0);
@@ -230,12 +237,13 @@ function render(){
  const v=Object.fromEntries([...new FormData(form)].map(([k,x])=>[k,Number(x)]));
  if(Object.values(v).some(n=>!Number.isFinite(n)||n<0)){document.getElementById('eco-ecr-study').hidden=true;return;}
  const year=Number(document.getElementById('eco-year').value);
- const r=activeProfile?calculateDraft(v,activeProfile,year):calculate(v,year);
- if(!r)return;
+ const calculated=activeProfile?calculateDraft(v,activeProfile,year):calculate(v,year);
+ if(!calculated)return;
+ const r=sourcePending(v)?pendingBill(calculated):calculated;
  const ref=activeProfile?.reference??policy.reference;
  const month=ref.slice(5)+'/'+ref.slice(0,4);
  const messages={loading:'Consultando referência central; cálculo provisório.',central:'Tarifa aprovada · revisão '+revision+'.',default:'Referência padrão do código.',unavailable:'Consulta tarifária indisponível: estimativa com referência de contingência; confirme antes de usar.'};
- document.getElementById('eco-year-note').textContent='Fio B: '+qty(r.incidence*100)+'% · Referência '+month+' mantida constante; valores estimados. '+(year>=2027?'Cenário com tributos históricos de 2026, sem adequação à CBS/IBS e sem ECR na fatura principal. ':'')+messages[referenceState];
+ document.getElementById('eco-year-note').textContent='Fio B: '+qty(r.incidence*100)+'% · Referência '+month+' mantida constante; valores estimados. '+(year>=2027?'Cenário com tributos históricos de 2026, sem adequação à CBS/IBS e sem ECR na fatura principal. ':'')+messages[referenceState]+(sourcePending(v)?' · Preencha os dados da unidade geradora para calcular a fatura.':'');
  for(const k of ['before','after','saving']) document.getElementById(k).textContent=money(r[k]);
  const rows=[['Economia anual (12 meses)',money(r.saving*12)],['Redução estimada',qty(r.before>0?r.saving/r.before*100:0)+'%'],['Autoconsumo',qty(r.self)+' kWh'],['Consumo da rede',qty(r.grid)+' kWh'],['Energia injetada',qty(r.injected)+' kWh'],['Compensação estimada',qty(r.compensated)+' kWh'],['Energia não compensada',qty(r.uncredited)+' kWh'],['Excedente não utilizado',qty(r.excess)+' kWh'],['Fio B estimado sem tributos (incluído no residual)',money(r.wire)],['Energia não compensada com tributos',money(r.nonCompensatedCost)],['Adicional de bandeira após instalação (estimado)',money(r.flagAfter)],['Iluminação pública',money(v.cip)],['Custo da energia compensada (Fio B e diferenças tributárias)',money(r.residual)],['Ajuste mínimo aproximado',money(r.floorAdjustment)],['Payback simples (economia constante)',v.invest>0&&r.saving>0?qty(v.invest/(12*r.saving))+' anos':'Não calculado']];
  if(form.elements.atual.value!=='')rows.push(['Fatura atual informada (não usada no cálculo)',money(v.atual)]);
