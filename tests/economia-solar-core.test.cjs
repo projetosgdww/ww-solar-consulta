@@ -238,9 +238,9 @@ test('Economia Solar transmite geração e abre o kit compatível, sem adicionar
  const eco=fs.readFileSync('economia-solar.js','utf8');
  const client=fs.readFileSync('cliente-dev.js','utf8');
  const link={hidden:true,setAttribute(){},removeAttribute(k){delete this[k];}};
- vm.runInNewContext(eco.slice(eco.indexOf('function updateKitLink('),eco.indexOf('function render()'))+'\nupdateKitLink(599.1)',{kitLink:link});
+ vm.runInNewContext(eco.slice(eco.indexOf('function updateKitLink('),eco.indexOf('const rateioEnabled',eco.indexOf('function updateKitLink(')))+'\nupdateKitLink(599.1)',{kitLink:link});
  assert.equal(link.href,'./?economia_kwh=600#catalogo');assert.equal(link.hidden,false);
- vm.runInNewContext(eco.slice(eco.indexOf('function updateKitLink('),eco.indexOf('function render()'))+'\nupdateKitLink(0)',{kitLink:link});
+ vm.runInNewContext(eco.slice(eco.indexOf('function updateKitLink('),eco.indexOf('const rateioEnabled',eco.indexOf('function updateKitLink(')))+'\nupdateKitLink(0)',{kitLink:link});
  assert.equal(link.href,undefined);assert.equal(link.hidden,true);
  const src=client.slice(client.indexOf('let economiaTargetApplied=false'),client.indexOf('function renderAll()'));
  for(const [query,expected,match] of [['?economia_kwh=600',600,true],['?economia_kwh=2500',2500,false],['?economia_kwh=0',null,false],['?economia_kwh=1e3',null,false]]){
